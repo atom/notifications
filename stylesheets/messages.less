@@ -1,32 +1,74 @@
 @import "ui-variables";
+@import "octicon-mixins";
+
+@icon-size: 30px;
 
 atom-messages {
   display: block;
   position: absolute;
-  top: @component-padding;
-  right: @component-padding;
+  top: @tab-height;
+  right: 0;
+  bottom: 30px;
+  max-width: 300px;
+  padding: @component-padding;
+  font-size: 1.2em;
+  overflow: auto;
+
+  -webkit-user-modify: read-write; // edit during dev
 }
 
 atom-message {
   display: block;
+  position: relative;
   padding: @component-padding;
+  margin-bottom: 2px;
+  border-radius: @component-border-radius;
 
-  margin-bottom: @component-padding;
+  .detail {
+    margin-top:  @component-padding/2;
+    padding-top:  @component-padding/2;
+    font-size: .8em;
+    border-top: 1px solid hsla(0,0%,0%,.2);
+  }
+
+  &.icon:before {
+    position: absolute;
+    top: 12px;
+    left: -@icon-size;
+    bottom: 0;
+    width: @icon-size;
+    text-align: center;
+  }
 }
+
+// Types -------------------------------
 
 atom-message[type="fatal"],
 atom-message[type="error"] {
-  background: @background-color-error;
+  .message(@text-color-error; @background-color-error);
 }
 
 atom-message[type="warning"] {
-  background: @background-color-warning;
+  .message(@text-color-warning; @background-color-warning);
 }
 
 atom-message[type="info"] {
-  background: @background-color-info;
+  .message(@text-color-info; @background-color-info);
 }
 
 atom-message[type="success"] {
-  background: @background-color-success;
+  .message(@text-color-success; @background-color-success);
+}
+
+
+// Mixins -------------------------------
+
+.message(@txt; @bg) {
+  color: darken(@txt, 40%);
+  border-left: @icon-size solid @bg;
+  background-color: lighten(@bg, 25%);
+
+  &.icon:before {
+    color: lighten(@bg, 36%);
+  }
 }
