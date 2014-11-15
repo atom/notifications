@@ -4,6 +4,7 @@ class MessageElement extends HTMLElement
   getModel: -> @model
   setModel: (@model) ->
     @setAttribute('type', @model.type)
+    @setAttribute('class', 'icon icon-' + @model.icon)
     @textContent = @model.message
 
     if @model.detail?

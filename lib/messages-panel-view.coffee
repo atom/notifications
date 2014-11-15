@@ -48,7 +48,7 @@ class MessagesPanelView
   getElement: -> @element
 
   createFatalError: =>
-    atom.messages.add new Message('fatal', 'This is a fatal error')
+    atom.messages.add new Message('fatal', 'flame', 'This is a fatal error')
 
   createError: =>
     message = 'Failed to load your user config'
@@ -57,13 +57,13 @@ class MessagesPanelView
       'metrics'::
       ^
     """
-    atom.messages.add new Message('error', message, detail)
+    atom.messages.add new Message('error', 'x', message, detail)
 
   createWarning: =>
-    atom.messages.add new Message('warning', 'Oops warning')
+    atom.messages.add new Message('warning', 'alert', 'Oops warning')
 
   createInfo: =>
-    atom.messages.add new Message('info', 'Some info for you')
+    atom.messages.add new Message('info', 'comment', 'Some info for you')
 
   createSuccess: =>
-    atom.messages.add new Message('success', 'Yeah, success!')
+    atom.messages.add new Message('success', 'check', 'Yeah, success!')
