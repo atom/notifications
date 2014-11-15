@@ -1,5 +1,15 @@
 # messages package
 
-A short description of your package.
+Run these to get it going:
 
-![A screenshot of your spankin' package](https://f.cloud.github.com/assets/69169/2290250/c35d867a-a017-11e3-86be-cd7c5bf3ff9b.gif)
+```
+git clone git@github.com:atom/messages.git
+cd messages
+apm install
+apm link -d
+atom .
+```
+
+It adds some buttons to the bottom panel:
+
+![screen shot 2014-11-14 at 4 20 26 pm](https://cloud.githubusercontent.com/assets/69169/5055567/2e1ab0a4-6c1a-11e4-9fe6-ffbd710e157f.png)
