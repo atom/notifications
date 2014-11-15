@@ -1,20 +1,24 @@
 @import "ui-variables";
 @import "octicon-mixins";
+@import "tabs";
 
 @icon-size: 30px;
+@max-width: 250px;
+@top-margin: @tab-height + @tab-top-padding + @tab-bottom-border-height;
+@bottom-margin: @top-margin;
 
 atom-messages {
   display: block;
   position: absolute;
-  top: @tab-height;
+  top: @top-margin;
   right: 0;
-  bottom: 30px;
-  max-width: 300px;
+  bottom: @bottom-margin;
+  max-width: @max-width;
   padding: @component-padding;
   font-size: 1.2em;
   overflow: auto;
 
-  -webkit-user-modify: read-write; // edit during dev
+  // -webkit-user-modify: read-write; // editable text during dev
 }
 
 atom-message {
@@ -72,4 +76,31 @@ atom-message[type="success"] {
   &.icon:before {
     color: lighten(@bg, 36%);
   }
+}
+
+
+// Animations -------------------------------
+
+atom-message {
+  -webkit-animation: message-show .16s cubic-bezier(0.175, 0.885, 0.32, 1.27499);
+}
+
+atom-message[type="fatal"] {
+  -webkit-animation: message-show .16s cubic-bezier(0.175, 0.885, 0.32, 1.27499),
+                     message-shake 4s 2s;
+  -webkit-animation-iteration-count: 1, 3; // shake 3 times after showing
+}
+
+@-webkit-keyframes message-show {
+    0% { opacity: 0; transform: perspective(@max-width) translateY(-20px) rotateX(90deg);  }
+  100% { opacity: 1; transform: perspective(@max-width) translateY(0) rotateX(0deg); }
+}
+
+@-webkit-keyframes message-shake {
+    0% { transform: translateX(   0); }
+    2% { transform: translateX(-4px); }
+    4% { transform: translateX( 8px); }
+    6% { transform: translateX(-4px); }
+    8% { transform: translateX(   0); }
+  100% { transform: translateX(   0); }
 }
