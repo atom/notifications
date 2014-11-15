@@ -1,0 +1,32 @@
+@import "ui-variables";
+
+atom-messages {
+  display: block;
+  position: absolute;
+  top: @component-padding;
+  right: @component-padding;
+}
+
+atom-message {
+  display: block;
+  padding: @component-padding;
+
+  margin-bottom: @component-padding;
+}
+
+atom-message[type="fatal"],
+atom-message[type="error"] {
+  background: @background-color-error;
+}
+
+atom-message[type="warning"] {
+  background: @background-color-warning;
+}
+
+atom-message[type="info"] {
+  background: @background-color-info;
+}
+
+atom-message[type="success"] {
+  background: @background-color-success;
+}
