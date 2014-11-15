@@ -51,7 +51,13 @@ class MessagesPanelView
     atom.messages.add new Message('fatal', 'This is a fatal error')
 
   createError: =>
-    atom.messages.add new Message('error', 'This is a regular error')
+    message = 'Failed to load your user config'
+    detail = """
+      line 6: unexpected newline
+      'metrics'::
+      ^
+    """
+    atom.messages.add new Message('error', message, detail)
 
   createWarning: =>
     atom.messages.add new Message('warning', 'Oops warning')
