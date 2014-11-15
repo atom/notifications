@@ -44,6 +44,32 @@ atom-message {
     width: @icon-size;
     text-align: center;
   }
+
+  &.has-close {
+    padding-right: @component-padding + 24px; // space for icon
+  }
+
+  // TODO: might be better to create unique close buttons?
+  .close {
+    position: absolute;
+    top: @component-padding;
+    right: @component-padding;
+    font-size: 16px;
+    text-shadow: none;
+    color: inherit;
+    opacity: .3;
+    &:hover, &:focus {
+      opacity: 1;
+      color: inherit;
+    }
+    &:active {
+      opacity: .2;
+    }
+    &:before {
+      margin: 0;
+      color: inherit;
+    }
+  }
 }
 
 // Types -------------------------------

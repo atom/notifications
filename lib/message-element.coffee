@@ -7,6 +7,12 @@ class MessageElement extends HTMLElement
     @setAttribute('class', 'icon icon-' + @model.icon)
     @textContent = @model.message
 
+    if @model.type == 'fatal'
+      @.classList.add('has-close')
+      closeButton = document.createElement('button')
+      closeButton.classList.add('close', 'icon', 'icon-x')
+      @appendChild(closeButton)
+
     if @model.detail?
       detailContainer = document.createElement('div')
       detailContainer.classList.add('detail')
