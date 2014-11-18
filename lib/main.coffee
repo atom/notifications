@@ -17,15 +17,17 @@ module.exports =
     @messagesPanelView = new MessagesPanelView(@messagesElement)
     @messagesPanel = atom.workspace.addBottomPanel(item: @messagesPanelView.getElement())
 
-    atom.onWillThrowError ({message, originalError, preventDefault}) ->
+    atom.onWillThrowError ({message, url, line, originalError, preventDefault}) ->
       preventDefault()
-      atom.messages.add(new Message('fatal', message, originalError.stack))
+      console.log originalError.stack
+      options =
+        errorDetail: "#{url}:#{line}"
+        stack: originalError.stack
+      atom.messages.add(new Message('fatal', message, options))
 
   deactivate: ->
     @messagesPanel.destroy()
     @messagesPanelView.destroy()
-
-
 
 atom.commands.add 'atom-workspace', 'messages:trigger-error', ->
   abc + 2 # nope
