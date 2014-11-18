@@ -25,6 +25,10 @@ class MessageElement extends HTMLElement
         detailContainer.appendChild(div)
 
     if @model.type == 'fatal'
+      fatalMessage = document.createElement('div')
+      fatalMessage.classList.add('fatal-message')
+      fatalMessage.textContent = 'This is likely a bug in atom. You can help by creating an issue.'
+
       issueButton = document.createElement('a')
       issueButton.setAttribute('href', @model.getIssueUrl())
       issueButton.classList.add('btn')
@@ -33,9 +37,10 @@ class MessageElement extends HTMLElement
 
       toolbar = document.createElement('div')
       toolbar.classList.add('btn-toolbar')
-      @appendChild(toolbar)
-
       toolbar.appendChild(issueButton)
+
+      @appendChild(fatalMessage)
+      @appendChild(toolbar)
 
   createIssue: ->
     console.log 'issue', @model

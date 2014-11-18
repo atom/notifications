@@ -20,11 +20,14 @@ class Message
     @message
 
   getIssueBody: ->
+    # TODO: crib version information from bug-report: https://github.com/lee-dohm/bug-report/blob/master/lib/bug-report.coffee#L69
     """
-    #{@options.errorDetail}
+    There was an unhandled error
 
     Stack Trace
     ```
+    At #{@options.errorDetail}
+
     #{@options.stack}
     ```
     """
