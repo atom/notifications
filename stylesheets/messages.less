@@ -3,17 +3,18 @@
 @import "tabs";
 
 @icon-size: 30px;
-@max-width: 250px;
+@max-width: 300px;
 @top-margin: @tab-height + @tab-top-padding + @tab-bottom-border-height;
 @bottom-margin: @top-margin;
 
 atom-messages {
   display: block;
+  z-index: 2;
   position: absolute;
   top: @top-margin;
   right: 0;
-  bottom: @bottom-margin;
   max-width: @max-width;
+  max-height: calc(100% ~"-" @top-margin); // ~"-" disable LESS calculation
   padding: @component-padding;
   font-size: 1.2em;
   overflow: auto;
@@ -24,17 +25,9 @@ atom-messages {
 atom-message {
   display: block;
   position: relative;
-  padding: @component-padding;
   margin-bottom: 2px;
   border-radius: @component-border-radius;
   word-wrap: break-word;
-
-  .detail {
-    margin-top:  @component-padding/2;
-    padding-top:  @component-padding/2;
-    font-size: .8em;
-    border-top: 1px solid hsla(0,0%,0%,.2);
-  }
 
   &.icon:before {
     position: absolute;
@@ -45,7 +38,17 @@ atom-message {
     text-align: center;
   }
 
-  &.has-close {
+  // .item's are used as general containers
+  .item {
+    padding: @component-padding;
+    border-top: 1px solid hsla(0,0%,0%,.1);
+  }
+
+  .message.item {
+    border-top: none;
+  }
+
+  &.has-close .message {
     padding-right: @component-padding + 24px; // space for icon
   }
 
@@ -71,11 +74,14 @@ atom-message {
     }
   }
 
-  .fatal-message {
-    margin-top:  @component-padding/2;
-    padding-top:  @component-padding/2;
+  .detail {
     font-size: .8em;
-    border-top: 1px solid hsla(0,0%,0%,.2);
+    background-color: hsla(0,0%,100%,.3);
+    background-clip: padding-box;
+  }
+
+  .fatal-message {
+    font-size: .8em;
   }
 
   .btn-toolbar {

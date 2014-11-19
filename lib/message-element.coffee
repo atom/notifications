@@ -5,17 +5,17 @@ class MessageElement extends HTMLElement
   setModel: (@model) ->
     @setAttribute('type', @model.type)
     @setAttribute('class', 'icon icon-' + @model.getIcon())
-    @textContent = @model.message
 
-    if @model.type == 'fatal'
-      @.classList.add('has-close')
-      closeButton = document.createElement('button')
-      closeButton.classList.add('close', 'icon', 'icon-x')
-      @appendChild(closeButton)
+    messageContainer = document.createElement('div')
+    messageContainer.classList.add('item')
+    messageContainer.classList.add('message')
+    messageContainer.textContent = @model.message
+    @appendChild(messageContainer)
 
     errorDetail = @model.options.errorDetail
     if errorDetail?
       detailContainer = document.createElement('div')
+      detailContainer.classList.add('item')
       detailContainer.classList.add('detail')
       @appendChild(detailContainer)
 
@@ -25,6 +25,10 @@ class MessageElement extends HTMLElement
         detailContainer.appendChild(div)
 
     if @model.type == 'fatal'
+
+      fatalContainer = document.createElement('div')
+      fatalContainer.classList.add('item')
+
       fatalMessage = document.createElement('div')
       fatalMessage.classList.add('fatal-message')
       fatalMessage.textContent = 'This is likely a bug in atom. You can help by creating an issue.'
@@ -39,8 +43,14 @@ class MessageElement extends HTMLElement
       toolbar.classList.add('btn-toolbar')
       toolbar.appendChild(issueButton)
 
-      @appendChild(fatalMessage)
-      @appendChild(toolbar)
+      @.classList.add('has-close')
+      closeButton = document.createElement('button')
+      closeButton.classList.add('close', 'icon', 'icon-x')
+
+      fatalContainer.appendChild(fatalMessage)
+      fatalContainer.appendChild(toolbar)
+      @appendChild(fatalContainer)
+      @appendChild(closeButton)
 
   createIssue: ->
     console.log 'issue', @model
