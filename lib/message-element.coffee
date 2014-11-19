@@ -46,6 +46,7 @@ class MessageElement extends HTMLElement
       @.classList.add('has-close')
       closeButton = document.createElement('button')
       closeButton.classList.add('close', 'icon', 'icon-x')
+      closeButton.addEventListener 'click', @removeMessage
 
       fatalContainer.appendChild(fatalMessage)
       fatalContainer.appendChild(toolbar)
@@ -54,6 +55,11 @@ class MessageElement extends HTMLElement
 
   createIssue: ->
     console.log 'issue', @model
+
+  removeMessage: (e) ->
+    console.log e
+    e.target.parentElement.classList.add('remove')
+    setTimeout (-> e.target.parentElement.remove() ), 400 # keep in sync with CSS animation
 
 
 module.exports = MessageElement = document.registerElement 'atom-message', prototype: MessageElement.prototype
