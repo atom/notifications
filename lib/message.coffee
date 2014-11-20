@@ -8,7 +8,7 @@ class Message
     return @options.icon if @options.icon?
     switch @type
       when 'fatal' then 'flame'
-      when 'error' then 'x'
+      when 'error' then 'bug'
       when 'warning' then 'alert'
       when 'info' then 'info'
       when 'success' then 'check'
