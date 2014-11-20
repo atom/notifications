@@ -22,6 +22,9 @@ atom-messages {
   font-size: 1.2em;
   overflow-x: hidden;
   overflow-y: auto;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 
   // -webkit-user-modify: read-write; // editable text during dev
 }
@@ -49,8 +52,11 @@ atom-message {
   }
 
   .content {
-    overflow-y: auto;
     max-height: inherit;
+    overflow-y: auto;
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 
   // .item's are used as general containers
