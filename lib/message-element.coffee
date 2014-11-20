@@ -6,18 +6,22 @@ class MessageElement extends HTMLElement
     @setAttribute('type', @model.type)
     @setAttribute('class', 'icon icon-' + @model.getIcon())
 
+    messageContent = document.createElement('div')
+    messageContent.classList.add('content')
+    @appendChild(messageContent)
+
     messageContainer = document.createElement('div')
     messageContainer.classList.add('item')
     messageContainer.classList.add('message')
     messageContainer.textContent = @model.message
-    @appendChild(messageContainer)
+    messageContent.appendChild(messageContainer)
 
     errorDetail = @model.options.errorDetail
     if errorDetail?
       detailContainer = document.createElement('div')
       detailContainer.classList.add('item')
       detailContainer.classList.add('detail')
-      @appendChild(detailContainer)
+      messageContent.appendChild(detailContainer)
 
       for line in errorDetail.split('\n')
         div = document.createElement('div')
@@ -50,7 +54,8 @@ class MessageElement extends HTMLElement
 
       fatalContainer.appendChild(fatalMessage)
       fatalContainer.appendChild(toolbar)
-      @appendChild(fatalContainer)
+      messageContent.appendChild(fatalContainer)
+
       @appendChild(closeButton)
 
   createIssue: ->

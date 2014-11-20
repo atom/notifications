@@ -18,7 +18,7 @@ atom-messages {
   top: @top-margin;
   right: 0;
   max-height: calc(100% ~"-" @top-margin); // ~"-" disable LESS calculation
-  padding: @component-padding @component-padding @component-padding @component-padding*3; // more space on the left for the animations
+  padding: @component-padding;
   font-size: 1.2em;
   overflow-x: hidden;
   overflow-y: auto;
@@ -31,6 +31,7 @@ atom-message {
   clear: right;
   position: relative;
   width: @width;
+  padding-left: @icon-size;
   max-height: @max-height;
   margin-bottom: @message-gap;
   border-radius: @component-border-radius;
@@ -38,21 +39,27 @@ atom-message {
 
   &.icon:before {
     position: absolute;
-    top: 12px;
-    left: -@icon-size;
-    bottom: 0;
+    top: 0;
+    left: 0;
     width: @icon-size;
+    height: 100%;
+    padding-top: @component-padding;
     text-align: center;
+    border-radius: @component-border-radius 0 0 @component-border-radius;
+  }
+
+  .content {
+    overflow-y: auto;
+    max-height: inherit;
   }
 
   // .item's are used as general containers
   .item {
     padding: @component-padding;
     border-top: 1px solid hsla(0,0%,0%,.1);
-  }
-
-  .message.item {
-    border-top: none;
+    &.message {
+      border-top: none;
+    }
   }
 
   &.has-close .message {
@@ -125,11 +132,11 @@ atom-message[type="success"] {
 
 .message(@txt; @bg) {
   color: darken(@txt, 40%);
-  border-left: @icon-size solid @bg;
   background-color: lighten(@bg, 25%);
 
   &.icon:before {
     color: lighten(@bg, 36%);
+    background-color: @bg;
   }
 }
 
@@ -154,7 +161,7 @@ atom-message {
   &.remove,
   &.remove:hover {
     // Total time: 700ms
-    -webkit-animation: message-hide   .24s .16s cubic-bezier(0.6, -0.28001, 0.735, 0.045),
+    -webkit-animation: message-hide   .24s .16s cubic-bezier(0.6, 0.04, 0.98, 0.335),
                        message-shrink .30s .40s cubic-bezier(0.5, 0, 0, 1);
     -webkit-animation-fill-mode: forwards;
   }
@@ -165,15 +172,14 @@ atom-message {
   100% { opacity: 1; transform: perspective(@width) translate(0,     0) rotateX( 0deg); }
 }
 
-@-webkit-keyframes message-hide {
-    0% { opacity: 1; transform: scale(1); }
-  100% { opacity: 1; transform: scale(0); }
+@-webkit-keyframes message-hideeee {
+    0% { opacity: 1; transform: scale( 1); }
+  100% { opacity: 0; transform: scale(.8); }
 }
 
-
-@-webkit-keyframes message-shrink {
-    0% {  opacity: 1; max-height: @max-height; margin-bottom: @message-gap; transform: scale(0); }
-  100% {  opacity: 0; max-height: 0;           margin-bottom: 0;            transform: scale(0); }
+@-webkit-keyframes message-shrinkkkk {
+    0% {  opacity: 0; max-height: @max-height; margin-bottom: @message-gap; transform: scale(.8); }
+  100% {  opacity: 0; max-height: 0;           margin-bottom: 0;            transform: scale(.8); }
 }
 
 @-webkit-keyframes message-shake {
