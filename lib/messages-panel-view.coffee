@@ -1,8 +1,5 @@
 # The panel with the buttons
-
-Message = require './message'
-MessageElement = require './message-element'
-
+# TODO: remove this
 module.exports =
 class MessagesPanelView
   constructor: ->
@@ -53,18 +50,19 @@ class MessagesPanelView
   createError: =>
     message = 'Failed to load your user config'
     options =
-      errorDetail = """
+      closable: true
+      detail: """
         line 6: unexpected newline
         'metrics'::
         ^
       """
-    atom.messages.add new Message('error', message, options)
+    atom.messages.addError(message, options)
 
   createWarning: =>
-    atom.messages.add new Message('warning', 'Oops warning')
+    atom.messages.addWarning('Oops warning')
 
   createInfo: =>
-    atom.messages.add new Message('info', 'Some info for you', icon: 'comment')
+    atom.messages.addInfo('Some info for you', icon: 'comment')
 
   createSuccess: =>
-    atom.messages.add new Message('success', 'Yeah, success!')
+    atom.messages.addSuccess('Yeah, success!')

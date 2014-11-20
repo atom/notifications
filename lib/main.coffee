@@ -1,33 +1,35 @@
 MessagesPanelView = require './messages-panel-view'
 MessagesElement = require './messages-element'
-Message = require './message'
-
-class AtomMessagesService
-  constructor: (@messagesContainer) ->
-  add: (message) ->
-    @messagesContainer.appendChild(atom.views.getView(message))
+MessageElement = require './message-element'
+{Message} = require 'atom'
 
 module.exports =
   activate: (state) ->
     @messagesElement = new MessagesElement
     atom.views.getView(atom.workspace).appendChild(@messagesElement)
 
-    atom.messages = new AtomMessagesService(@messagesElement)
-
-    @messagesPanelView = new MessagesPanelView(@messagesElement)
-    @messagesPanel = atom.workspace.addBottomPanel(item: @messagesPanelView.getElement())
+    atom.messages.onDidAddMessage (message) =>
+      @messagesElement.appendChild(atom.views.getView(message))
 
     atom.onWillThrowError ({message, url, line, originalError, preventDefault}) ->
       preventDefault()
-      console.log originalError.stack
       options =
-        errorDetail: "#{url}:#{line}"
+        detail: "#{url}:#{line}"
         stack: originalError.stack
-      atom.messages.add(new Message('fatal', message, options))
+        closable: true
+      atom.messages.addFatalError(message, options)
+
+    # TODO: remove this when we are finished developing
+    @messagesPanelView = new MessagesPanelView(@messagesElement)
+    @messagesPanel = atom.workspace.addBottomPanel(item: @messagesPanelView.getElement())
 
   deactivate: ->
     @messagesPanel.destroy()
     @messagesPanelView.destroy()
+
+atom.views.addViewProvider
+  modelConstructor: Message
+  viewConstructor: MessageElement
 
 atom.commands.add 'atom-workspace', 'messages:trigger-error', ->
   abc + 2 # nope

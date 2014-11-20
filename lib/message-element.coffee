@@ -3,6 +3,10 @@ class MessageElement extends HTMLElement
 
   getModel: -> @model
   setModel: (@model) ->
+    @generateMarkup()
+    @autohide() unless @model.isClosable()
+
+  generateMarkup: ->
     @setAttribute('type', @model.type)
     @setAttribute('class', 'icon icon-' + @model.getIcon())
 
@@ -16,20 +20,19 @@ class MessageElement extends HTMLElement
     messageContainer.textContent = @model.message
     messageContent.appendChild(messageContainer)
 
-    errorDetail = @model.options.errorDetail
-    if errorDetail?
+    detail = @model.options.detail
+    if detail?
       detailContainer = document.createElement('div')
       detailContainer.classList.add('item')
       detailContainer.classList.add('detail')
       messageContent.appendChild(detailContainer)
 
-      for line in errorDetail.split('\n')
+      for line in detail.split('\n')
         div = document.createElement('div')
         div.textContent = line
         detailContainer.appendChild(div)
 
-    if @model.type == 'fatal'
-
+    if @model.type is 'fatal'
       fatalContainer = document.createElement('div')
       fatalContainer.classList.add('item')
 
@@ -47,23 +50,30 @@ class MessageElement extends HTMLElement
       toolbar.classList.add('btn-toolbar')
       toolbar.appendChild(issueButton)
 
-      @.classList.add('has-close')
-      closeButton = document.createElement('button')
-      closeButton.classList.add('close', 'icon', 'icon-x')
-      closeButton.addEventListener 'click', @removeMessage
-
       fatalContainer.appendChild(fatalMessage)
       fatalContainer.appendChild(toolbar)
       messageContent.appendChild(fatalContainer)
 
+    if @model.isClosable()
+      @classList.add('has-close')
+      closeButton = document.createElement('button')
+      closeButton.classList.add('close', 'icon', 'icon-x')
+      closeButton.addEventListener 'click', => @handleRemoveMessageClick()
       @appendChild(closeButton)
 
-  createIssue: ->
-    console.log 'issue', @model
+  handleRemoveMessageClick: =>
+    @classList.add('remove')
+    @removeMessageAfterTimeout()
 
-  removeMessage: (e) ->
-    e.target.parentElement.classList.add('remove')
-    setTimeout (-> e.target.parentElement.remove() ), 700 # keep in sync with CSS animation
+  autohide: ->
+    setTimeout =>
+      @classList.add('remove')
+      @removeMessageAfterTimeout()
+    , 5000
 
+  removeMessageAfterTimeout: ->
+    setTimeout =>
+      @remove()
+    , 700 # keep in sync with CSS animation
 
 module.exports = MessageElement = document.registerElement 'atom-message', prototype: MessageElement.prototype
