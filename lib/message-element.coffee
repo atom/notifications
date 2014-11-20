@@ -57,9 +57,8 @@ class MessageElement extends HTMLElement
     console.log 'issue', @model
 
   removeMessage: (e) ->
-    console.log e
     e.target.parentElement.classList.add('remove')
-    setTimeout (-> e.target.parentElement.remove() ), 400 # keep in sync with CSS animation
+    setTimeout (-> e.target.parentElement.remove() ), 700 # keep in sync with CSS animation
 
 
 module.exports = MessageElement = document.registerElement 'atom-message', prototype: MessageElement.prototype

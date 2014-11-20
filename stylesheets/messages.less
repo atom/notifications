@@ -2,8 +2,12 @@
 @import "octicon-mixins";
 @import "tabs";
 
+@autohide: 5s;
 @icon-size: 30px;
-@max-width: 300px;
+@width: 260px;
+@width-fatal: 400px;
+@max-height: 200px;
+@message-gap: 2px;
 @top-margin: @tab-height + @tab-top-padding + @tab-bottom-border-height;
 @bottom-margin: @top-margin;
 
@@ -13,7 +17,6 @@ atom-messages {
   position: absolute;
   top: @top-margin;
   right: 0;
-  max-width: @max-width;
   max-height: calc(100% ~"-" @top-margin); // ~"-" disable LESS calculation
   padding: @component-padding @component-padding @component-padding @component-padding*3; // more space on the left for the animations
   font-size: 1.2em;
@@ -24,9 +27,12 @@ atom-messages {
 }
 
 atom-message {
-  display: block;
+  float: right;
+  clear: right;
   position: relative;
-  margin-bottom: 2px;
+  width: @width;
+  max-height: @max-height;
+  margin-bottom: @message-gap;
   border-radius: @component-border-radius;
   word-wrap: break-word;
 
@@ -93,7 +99,11 @@ atom-message {
 
 // Types -------------------------------
 
-atom-message[type="fatal"],
+atom-message[type="fatal"] {
+  width: @width-fatal;
+  .message(@text-color-error; @background-color-error);
+}
+
 atom-message[type="error"] {
   .message(@text-color-error; @background-color-error);
 }
@@ -127,28 +137,43 @@ atom-message[type="success"] {
 // Animations -------------------------------
 
 atom-message {
-  -webkit-animation: message-show .16s cubic-bezier(0.175, 0.885, 0.32, 1.27499);
+  -webkit-animation: message-show   .16s cubic-bezier(0.175, 0.885, 0.32, 1.27499),
+                     message-hide   .24s @autohide + 0.16s cubic-bezier(0.6, 0.04, 0.98, 0.335),
+                     message-shrink .30s @autohide + 0.40s cubic-bezier(0.5, 0, 0, 1);
+  -webkit-animation-fill-mode: backwards, both, forwards;
 
   &[type="fatal"] {
     -webkit-animation: message-show .16s cubic-bezier(0.175, 0.885, 0.32, 1.27499),
-    message-shake 4s 2s;
+                       message-shake 4s 2s;
     -webkit-animation-iteration-count: 1, 3; // shake 3 times after showing
+    &:hover {
+      -webkit-animation-play-state: paused; // stop shaking when hovering
+    }
   }
 
-  &.remove {
-    -webkit-animation: message-hide .24s .1s cubic-bezier(0.6, -0.28001, 0.735, 0.045);
+  &.remove,
+  &.remove:hover {
+    // Total time: 700ms
+    -webkit-animation: message-hide   .24s .16s cubic-bezier(0.6, -0.28001, 0.735, 0.045),
+                       message-shrink .30s .40s cubic-bezier(0.5, 0, 0, 1);
     -webkit-animation-fill-mode: forwards;
   }
 }
 
 @-webkit-keyframes message-show {
-    0% { opacity: 0; transform: perspective(@max-width) translateY(-20px) rotateX(90deg); }
-  100% { opacity: 1; transform: perspective(@max-width) translateY(    0) rotateX( 0deg); }
+    0% { opacity: 0; transform: perspective(@width) translate(0, -20px) rotateX(90deg); }
+  100% { opacity: 1; transform: perspective(@width) translate(0,     0) rotateX( 0deg); }
 }
 
 @-webkit-keyframes message-hide {
-    0% { opacity: 1; transform: translateX(   0); }
-  100% { opacity: 0; transform: translateX(100%); }
+    0% { opacity: 1; transform: scale(1); }
+  100% { opacity: 1; transform: scale(0); }
+}
+
+
+@-webkit-keyframes message-shrink {
+    0% {  opacity: 1; max-height: @max-height; margin-bottom: @message-gap; transform: scale(0); }
+  100% {  opacity: 0; max-height: 0;           margin-bottom: 0;            transform: scale(0); }
 }
 
 @-webkit-keyframes message-shake {
