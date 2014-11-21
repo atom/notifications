@@ -9,5 +9,6 @@
     "atom": ">0.50.0"
   },
   "dependencies": {
+    "plist": "^1.1.0"
   }
 }

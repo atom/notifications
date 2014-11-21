@@ -1,3 +1,7 @@
+os = require 'os'
+fs = require 'fs'
+plist = require 'plist'
+
 class MessageElement extends HTMLElement
   constructor: ->
 
@@ -41,7 +45,7 @@ class MessageElement extends HTMLElement
       fatalMessage.textContent = 'This is likely a bug in atom. You can help by creating an issue.'
 
       issueButton = document.createElement('a')
-      issueButton.setAttribute('href', @model.getIssueUrl())
+      issueButton.setAttribute('href', @getIssueUrl())
       issueButton.classList.add('btn')
       issueButton.classList.add('btn-error')
       issueButton.textContent = "Create Issue"
@@ -75,5 +79,49 @@ class MessageElement extends HTMLElement
     setTimeout =>
       @remove()
     , 700 # keep in sync with CSS animation
+
+  getIssueUrl: ->
+    "https://github.com/atom/atom/issues/new?title=#{encodeURI(@getIssueTitle())}&body=#{encodeURI(@getIssueBody())}"
+
+  getIssueTitle: ->
+    @model.getMessage()
+
+  getIssueBody: ->
+    options = @model.getOptions()
+    """
+    There was an unhandled error!
+
+    Atom Version: #{atom.getVersion()}
+    System: #{@osMarketingVersion()}
+
+    Stack Trace
+    ```
+    At #{options.detail}
+
+    #{options.stack}
+    ```
+    """
+
+  osMarketingVersion: ->
+    switch os.platform()
+      when 'darwin' then @macVersionText()
+      when 'win32' then @winVersionText()
+      else "#{os.platform()} #{os.release()}"
+
+  macVersionText: (info = @macVersionInfo()) ->
+    return 'Unknown OS X version' unless info.ProductName and info.ProductVersion
+
+    "#{info.ProductName} #{info.ProductVersion}"
+
+  macVersionInfo: ->
+    # try
+      text = fs.readFileSync('/System/Library/CoreServices/SystemVersion.plist', 'utf8')
+      plist.parse(text)
+    # catch e
+    #   {}
+
+  winVersionText: ->
+    info = spawnSync('systeminfo').stdout.toString()
+    if (res = /OS.Name.\s+(.*)$/im.exec(info)) then res[1] else 'Unknown Windows Version'
 
 module.exports = MessageElement = document.registerElement 'atom-message', prototype: MessageElement.prototype
