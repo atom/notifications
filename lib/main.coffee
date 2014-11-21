@@ -1,10 +1,11 @@
-NotificationsPanelView = require './notifications-panel-view'
-NotificationsElement = require './notifications-element'
-NotificationElement = require './notification-element'
 {Notification} = require 'atom'
 
 module.exports =
   activate: (state) ->
+    NotificationsPanelView = require './notifications-panel-view'
+    NotificationsElement = require './notifications-element'
+    NotificationElement = require './notification-element'
+
     @notificationsElement = new NotificationsElement
     atom.views.getView(atom.workspace).appendChild(@notificationsElement)
 

@@ -1,30 +1,13 @@
-{WorkspaceView} = require 'atom'
-Notifications = require '../lib/notifications'
-
-# Use the command `window:run-package-specs` (cmd-alt-ctrl-p) to run specs.
-#
-# To run a specific `it` or `describe` block add an `f` to the front (e.g. `fit`
-# or `fdescribe`). Remove the `f` to unfocus the block.
-
 describe "Notifications", ->
-  activationPromise = null
+  [workspaceElement, activationPromise] = []
 
   beforeEach ->
-    atom.workspaceView = new WorkspaceView
+    workspaceElement = atom.views.getView(atom.workspace)
     activationPromise = atom.packages.activatePackage('notifications')
 
-  describe "when the notifications:toggle event is triggered", ->
-    it "attaches and then detaches the view", ->
-      expect(atom.workspaceView.find('.notifications')).not.toExist()
+    waitsForPromise ->
+      activationPromise
 
-      # This is an activation event, triggering it will cause the package to be
-      # activated.
-      atom.commands.dispatch atom.workspaceView.element, 'notifications:toggle'
-
-      waitsForPromise ->
-        activationPromise
-
-      runs ->
-        expect(atom.workspaceView.find('.notifications')).toExist()
-        atom.commands.dispatch atom.workspaceView.element, 'notifications:toggle'
-        expect(atom.workspaceView.find('.notifications')).not.toExist()
+  describe "when the package is activated", ->
+    it "attaches an atom-notifications element to the dom", ->
+      expect(workspaceElement.querySelector('atom-notifications')).toBeDefined()
