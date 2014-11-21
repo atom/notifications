@@ -1,18 +1,26 @@
-{Notification} = require 'atom'
+{Notification, CompositeDisposable} = require 'atom'
 
 module.exports =
+  subscriptions: null
+
   activate: (state) ->
     NotificationsPanelView = require './notifications-panel-view'
     NotificationsElement = require './notifications-element'
     NotificationElement = require './notification-element'
 
+    @subscriptions = new CompositeDisposable
+
+    atom.views.addViewProvider
+      modelConstructor: Notification
+      viewConstructor: NotificationElement
+
     @notificationsElement = new NotificationsElement
     atom.views.getView(atom.workspace).appendChild(@notificationsElement)
 
-    atom.notifications.onDidAddNotification (notification) =>
+    @subscriptions.add atom.notifications.onDidAddNotification (notification) =>
       @notificationsElement.appendChild(atom.views.getView(notification))
 
-    atom.onWillThrowError ({message, url, line, originalError, preventDefault}) ->
+    @subscriptions.add atom.onWillThrowError ({message, url, line, originalError, preventDefault}) ->
       preventDefault()
       options =
         detail: "#{url}:#{line}"
@@ -25,12 +33,8 @@ module.exports =
     @notificationsPanel = atom.workspace.addBottomPanel(item: @notificationsPanelView.getElement())
 
   deactivate: ->
-    @notificationsPanel.destroy()
-    @notificationsPanelView.destroy()
-
-atom.views.addViewProvider
-  modelConstructor: Notification
-  viewConstructor: NotificationElement
+    @subscriptions?.dispose()
+    @notificationsElement.remove()
 
 atom.commands.add 'atom-workspace', 'notifications:trigger-error', ->
   abc + 2 # nope
