@@ -112,24 +112,24 @@ atom-notification {
 
 // Types -------------------------------
 
-atom-notification[type="fatal"] {
+atom-notification.fatal {
   width: @width-fatal;
   .notification(@text-color-error; @background-color-error);
 }
 
-atom-notification[type="error"] {
+atom-notification.error {
   .notification(@text-color-error; @background-color-error);
 }
 
-atom-notification[type="warning"] {
+atom-notification.warning {
   .notification(@text-color-warning; @background-color-warning);
 }
 
-atom-notification[type="info"] {
+atom-notification.info {
   .notification(@text-color-info; @background-color-info);
 }
 
-atom-notification[type="success"] {
+atom-notification.success {
   .notification(@text-color-success; @background-color-success);
 }
 

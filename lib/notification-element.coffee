@@ -3,6 +3,9 @@ fs = require 'fs'
 plist = require 'plist'
 
 class NotificationElement extends HTMLElement
+  animationDuration: 700
+  visibilityDuration: 5000
+
   constructor: ->
 
   getModel: -> @model
@@ -11,8 +14,9 @@ class NotificationElement extends HTMLElement
     @autohide() unless @model.isClosable()
 
   generateMarkup: ->
-    @setAttribute('type', @model.type)
-    @setAttribute('class', 'icon icon-' + @model.getIcon())
+    @classList.add "#{@model.getType()}"
+    @classList.add "icon"
+    @classList.add "icon-#{@model.getIcon()}"
 
     notificationContent = document.createElement('div')
     notificationContent.classList.add('content')
@@ -65,7 +69,7 @@ class NotificationElement extends HTMLElement
       closeButton.addEventListener 'click', => @handleRemoveNotificationClick()
       @appendChild(closeButton)
 
-  handleRemoveNotificationClick: =>
+  handleRemoveNotificationClick: ->
     @classList.add('remove')
     @removeNotificationAfterTimeout()
 
@@ -73,12 +77,12 @@ class NotificationElement extends HTMLElement
     setTimeout =>
       @classList.add('remove')
       @removeNotificationAfterTimeout()
-    , 5000
+    , @visibilityDuration
 
   removeNotificationAfterTimeout: ->
     setTimeout =>
       @remove()
-    , 700 # keep in sync with CSS animation
+    , @animationDuration # keep in sync with CSS animation
 
   getIssueUrl: ->
     "https://github.com/atom/atom/issues/new?title=#{encodeURI(@getIssueTitle())}&body=#{encodeURI(@getIssueBody())}"
