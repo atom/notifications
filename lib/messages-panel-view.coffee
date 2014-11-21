@@ -56,13 +56,13 @@ class MessagesPanelView
         'metrics'::
         ^
       """
-    atom.messages.addError(message, options)
+    atom.notifications.addError(message, options)
 
   createWarning: =>
-    atom.messages.addWarning('Oops warning')
+    atom.notifications.addWarning('Oops warning')
 
   createInfo: =>
-    atom.messages.addInfo('Some info for you', icon: 'comment')
+    atom.notifications.addInfo('Some info for you', icon: 'comment')
 
   createSuccess: =>
-    atom.messages.addSuccess('Yeah, success!')
+    atom.notifications.addSuccess('Yeah, success!')

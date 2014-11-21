@@ -8,7 +8,7 @@ module.exports =
     @messagesElement = new MessagesElement
     atom.views.getView(atom.workspace).appendChild(@messagesElement)
 
-    atom.messages.onDidAddMessage (message) =>
+    atom.notifications.onDidAddNotification (message) =>
       @messagesElement.appendChild(atom.views.getView(message))
 
     atom.onWillThrowError ({message, url, line, originalError, preventDefault}) ->
@@ -17,7 +17,7 @@ module.exports =
         detail: "#{url}:#{line}"
         stack: originalError.stack
         closable: true
-      atom.messages.addFatalError(message, options)
+      atom.notifications.addFatalError(message, options)
 
     # TODO: remove this when we are finished developing
     @messagesPanelView = new MessagesPanelView(@messagesElement)
