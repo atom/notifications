@@ -1,9 +1,9 @@
 {
-  "name": "messages",
+  "name": "notifications",
   "main": "./lib/main",
   "version": "0.0.0",
   "description": "A short description of your package",
-  "repository": "https://github.com/atom/messages",
+  "repository": "https://github.com/atom/notifications",
   "license": "MIT",
   "engines": {
     "atom": ">0.50.0"

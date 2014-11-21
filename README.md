@@ -1,10 +1,10 @@
-# messages package
+# notifications package
 
 Run these to get it going:
 
 ```
-git clone git@github.com:atom/messages.git
-cd messages
+git clone git@github.com:atom/notifications.git
+cd notifications
 apm install
 apm link -d
 atom .
@@ -16,6 +16,6 @@ It adds some buttons to the bottom panel:
 
 ### TODO
 
-* [x] Show some example messages
-* [ ] A panel for all the messages
+* [x] Show some example notifications
+* [ ] A panel for all the notifications
 * [ ] A status bar icon

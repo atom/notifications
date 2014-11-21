@@ -1,11 +1,11 @@
 # The panel with the buttons
 # TODO: remove this
 module.exports =
-class MessagesPanelView
+class NotificationsPanelView
   constructor: ->
     # Create root element
     @element = document.createElement('div')
-    @element.classList.add('messages')
+    @element.classList.add('notifications')
     @element.classList.add('padded')
 
     toolbar = document.createElement('div')
@@ -32,20 +32,20 @@ class MessagesPanelView
 
     infoButton = document.createElement('button')
     infoButton.classList.add('btn')
-    infoButton.textContent = "Create Info Message"
+    infoButton.textContent = "Create Info Notification"
     infoButton.addEventListener 'click', @createInfo
     toolbar.appendChild(infoButton)
 
     successButton = document.createElement('button')
     successButton.classList.add('btn')
-    successButton.textContent = "Create Success Message"
+    successButton.textContent = "Create Success Notification"
     successButton.addEventListener 'click', @createSuccess
     toolbar.appendChild(successButton)
 
   getElement: -> @element
 
   createFatalError: =>
-    atom.workspaceView.trigger('messages:trigger-error')
+    atom.workspaceView.trigger('notifications:trigger-error')
 
   createError: =>
     message = 'Failed to load your user config'

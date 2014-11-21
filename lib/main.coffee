@@ -1,15 +1,15 @@
-MessagesPanelView = require './messages-panel-view'
-MessagesElement = require './messages-element'
-MessageElement = require './message-element'
-{Message} = require 'atom'
+NotificationsPanelView = require './notifications-panel-view'
+NotificationsElement = require './notifications-element'
+NotificationElement = require './notification-element'
+{Notification} = require 'atom'
 
 module.exports =
   activate: (state) ->
-    @messagesElement = new MessagesElement
-    atom.views.getView(atom.workspace).appendChild(@messagesElement)
+    @notificationsElement = new NotificationsElement
+    atom.views.getView(atom.workspace).appendChild(@notificationsElement)
 
-    atom.notifications.onDidAddNotification (message) =>
-      @messagesElement.appendChild(atom.views.getView(message))
+    atom.notifications.onDidAddNotification (notification) =>
+      @notificationsElement.appendChild(atom.views.getView(notification))
 
     atom.onWillThrowError ({message, url, line, originalError, preventDefault}) ->
       preventDefault()
@@ -20,16 +20,16 @@ module.exports =
       atom.notifications.addFatalError(message, options)
 
     # TODO: remove this when we are finished developing
-    @messagesPanelView = new MessagesPanelView(@messagesElement)
-    @messagesPanel = atom.workspace.addBottomPanel(item: @messagesPanelView.getElement())
+    @notificationsPanelView = new NotificationsPanelView(@notificationsElement)
+    @notificationsPanel = atom.workspace.addBottomPanel(item: @notificationsPanelView.getElement())
 
   deactivate: ->
-    @messagesPanel.destroy()
-    @messagesPanelView.destroy()
+    @notificationsPanel.destroy()
+    @notificationsPanelView.destroy()
 
 atom.views.addViewProvider
-  modelConstructor: Message
-  viewConstructor: MessageElement
+  modelConstructor: Notification
+  viewConstructor: NotificationElement
 
-atom.commands.add 'atom-workspace', 'messages:trigger-error', ->
+atom.commands.add 'atom-workspace', 'notifications:trigger-error', ->
   abc + 2 # nope

@@ -2,7 +2,7 @@ os = require 'os'
 fs = require 'fs'
 plist = require 'plist'
 
-class MessageElement extends HTMLElement
+class NotificationElement extends HTMLElement
   constructor: ->
 
   getModel: -> @model
@@ -14,22 +14,22 @@ class MessageElement extends HTMLElement
     @setAttribute('type', @model.type)
     @setAttribute('class', 'icon icon-' + @model.getIcon())
 
-    messageContent = document.createElement('div')
-    messageContent.classList.add('content')
-    @appendChild(messageContent)
+    notificationContent = document.createElement('div')
+    notificationContent.classList.add('content')
+    @appendChild(notificationContent)
 
-    messageContainer = document.createElement('div')
-    messageContainer.classList.add('item')
-    messageContainer.classList.add('message')
-    messageContainer.textContent = @model.message
-    messageContent.appendChild(messageContainer)
+    notificationContainer = document.createElement('div')
+    notificationContainer.classList.add('item')
+    notificationContainer.classList.add('message')
+    notificationContainer.textContent = @model.getMessage()
+    notificationContent.appendChild(notificationContainer)
 
     detail = @model.options.detail
     if detail?
       detailContainer = document.createElement('div')
       detailContainer.classList.add('item')
       detailContainer.classList.add('detail')
-      messageContent.appendChild(detailContainer)
+      notificationContent.appendChild(detailContainer)
 
       for line in detail.split('\n')
         div = document.createElement('div')
@@ -40,9 +40,9 @@ class MessageElement extends HTMLElement
       fatalContainer = document.createElement('div')
       fatalContainer.classList.add('item')
 
-      fatalMessage = document.createElement('div')
-      fatalMessage.classList.add('fatal-message')
-      fatalMessage.textContent = 'This is likely a bug in atom. You can help by creating an issue.'
+      fatalNotification = document.createElement('div')
+      fatalNotification.classList.add('fatal-notification')
+      fatalNotification.textContent = 'This is likely a bug in atom. You can help by creating an issue.'
 
       issueButton = document.createElement('a')
       issueButton.setAttribute('href', @getIssueUrl())
@@ -54,28 +54,28 @@ class MessageElement extends HTMLElement
       toolbar.classList.add('btn-toolbar')
       toolbar.appendChild(issueButton)
 
-      fatalContainer.appendChild(fatalMessage)
+      fatalContainer.appendChild(fatalNotification)
       fatalContainer.appendChild(toolbar)
-      messageContent.appendChild(fatalContainer)
+      notificationContent.appendChild(fatalContainer)
 
     if @model.isClosable()
       @classList.add('has-close')
       closeButton = document.createElement('button')
       closeButton.classList.add('close', 'icon', 'icon-x')
-      closeButton.addEventListener 'click', => @handleRemoveMessageClick()
+      closeButton.addEventListener 'click', => @handleRemoveNotificationClick()
       @appendChild(closeButton)
 
-  handleRemoveMessageClick: =>
+  handleRemoveNotificationClick: =>
     @classList.add('remove')
-    @removeMessageAfterTimeout()
+    @removeNotificationAfterTimeout()
 
   autohide: ->
     setTimeout =>
       @classList.add('remove')
-      @removeMessageAfterTimeout()
+      @removeNotificationAfterTimeout()
     , 5000
 
-  removeMessageAfterTimeout: ->
+  removeNotificationAfterTimeout: ->
     setTimeout =>
       @remove()
     , 700 # keep in sync with CSS animation
@@ -124,4 +124,4 @@ class MessageElement extends HTMLElement
     info = spawnSync('systeminfo').stdout.toString()
     if (res = /OS.Name.\s+(.*)$/im.exec(info)) then res[1] else 'Unknown Windows Version'
 
-module.exports = MessageElement = document.registerElement 'atom-message', prototype: MessageElement.prototype
+module.exports = NotificationElement = document.registerElement 'atom-notification', prototype: NotificationElement.prototype

@@ -2,19 +2,19 @@
 'context-menu':
   'atom-text-editor': [
     {
-      'label': 'Toggle messages'
-      'command': 'messages:toggle'
+      'label': 'Toggle notifications'
+      'command': 'notifications:toggle'
     }
   ]
 'menu': [
   {
     'label': 'Packages'
     'submenu': [
-      'label': 'messages'
+      'label': 'notifications'
       'submenu': [
         {
           'label': 'Toggle'
-          'command': 'messages:toggle'
+          'command': 'notifications:toggle'
         }
       ]
     ]
