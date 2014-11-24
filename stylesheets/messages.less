@@ -100,14 +100,13 @@ atom-notification {
     background-clip: padding-box;
   }
 
-  .fatal-message {
+  .fatal-notification {
     font-size: .8em;
   }
 
   .btn-toolbar {
-    margin-top:  @component-padding/2;
+    margin-top:  @component-padding;
   }
-
 }
 
 // Types -------------------------------
@@ -139,6 +138,10 @@ atom-notification.success {
 .notification(@txt; @bg) {
   color: darken(@txt, 40%);
   background-color: lighten(@bg, 25%);
+
+  a {
+    color: darken(@txt, 20%);
+  }
 
   &.icon:before {
     color: lighten(@bg, 36%);
