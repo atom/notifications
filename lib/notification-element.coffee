@@ -48,13 +48,21 @@ class NotificationElement extends HTMLElement
 
       fatalNotification = document.createElement('div')
       fatalNotification.classList.add('fatal-notification')
-      fatalNotification.textContent = 'This is likely a bug in atom. You can help by creating an issue.'
+
+      repoUrl = @getRepoUrl()
+      packageName = @getPackageName()
+      if packageName? and repoUrl?
+        fatalNotification.innerHTML = "The error was thrown from the <a href=\"#{repoUrl}\">#{packageName} package</a>, but might be a bug in Atom core."
+      else if packageName?
+        fatalNotification.textContent = 'The error was thrown from the #{packageName} package.'
+      else
+        fatalNotification.textContent = 'This is likely a bug in Atom. You can help by creating an issue.'
 
       issueButton = document.createElement('a')
       issueButton.setAttribute('href', @getIssueUrl())
       issueButton.classList.add('btn')
       issueButton.classList.add('btn-error')
-      issueButton.textContent = "Create Issue"
+      issueButton.textContent = "Create Issue On atom/atom"
 
       toolbar = document.createElement('div')
       toolbar.classList.add('btn-toolbar')

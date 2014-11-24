@@ -72,7 +72,7 @@ describe "Notifications", ->
           expect(fatalError).toBeDefined()
           expect(fatalError).toHaveClass 'has-close'
           expect(fatalError.innerHTML).toContain 'ReferenceError: a is not defined'
-          # expect(fatalError.innerHTML).toContain "'notifications'"
+          expect(fatalError.innerHTML).toContain "<a href=\"https://github.com/atom/notifications\">notifications package</a>"
           expect(fatalError.getPackageName()).toBe 'notifications'
 
           issueBody = fatalError.getIssueBody()
@@ -98,7 +98,7 @@ describe "Notifications", ->
           expect(fatalError).toBeDefined()
           expect(fatalError).toHaveClass 'has-close'
           expect(fatalError.innerHTML).toContain 'ReferenceError: a is not defined'
-          expect(fatalError.innerHTML).toContain 'bug in atom'
+          expect(fatalError.innerHTML).toContain 'bug in Atom'
           expect(fatalError.getPackageName()).toBeUndefined()
 
           issueBody = fatalError.getIssueBody()
