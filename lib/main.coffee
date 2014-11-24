@@ -1,10 +1,9 @@
 {Notification, CompositeDisposable} = require 'atom'
 
-module.exports =
+Notifications =
   subscriptions: null
 
   activate: (state) ->
-    NotificationsPanelView = require './notifications-panel-view'
     NotificationsElement = require './notifications-element'
     NotificationElement = require './notification-element'
 
@@ -28,13 +27,24 @@ module.exports =
         closable: true
       atom.notifications.addFatalError(message, options)
 
-    # TODO: remove this when we are finished developing
-    @notificationsPanelView = new NotificationsPanelView(@notificationsElement)
-    @notificationsPanel = atom.workspace.addBottomPanel(item: @notificationsPanelView.getElement())
-
   deactivate: ->
     @subscriptions?.dispose()
     @notificationsElement.remove()
+    @notificationsPanel?.destroy()
 
-atom.commands.add 'atom-workspace', 'notifications:trigger-error', ->
-  abc + 2 # nope
+  togglePanel: ->
+    if @notificationsPanel?
+      if Notifications.notificationsPanel.isVisible()
+        Notifications.notificationsPanel.hide()
+      else
+        Notifications.notificationsPanel.show()
+    else
+      NotificationsPanelView = require './notifications-panel-view'
+      Notifications.notificationsPanelView = new NotificationsPanelView
+      Notifications.notificationsPanel = atom.workspace.addBottomPanel(item: Notifications.notificationsPanelView.getElement())
+
+if atom.inDevMode()
+  atom.commands.add 'atom-workspace', 'notifications:toggle-dev-panel', -> Notifications.togglePanel()
+  atom.commands.add 'atom-workspace', 'notifications:trigger-error', -> abc + 2 # nope
+
+module.exports = Notifications

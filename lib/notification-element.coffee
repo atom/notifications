@@ -116,7 +116,7 @@ class NotificationElement extends HTMLElement
     There was an unhandled error!
 
     Atom Version: #{atom.getVersion()}
-    System: #{@osMarketingVersion()}
+    System: #{@getOSMarketingVersion()}
     Thrown From: #{packageMessage}
 
     Stack Trace
@@ -164,7 +164,8 @@ class NotificationElement extends HTMLElement
       @packagePathsByPackageName[pack.name] = pack.path
     @packagePathsByPackageName
 
-  osMarketingVersion: ->
+  # OS version strings lifted from https://github.com/lee-dohm/bug-report
+  getOSMarketingVersion: ->
     switch os.platform()
       when 'darwin' then @macVersionText()
       when 'win32' then @winVersionText()
