@@ -56,3 +56,23 @@ describe "Notifications", ->
 
         advanceClock(NotificationElement::animationDuration)
         expect(notificationContainer.childNodes.length).toBe 0
+
+    describe "when an exception is thrown", ->
+      beforeEach ->
+        try
+          a + 1
+        catch e
+          window.onerror.call(window, e.toString(), 'abc', 2, 3, e)
+
+      it "displays a fatal error", ->
+        notificationContainer = workspaceElement.querySelector('atom-notifications')
+        fatalError = notificationContainer.querySelector('atom-notification.fatal')
+        expect(notificationContainer.childNodes.length).toBe 1
+        expect(fatalError).toBeDefined()
+        expect(fatalError).toHaveClass 'has-close'
+        expect(fatalError.innerHTML).toContain 'ReferenceError: a is not defined'
+
+        issueBody = fatalError.getIssueBody()
+        expect(issueBody).toMatch /Atom Version: [0-9].[0-9]+.[0-9]+/ig
+        expect(issueBody).not.toMatch /Unknown/ig
+        expect(issueBody).toContain 'ReferenceError: a is not defined'
