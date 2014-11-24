@@ -9,6 +9,7 @@
     "atom": ">0.50.0"
   },
   "dependencies": {
-    "plist": "^1.1.0"
+    "plist": "^1.1.0",
+    "stacktrace-parser": "0.1.1"
   }
 }

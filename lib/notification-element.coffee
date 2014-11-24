@@ -1,6 +1,8 @@
 os = require 'os'
 fs = require 'fs'
+path = require 'path'
 plist = require 'plist'
+StackTraceParser = require 'stacktrace-parser'
 
 class NotificationElement extends HTMLElement
   animationDuration: 700
@@ -92,11 +94,22 @@ class NotificationElement extends HTMLElement
 
   getIssueBody: ->
     options = @model.getOptions()
+    repoUrl = @getRepoUrl()
+    packageName = @getPackageName()
+
+    if packageName? and repoUrl?
+      packageMessage = "[#{packageName}](#{repoUrl}) package"
+    else if packageName?
+      packageMessage = "'#{packageName}' package"
+    else
+      packageMessage = 'Atom Core'
+
     """
     There was an unhandled error!
 
     Atom Version: #{atom.getVersion()}
     System: #{@osMarketingVersion()}
+    Thrown From: #{packageMessage}
 
     Stack Trace
     ```
@@ -105,6 +118,43 @@ class NotificationElement extends HTMLElement
     #{options.stack}
     ```
     """
+
+  getRepoUrl: ->
+    packageName = @getPackageName()
+    return unless packageName?
+    repo = atom.packages.getActivePackage(packageName)?.metadata?.repository
+    repoUrl = repo?.url ? repo
+    repoUrl = repoUrl?.replace(/\.git$/, '')
+    repoUrl
+
+  getPackageName: ->
+    options = @model.getOptions()
+    return unless options.stack?
+    stack = StackTraceParser.parse(options.stack)
+
+    packagePaths = @getPackagePathsByPackageName()
+    for packageName, packagePath of packagePaths
+      if packagePath.indexOf('.atom/dev/packages') > -1 or packagePath.indexOf('.atom/packages') > -1
+        packagePaths[packageName] = fs.realpathSync(packagePath)
+
+    for i in [0...stack.length]
+      {file} = stack[i]
+
+      # Empty when it was run from the dev console
+      return unless file
+
+      for packageName, packagePath of packagePaths
+        continue if file is 'node.js'
+        relativePath = path.relative(packagePath, file)
+        return packageName unless /^\.\./.test(relativePath)
+    return
+
+  getPackagePathsByPackageName: ->
+    return @packagePathsByPackageName if @packagePathsByPackageName?
+    @packagePathsByPackageName = {}
+    for pack in atom.packages.getLoadedPackages()
+      @packagePathsByPackageName[pack.name] = pack.path
+    @packagePathsByPackageName
 
   osMarketingVersion: ->
     switch os.platform()

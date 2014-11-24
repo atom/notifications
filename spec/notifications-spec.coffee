@@ -58,21 +58,49 @@ describe "Notifications", ->
         expect(notificationContainer.childNodes.length).toBe 0
 
     describe "when an exception is thrown", ->
-      beforeEach ->
-        try
-          a + 1
-        catch e
-          window.onerror.call(window, e.toString(), 'abc', 2, 3, e)
+      describe "when an exception is thrown from a package", ->
+        beforeEach ->
+          try
+            a + 1
+          catch e
+            window.onerror.call(window, e.toString(), 'abc', 2, 3, e)
 
-      it "displays a fatal error", ->
-        notificationContainer = workspaceElement.querySelector('atom-notifications')
-        fatalError = notificationContainer.querySelector('atom-notification.fatal')
-        expect(notificationContainer.childNodes.length).toBe 1
-        expect(fatalError).toBeDefined()
-        expect(fatalError).toHaveClass 'has-close'
-        expect(fatalError.innerHTML).toContain 'ReferenceError: a is not defined'
+        it "displays a fatal error with the package name in the error", ->
+          notificationContainer = workspaceElement.querySelector('atom-notifications')
+          fatalError = notificationContainer.querySelector('atom-notification.fatal')
+          expect(notificationContainer.childNodes.length).toBe 1
+          expect(fatalError).toBeDefined()
+          expect(fatalError).toHaveClass 'has-close'
+          expect(fatalError.innerHTML).toContain 'ReferenceError: a is not defined'
+          # expect(fatalError.innerHTML).toContain "'notifications'"
+          expect(fatalError.getPackageName()).toBe 'notifications'
 
-        issueBody = fatalError.getIssueBody()
-        expect(issueBody).toMatch /Atom Version: [0-9].[0-9]+.[0-9]+/ig
-        expect(issueBody).not.toMatch /Unknown/ig
-        expect(issueBody).toContain 'ReferenceError: a is not defined'
+          issueBody = fatalError.getIssueBody()
+          expect(issueBody).toMatch /Atom Version: [0-9].[0-9]+.[0-9]+/ig
+          expect(issueBody).not.toMatch /Unknown/ig
+          expect(issueBody).toContain 'ReferenceError: a is not defined'
+          expect(issueBody).toContain 'Thrown From: [notifications](https://github.com/atom/notifications) package'
+
+      describe "when an exception is thrown from core", ->
+        beforeEach ->
+          try
+            a + 1
+          catch e
+            stackLines = e.stack.split('\n')
+            stackLines.splice(1, 1) # strip out the notifications reference
+            e.stack = stackLines.join('\n')
+            window.onerror.call(window, e.toString(), 'abc', 2, 3, e)
+
+        it "displays a fatal error with the package name in the error", ->
+          notificationContainer = workspaceElement.querySelector('atom-notifications')
+          fatalError = notificationContainer.querySelector('atom-notification.fatal')
+          expect(notificationContainer.childNodes.length).toBe 1
+          expect(fatalError).toBeDefined()
+          expect(fatalError).toHaveClass 'has-close'
+          expect(fatalError.innerHTML).toContain 'ReferenceError: a is not defined'
+          expect(fatalError.innerHTML).toContain 'bug in atom'
+          expect(fatalError.getPackageName()).toBeUndefined()
+
+          issueBody = fatalError.getIssueBody()
+          expect(issueBody).toContain 'ReferenceError: a is not defined'
+          expect(issueBody).toContain 'Thrown From: Atom Core'
