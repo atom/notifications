@@ -118,11 +118,11 @@ class NotificationElement extends HTMLElement
     "#{info.ProductName} #{info.ProductVersion}"
 
   macVersionInfo: ->
-    # try
+    try
       text = fs.readFileSync('/System/Library/CoreServices/SystemVersion.plist', 'utf8')
       plist.parse(text)
-    # catch e
-    #   {}
+    catch e
+      {}
 
   winVersionText: ->
     info = spawnSync('systeminfo').stdout.toString()
