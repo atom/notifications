@@ -5,7 +5,7 @@
 @autohide: 5s;
 @icon-size: 30px;
 @width: 260px;
-@width-fatal: 400px;
+@width-error: 400px;
 @max-height: 200px;
 @notification-gap: 2px;
 @top-margin: @tab-height + @tab-top-padding + @tab-bottom-border-height;
@@ -98,6 +98,8 @@ atom-notification {
     font-size: .8em;
     background-color: hsla(0,0%,100%,.3);
     background-clip: padding-box;
+    white-space: pre;
+    font-family: monaco, monospace;
   }
 
   .fatal-notification {
@@ -112,11 +114,12 @@ atom-notification {
 // Types -------------------------------
 
 atom-notification.fatal {
-  width: @width-fatal;
+  width: @width-error;
   .notification(@text-color-error; @background-color-error);
 }
 
 atom-notification.error {
+  width: @width-error;
   .notification(@text-color-error; @background-color-error);
 }
 
