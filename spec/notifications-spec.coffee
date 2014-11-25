@@ -78,10 +78,10 @@ describe "Notifications", ->
           expect(fatalError.getPackageName()).toBe 'notifications'
 
           issueBody = fatalError.getIssueBody()
-          expect(issueBody).toMatch /Atom Version: [0-9].[0-9]+.[0-9]+/ig
+          expect(issueBody).toMatch /Atom Version\*\*: [0-9].[0-9]+.[0-9]+/ig
           expect(issueBody).not.toMatch /Unknown/ig
           expect(issueBody).toContain 'ReferenceError: a is not defined'
-          expect(issueBody).toContain 'Thrown From: [notifications](https://github.com/atom/notifications) package'
+          expect(issueBody).toContain 'Thrown From**: [notifications](https://github.com/atom/notifications) package'
 
       describe "when an exception is thrown from core", ->
         beforeEach ->
@@ -105,7 +105,7 @@ describe "Notifications", ->
 
           issueBody = fatalError.getIssueBody()
           expect(issueBody).toContain 'ReferenceError: a is not defined'
-          expect(issueBody).toContain 'Thrown From: Atom Core'
+          expect(issueBody).toContain 'Thrown From**: Atom Core'
 
       describe "when the error has been reported", ->
         beforeEach ->
