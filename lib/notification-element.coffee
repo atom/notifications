@@ -30,8 +30,9 @@ class NotificationElement extends HTMLElement
     notificationContainer.textContent = @model.getMessage()
     notificationContent.appendChild(notificationContainer)
 
-    detail = @model.options.detail
+    detail = @model.getDetail()
     if detail?
+      @classList.add('has-detail')
       detailContainer = document.createElement('div')
       detailContainer.classList.add('item')
       detailContainer.classList.add('detail')
