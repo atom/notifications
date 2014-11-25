@@ -1,4 +1,5 @@
 NotificationElement = require '../lib/notification-element'
+$ = require 'jquery'
 
 describe "Notifications", ->
   [workspaceElement, activationPromise] = []
@@ -18,6 +19,7 @@ describe "Notifications", ->
     notificationContainer = null
     beforeEach ->
       notificationContainer = workspaceElement.querySelector('atom-notifications')
+      spyOn($, 'ajax')
 
     it "adds an atom-notification element to the container with a class corresponding to the type", ->
       expect(notificationContainer.childNodes.length).toBe 0
@@ -104,3 +106,37 @@ describe "Notifications", ->
           issueBody = fatalError.getIssueBody()
           expect(issueBody).toContain 'ReferenceError: a is not defined'
           expect(issueBody).toContain 'Thrown From: Atom Core'
+
+      describe "when the error has been reported", ->
+        beforeEach ->
+          $.ajax.andCallFake (url, settings) -> settings.success(items: [])
+          try
+            a + 1
+          catch e
+            window.onerror.call(window, e.toString(), 'abc', 2, 3, e)
+
+        it "asks the user to create an issue", ->
+          fatalError = notificationContainer.querySelector('atom-notification.fatal')
+          button = fatalError.querySelector('.btn')
+          expect(button.textContent).toContain 'Create Issue'
+          fatalNotification = fatalError.querySelector('.fatal-notification')
+          expect(fatalNotification.textContent).toContain 'You can help by creating an issue'
+
+      describe "when the error has been reported", ->
+        beforeEach ->
+          $.ajax.andCallFake (url, settings) -> settings.success
+            items: [
+              {html_url: 'http://url.com/ok'}
+            ]
+          try
+            a + 1
+          catch e
+            window.onerror.call(window, e.toString(), 'abc', 2, 3, e)
+
+        it "asks the user to create an issue", ->
+          fatalError = notificationContainer.querySelector('atom-notification.fatal')
+          button = fatalError.querySelector('.btn')
+          expect(button.textContent).toContain 'View Issue'
+          expect(button.getAttribute('href')).toBe 'http://url.com/ok'
+          fatalNotification = fatalError.querySelector('.fatal-notification')
+          expect(fatalNotification.textContent).toContain 'already been reported'

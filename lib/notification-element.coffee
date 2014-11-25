@@ -3,6 +3,7 @@ fs = require 'fs'
 path = require 'path'
 plist = require 'plist'
 StackTraceParser = require 'stacktrace-parser'
+$ = require 'jquery'
 
 class NotificationElement extends HTMLElement
   animationDuration: 700
@@ -53,17 +54,24 @@ class NotificationElement extends HTMLElement
       repoUrl = @getRepoUrl()
       packageName = @getPackageName()
       if packageName? and repoUrl?
-        fatalNotification.innerHTML = "The error was thrown from the <a href=\"#{repoUrl}\">#{packageName} package</a>, but might be a bug in Atom core."
+        fatalNotification.innerHTML = "The error was thrown from the <a href=\"#{repoUrl}\">#{packageName} package</a>, but it may be a bug in Atom."
       else if packageName?
-        fatalNotification.textContent = 'The error was thrown from the #{packageName} package.'
+        fatalNotification.textContent = 'The error was thrown from the #{packageName} package, but it might be a bug in Atom core.'
       else
-        fatalNotification.textContent = 'This is likely a bug in Atom. You can help by creating an issue.'
+        fatalNotification.textContent = 'This is likely a bug in Atom.'
 
       issueButton = document.createElement('a')
       issueButton.setAttribute('href', @getIssueUrl())
       issueButton.classList.add('btn')
       issueButton.classList.add('btn-error')
       issueButton.textContent = "Create Issue On atom/atom"
+      @fetchIssue (issue) ->
+        if issue?
+          issueButton.setAttribute('href', issue.html_url)
+          issueButton.textContent = "View Issue"
+          fatalNotification.textContent += " This issue has already been reported."
+        else
+          fatalNotification.textContent += " You can help by creating an issue."
 
       toolbar = document.createElement('div')
       toolbar.classList.add('btn-toolbar')
@@ -94,6 +102,17 @@ class NotificationElement extends HTMLElement
     setTimeout =>
       @remove()
     , @animationDuration # keep in sync with CSS animation
+
+  fetchIssue: (callback) ->
+    url = "https://api.github.com/search/issues"
+    query = "#{@getIssueTitle()} repo:atom/atom state:open"
+
+    $.ajax "#{url}?q=#{encodeURI(query)}&sort=created",
+      accept: 'application/vnd.github.v3+json'
+      contentType: "application/json"
+      success: (data) ->
+        issue = data.items?[0]
+        callback?(issue)
 
   getIssueUrl: ->
     "https://github.com/atom/atom/issues/new?title=#{encodeURI(@getIssueTitle())}&body=#{encodeURI(@getIssueBody())}"
