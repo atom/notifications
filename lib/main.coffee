@@ -2,6 +2,7 @@
 
 Notifications =
   subscriptions: null
+  duplicateTimeDelay: 500
 
   activate: (state) ->
     NotificationsElement = require './notifications-element'
@@ -16,8 +17,16 @@ Notifications =
     @notificationsElement = new NotificationsElement
     atom.views.getView(atom.workspace).appendChild(@notificationsElement)
 
+    lastNotification = null
     @subscriptions.add atom.notifications.onDidAddNotification (notification) =>
-      @notificationsElement.appendChild(atom.views.getView(notification))
+      if lastNotification?
+        # do not show duplicates unless some amount of time has passed
+        timeSpan = notification.getTimestamp() - lastNotification.getTimestamp()
+        unless timeSpan < @duplicateTimeDelay and notification.isEqual(lastNotification)
+          @notificationsElement.appendChild(atom.views.getView(notification))
+      else
+        @notificationsElement.appendChild(atom.views.getView(notification))
+      lastNotification = notification
 
     @subscriptions.add atom.onWillThrowError ({message, url, line, originalError, preventDefault}) ->
       preventDefault()
