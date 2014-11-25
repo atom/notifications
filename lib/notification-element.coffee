@@ -133,13 +133,14 @@ class NotificationElement extends HTMLElement
       packageMessage = 'Atom Core'
 
     """
-    There was an unhandled error!
+    #{@model.getMessage()}
 
-    Atom Version: #{atom.getVersion()}
-    System: #{@getOSMarketingVersion()}
-    Thrown From: #{packageMessage}
+    **Atom Version**: #{atom.getVersion()}
+    **System**: #{@getOSMarketingVersion()}
+    **Thrown From**: #{packageMessage}
 
-    Stack Trace
+    ### Stack Trace
+
     ```
     At #{options.detail}
 
