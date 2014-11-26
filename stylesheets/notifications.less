@@ -19,6 +19,7 @@ atom-notifications {
   font-size: 1.2em;
   overflow-x: hidden;
   overflow-y: auto;
+  pointer-events: none; // Disable to click through layers underneath
   &::-webkit-scrollbar {
     display: none;
   }
@@ -36,6 +37,7 @@ atom-notification {
   margin-bottom: @notification-gap;
   border-radius: @component-border-radius;
   word-wrap: break-word;
+  pointer-events: auto; // Enable again
 
   &.icon:before {
     position: absolute;
@@ -51,6 +53,7 @@ atom-notification {
   .content {
     max-height: inherit;
     overflow-y: auto;
+    -webkit-user-select: text;
     &::-webkit-scrollbar {
       display: none;
     }
