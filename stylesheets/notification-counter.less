@@ -1,0 +1,57 @@
+@import "ui-variables";
+@import "octicon-mixins";
+
+@icon-size: 20px;
+@counter-size: 16px;
+@item-space: 1px;
+
+.notification-counter {
+  .icon {
+    display: inline-block;
+    width: @icon-size;
+    height: @icon-size;
+    font-size: @icon-size;
+    line-height: @icon-size;
+    vertical-align: middle;
+    margin-left: -10px;
+    margin-right: 3px;
+    text-align: center;
+    color: @base-background-color;
+    border-radius: @component-border-radius;
+    background-color: @base-background-color;
+    &.is-info {    background-color: @background-color-info; }
+    &.is-success { background-color: @background-color-success; }
+    &.is-warning { background-color: @background-color-warning; }
+    &.is-error {   background-color: @background-color-error; }
+    &:before {
+      font-size: 16px;
+      line-height: inherit;
+      height: inherit;
+      vertical-align: top;
+    }
+  }
+
+  .item {
+    display: inline-block;
+    width: @counter-size;
+    height: @counter-size;
+    margin-left: @item-space;
+    padding: 0;
+    line-height: @counter-size;
+    font-size: inherit;
+    text-align: center;
+    vertical-align: middle;
+    &:first-of-type  { border-radius: @component-border-radius 0 0 @component-border-radius; }
+    &:last-of-type  { border-radius: 0 @component-border-radius @component-border-radius 0; }
+    &.is-warning { .item( @text-color-warning; @background-color-warning ); }
+    &.is-error   { .item( @text-color-error;   @background-color-error   ); }
+  }
+}
+
+
+// Mixins -------------------------------
+
+.item(@txt; @bg) {
+  color: @txt;
+  background-color: darken(@bg, 25%);
+}

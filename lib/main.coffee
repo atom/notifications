@@ -36,6 +36,8 @@ Notifications =
         closable: true
       atom.notifications.addFatalError(message, options)
 
+    atom.packages.once('activated', updateCounter)
+
   deactivate: ->
     @subscriptions?.dispose()
     @notificationsElement.remove()
@@ -51,6 +53,11 @@ Notifications =
       NotificationsPanelView = require './notifications-panel-view'
       Notifications.notificationsPanelView = new NotificationsPanelView
       Notifications.notificationsPanel = atom.workspace.addBottomPanel(item: Notifications.notificationsPanelView.getElement())
+
+updateCounter = ->
+  if atom.workspaceView?.statusBar?
+    NotificationCounterView = require './notification-counter'
+    notificationCounterView = new NotificationCounterView(atom.workspaceView.statusBar)
 
 if atom.inDevMode()
   atom.commands.add 'atom-workspace', 'notifications:toggle-dev-panel', -> Notifications.togglePanel()
