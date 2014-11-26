@@ -160,7 +160,6 @@ atom-notification.success {
 
 atom-notification {
   -webkit-animation: notification-show .16s cubic-bezier(0.175, 0.885, 0.32, 1.27499);
-  -webkit-animation-fill-mode: backwards, both, forwards;
 
   &[type="fatal"] {
     -webkit-animation: notification-show .16s cubic-bezier(0.175, 0.885, 0.32, 1.27499),
@@ -174,15 +173,15 @@ atom-notification {
   &.remove,
   &.remove:hover {
     // Total time: 700ms
-    -webkit-animation: notification-hide   .24s .16s cubic-bezier(0.6, 0.04, 0.98, 0.335),
-                       notification-shrink .30s .40s cubic-bezier(0.5, 0, 0, 1);
+    -webkit-animation: notification-hide   .24s      cubic-bezier(0.33859, -0.42, 1, -0.22),
+                       notification-shrink .24s .24s cubic-bezier(0.5, 0, 0, 1);
     -webkit-animation-fill-mode: forwards;
   }
 }
 
 @-webkit-keyframes notification-show {
-    0% { opacity: 0; transform: perspective(@width) translate(0, -20px) rotateX(90deg); }
-  100% { opacity: 1; transform: perspective(@width) translate(0,     0) rotateX( 0deg); }
+    0% { opacity: 0; transform: perspective(@width) translate(0, -@icon-size) rotateX(90deg); }
+  100% { opacity: 1; transform: perspective(@width) translate(0,           0) rotateX( 0deg); }
 }
 
 @-webkit-keyframes notification-hide {
