@@ -1,24 +1,20 @@
 @import "ui-variables";
 @import "octicon-mixins";
-@import "tabs";
 
-@autohide: 5s;
 @icon-size: 30px;
 @width: 260px;
 @width-detail: 400px;
 @max-height: 200px;
 @notification-gap: 2px;
-@top-margin: @tab-height + @tab-top-padding + @tab-bottom-border-height;
-@bottom-margin: @top-margin;
 @font-family-monospace: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 
 atom-notifications {
   display: block;
   z-index: 2;
   position: absolute;
-  top: @top-margin;
+  top: 0;
   right: 0;
-  max-height: calc(100% ~"-" @top-margin); // ~"-" disable LESS calculation
+  bottom: 0;
   padding: @component-padding;
   font-size: 1.2em;
   overflow-x: hidden;
