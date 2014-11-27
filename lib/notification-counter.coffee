@@ -4,18 +4,37 @@
 
 module.exports =
 class NotificationCounterView extends View
+
+  warningCount: 0
+  errorCount: 0
+
   @content: ->
     @div class: 'notification-counter inline-block', =>
       @span outlet: 'icon', class: 'icon'
-      @output outlet: 'labelError', class: 'item is-error'
-      @output outlet: 'labelWarning', class: 'item is-warning'
+      @output outlet: 'labelError', class: 'item is-error is-hidden'
+      @output outlet: 'labelWarning', class: 'item is-warning is-hidden'
 
   initialize: (statusBar) ->
-    @labelError.text('1')
-    @labelError.setTooltip("1 error")
-    @labelWarning.text('3')
-    @labelWarning.setTooltip("3 warnings")
+    @labelWarning.text(@warningCount)
+    @labelWarning.setTooltip("warnings")
+    @labelError.text(@errorCount)
+    @labelError.setTooltip("errors")
     statusBar.prependLeft(this)
+
+  increaseCounter: (type) ->
+    switch type
+      when 'warning'
+        @warningCount++
+        @labelWarning.text(@warningCount)
+      when 'error'
+        @errorCount++
+        @labelError.text(@errorCount)
+      when 'fatal'
+        @errorCount++
+        @labelError.text(@errorCount)
+
+    if @warningCount > 0 then @labelWarning.removeClass('is-hidden')
+    if @errorCount > 0 then @labelError.removeClass('is-hidden')
 
   setStatusIcon: (status) ->
     @icon.removeClass('is-progress  is-info       is-success  is-warning  is-error    is-fatal')

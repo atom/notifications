@@ -63,6 +63,7 @@ addCounter = ->
 updateCounter = (notification) ->
   if atom.workspaceView?.statusBar?
     @notificationCounterView.setStatusIcon(notification.type)
+    @notificationCounterView.increaseCounter(notification.type)
 
 if atom.inDevMode()
   atom.commands.add 'atom-workspace', 'notifications:toggle-dev-panel', -> Notifications.togglePanel()

@@ -42,10 +42,10 @@
 
   .item {
     display: inline-block;
-    width: @counter-size;
+    min-width: @counter-size;
     height: @counter-size;
     margin-left: @item-space;
-    padding: 0;
+    padding: 0 .25em;
     line-height: @counter-size;
     font-size: inherit;
     text-align: center;
@@ -54,6 +54,9 @@
     &:last-of-type  { border-radius: 0 @component-border-radius @component-border-radius 0; }
     &.is-warning { .item( @text-color-warning; @background-color-warning ); }
     &.is-error   { .item( @text-color-error;   @background-color-error   ); }
+    &.is-hidden {
+      display: none;
+    }
   }
 }
 
