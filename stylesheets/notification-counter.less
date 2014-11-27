@@ -13,21 +13,30 @@
     font-size: @icon-size;
     line-height: @icon-size;
     vertical-align: middle;
+    padding-top: 0px;
     margin-left: -10px;
     margin-right: 3px;
     text-align: center;
-    color: @base-background-color;
     border-radius: @component-border-radius;
+    color: @base-background-color;
     background-color: @base-background-color;
-    &.is-info {    background-color: @background-color-info; }
-    &.is-success { background-color: @background-color-success; }
-    &.is-warning { background-color: @background-color-warning; }
-    &.is-error {   background-color: @background-color-error; }
-    &:before {
-      font-size: 16px;
-      line-height: inherit;
-      height: inherit;
-      vertical-align: top;
+    &.icon:before {
+      width: @icon-size;
+      height: @icon-size;
+      line-height: @icon-size;
+      top: -2px; // Sorry, a bit trial and error
+    }
+    &.is-info     { .icon(@background-color-info); }
+    &.is-success  { .icon(@background-color-success); }
+    &.is-warning  { .icon(@background-color-warning); }
+    &.is-error    { .icon(@background-color-error); }
+    &.is-fatal    { .icon(@background-color-error); }
+    &.is-progress {
+      border-radius: @icon-size;
+      .icon( darken(@base-background-color, 25%) );
+      &:before {
+        -webkit-animation: notification-progress 1s linear infinite;
+      }
     }
   }
 
@@ -51,7 +60,20 @@
 
 // Mixins -------------------------------
 
+.icon(@bg) {
+  color: lighten(@bg, 36%);
+  background-color: @bg;
+}
+
 .item(@txt; @bg) {
-  color: @txt;
-  background-color: darken(@bg, 25%);
+  color: darken(@txt, 20%);
+  background-color: lighten(@bg, 25%);
+}
+
+
+// Animations -------------------------------
+
+@-webkit-keyframes notification-progress {
+    0% { transform: rotate(  0deg); }
+  100% { transform: rotate(360deg); }
 }

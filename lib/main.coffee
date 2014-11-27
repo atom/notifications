@@ -27,6 +27,7 @@ Notifications =
       else
         @notificationsElement.appendChild(atom.views.getView(notification))
       lastNotification = notification
+      updateCounter(notification)
 
     @subscriptions.add atom.onWillThrowError ({message, url, line, originalError, preventDefault}) ->
       preventDefault()
@@ -36,7 +37,7 @@ Notifications =
         closable: true
       atom.notifications.addFatalError(message, options)
 
-    atom.packages.once('activated', updateCounter)
+    atom.packages.once('activated', addCounter)
 
   deactivate: ->
     @subscriptions?.dispose()
@@ -54,10 +55,14 @@ Notifications =
       Notifications.notificationsPanelView = new NotificationsPanelView
       Notifications.notificationsPanel = atom.workspace.addBottomPanel(item: Notifications.notificationsPanelView.getElement())
 
-updateCounter = ->
+addCounter = ->
   if atom.workspaceView?.statusBar?
     NotificationCounterView = require './notification-counter'
-    notificationCounterView = new NotificationCounterView(atom.workspaceView.statusBar)
+    @notificationCounterView = new NotificationCounterView(atom.workspaceView.statusBar)
+
+updateCounter = (notification) ->
+  if atom.workspaceView?.statusBar?
+    @notificationCounterView.setStatusIcon(notification.type)
 
 if atom.inDevMode()
   atom.commands.add 'atom-workspace', 'notifications:toggle-dev-panel', -> Notifications.togglePanel()
