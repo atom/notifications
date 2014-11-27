@@ -12,6 +12,7 @@ class NotificationCounterView extends View
 
   initialize: (statusBar) ->
     @labelError.text('1')
+    @labelError.setTooltip("1 error")
     @labelWarning.text('3')
-    @setTooltip("1 error and 3 warnings")
+    @labelWarning.setTooltip("3 warnings")
     statusBar.prependLeft(this)
