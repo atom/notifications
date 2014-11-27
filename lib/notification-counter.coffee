@@ -16,9 +16,9 @@ class NotificationCounterView extends View
 
   initialize: (statusBar) ->
     @labelWarning.text(@warningCount)
-    @labelWarning.setTooltip("warnings")
+    @labelWarning.setTooltip("Warnings")
     @labelError.text(@errorCount)
-    @labelError.setTooltip("errors")
+    @labelError.setTooltip("Errors")
     statusBar.prependLeft(this)
 
   increaseCounter: (type) ->
@@ -33,8 +33,8 @@ class NotificationCounterView extends View
         @errorCount++
         @labelError.text(@errorCount)
 
-    if @warningCount > 0 then @labelWarning.removeClass('is-hidden')
-    if @errorCount > 0 then @labelError.removeClass('is-hidden')
+    if @warningCount > 0 then @labelWarning.addClass('is-visible')
+    if @errorCount > 0 then @labelError.addClass('is-visible')
 
   setStatusIcon: (status) ->
     @icon.removeClass('is-progress  is-info       is-success  is-warning  is-error    is-fatal')

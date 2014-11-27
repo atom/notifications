@@ -3,7 +3,7 @@
 
 @icon-size: 20px;
 @counter-size: 16px;
-@item-space: 1px;
+@item-space: 4px;
 
 .notification-counter {
   .icon {
@@ -14,12 +14,13 @@
     line-height: @icon-size;
     vertical-align: middle;
     padding-top: 0px;
-    margin-left: -10px;
-    margin-right: 3px;
+    margin-left: -10px; // move closer to edge
     text-align: center;
     border-radius: @component-border-radius;
     color: @base-background-color;
-    background-color: @base-background-color;
+    // background-color: @base-background-color;
+    transition: background-color .3s;
+
     &.icon:before {
       width: @icon-size;
       height: @icon-size;
@@ -41,21 +42,20 @@
   }
 
   .item {
-    display: inline-block;
-    min-width: @counter-size;
+    display: none;
     height: @counter-size;
     margin-left: @item-space;
-    padding: 0 .25em;
+    padding: 0;
     line-height: @counter-size;
     font-size: inherit;
     text-align: center;
     vertical-align: middle;
-    &:first-of-type  { border-radius: @component-border-radius 0 0 @component-border-radius; }
-    &:last-of-type  { border-radius: 0 @component-border-radius @component-border-radius 0; }
-    &.is-warning { .item( @text-color-warning; @background-color-warning ); }
-    &.is-error   { .item( @text-color-error;   @background-color-error   ); }
-    &.is-hidden {
-      display: none;
+    border-radius: @component-border-radius;
+    &.is-warning { .item( @text-color-warning ); }
+    &.is-error   { .item( @text-color-error ); }
+    &.is-visible {
+      display: inline-block;
+      -webkit-animation: notification-counter-show .2s cubic-bezier(0.07859, 0.465, 0.12859, 1.00499);
     }
   }
 }
@@ -68,9 +68,8 @@
   background-color: @bg;
 }
 
-.item(@txt; @bg) {
-  color: darken(@txt, 20%);
-  background-color: lighten(@bg, 25%);
+.item(@txt) {
+  color: @txt;
 }
 
 
@@ -79,4 +78,9 @@
 @-webkit-keyframes notification-progress {
     0% { transform: rotate(  0deg); }
   100% { transform: rotate(360deg); }
+}
+
+@-webkit-keyframes notification-counter-show {
+  0% { transform: scale(0); }
+  100% { transform: scale(1); }
 }
