@@ -11,10 +11,12 @@ class NotificationElement extends HTMLElement
 
   constructor: ->
 
-  getModel: -> @model
-  setModel: (@model) ->
+  initialize: (@model) ->
     @generateMarkup()
     @autohide() unless @model.isClosable()
+    this
+
+  getModel: -> @model
 
   generateMarkup: ->
     @classList.add "#{@model.getType()}"

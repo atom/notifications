@@ -10,9 +10,8 @@ Notifications =
 
     @subscriptions = new CompositeDisposable
 
-    atom.views.addViewProvider
-      modelConstructor: Notification
-      viewConstructor: NotificationElement
+    atom.views.addViewProvider Notification, (model) ->
+      new NotificationElement().initialize(model)
 
     @notificationsElement = new NotificationsElement
     atom.views.getView(atom.workspace).appendChild(@notificationsElement)
