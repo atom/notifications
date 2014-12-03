@@ -112,9 +112,11 @@ class NotificationElement extends HTMLElement
     $.ajax "#{url}?q=#{encodeURI(query)}&sort=created",
       accept: 'application/vnd.github.v3+json'
       contentType: "application/json"
-      success: (data) ->
-        issue = data.items?[0]
-        callback?(issue)
+      success: (data) =>
+        if data.items?
+          for issue in data.items
+            return callback?(issue) if issue.title.indexOf(@getIssueTitle()) > -1
+        callback?(null)
 
   getIssueUrl: ->
     "https://github.com/atom/atom/issues/new?title=#{encodeURI(@getIssueTitle())}&body=#{encodeURI(@getIssueBody())}"

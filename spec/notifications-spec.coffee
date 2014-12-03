@@ -126,7 +126,10 @@ describe "Notifications", ->
         beforeEach ->
           $.ajax.andCallFake (url, settings) -> settings.success
             items: [
-              {html_url: 'http://url.com/ok'}
+              {
+                title: 'ReferenceError: a is not defined'
+                html_url: 'http://url.com/ok'
+              }
             ]
           try
             a + 1
