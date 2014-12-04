@@ -143,6 +143,11 @@ class NotificationElement extends HTMLElement
     **System**: #{@getOSMarketingVersion()}
     **Thrown From**: #{packageMessage}
 
+    ### Steps To Reproduce
+
+    1. ...
+    2. ...
+
     ### Stack Trace
 
     ```
