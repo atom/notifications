@@ -93,12 +93,25 @@ class NotificationElement extends HTMLElement
       closeButton.addEventListener 'click', => @handleRemoveNotificationClick()
       @appendChild(closeButton)
 
+      closeAllButton = document.createElement('button')
+      closeAllButton.textContent = 'Close All'
+      closeAllButton.classList.add('close-all', 'btn', @getButtonClass())
+      closeAllButton.addEventListener 'click', => @handleRemoveAllNotificationsClick()
+      @appendChild(closeAllButton)
+
   removeNotification: ->
     @classList.add('remove')
     @removeNotificationAfterTimeout()
 
   handleRemoveNotificationClick: ->
     @model.dismiss()
+
+  handleRemoveAllNotificationsClick: ->
+    notifications = atom.notifications.getNotifications()
+    for notification in notifications
+      if notification.isDismissable() and not notification.isDismissed()
+        notification.dismiss()
+    return
 
   autohide: ->
     setTimeout =>
@@ -110,6 +123,10 @@ class NotificationElement extends HTMLElement
     setTimeout =>
       @remove()
     , @animationDuration # keep in sync with CSS animation
+
+  getButtonClass: ->
+    type = "btn-#{@model.getType()}"
+    if type == 'btn-fatal' then 'btn-error' else type
 
   fetchIssue: (callback) ->
     url = "https://api.github.com/search/issues"

@@ -25,6 +25,24 @@ atom-notifications {
   }
 
   // -webkit-user-modify: read-write; // editable text during dev
+
+  atom-notification {
+    .close-all {
+      display: none;
+    }
+  }
+
+  atom-notification:first-child {
+    .close-all {
+      display: block;
+    }
+  }
+
+  atom-notification:only-child {
+    .close-all {
+      display: none;
+    }
+  }
 }
 
 atom-notification {
@@ -69,6 +87,13 @@ atom-notification {
 
   &.has-close .message {
     padding-right: @component-padding + 24px; // space for icon
+  }
+
+  .close-all.btn {
+    position: absolute;
+    top: 6px;
+    right: 38px;
+    background: none;
   }
 
   .close {
@@ -151,6 +176,18 @@ atom-notification.success {
   &.icon:before {
     color: lighten(@bg, 36%);
     background-color: @bg;
+  }
+
+  .close-all.btn {
+    border: 1px solid fadeout(darken(@txt, 40%), 60%);
+    color: fadeout(darken(@txt, 40%), 40%);
+    text-shadow: none;
+
+    &:hover {
+      background: none;
+      border-color: fadeout(darken(@txt, 40%), 20%);
+      color: darken(@txt, 40%);
+    }
   }
 }
 
