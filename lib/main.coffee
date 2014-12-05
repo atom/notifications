@@ -28,6 +28,7 @@ Notifications =
       lastNotification = notification
 
     @subscriptions.add atom.onWillThrowError ({message, url, line, originalError, preventDefault}) ->
+      return if atom.inDevMode()
       preventDefault()
       options =
         detail: "#{url}:#{line}"

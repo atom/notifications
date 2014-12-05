@@ -60,8 +60,23 @@ describe "Notifications", ->
         expect(notificationContainer.childNodes.length).toBe 0
 
     describe "when an exception is thrown", ->
+      describe "when the editor is in dev mode", ->
+        beforeEach ->
+          spyOn(atom, 'inDevMode').andReturn true
+          try
+            a + 1
+          catch e
+            window.onerror.call(window, e.toString(), 'abc', 2, 3, e)
+
+        it "does not display a notification", ->
+          notificationContainer = workspaceElement.querySelector('atom-notifications')
+          fatalError = notificationContainer.querySelector('atom-notification.fatal')
+          expect(notificationContainer.childNodes.length).toBe 0
+          expect(fatalError).toBe null
+
       describe "when an exception is thrown from a package", ->
         beforeEach ->
+          spyOn(atom, 'inDevMode').andReturn false
           try
             a + 1
           catch e
@@ -71,7 +86,6 @@ describe "Notifications", ->
           notificationContainer = workspaceElement.querySelector('atom-notifications')
           fatalError = notificationContainer.querySelector('atom-notification.fatal')
           expect(notificationContainer.childNodes.length).toBe 1
-          expect(fatalError).toBeDefined()
           expect(fatalError).toHaveClass 'has-close'
           expect(fatalError.innerHTML).toContain 'ReferenceError: a is not defined'
           expect(fatalError.innerHTML).toContain "<a href=\"https://github.com/atom/notifications\">notifications package</a>"
@@ -85,6 +99,7 @@ describe "Notifications", ->
 
       describe "when an exception is thrown from core", ->
         beforeEach ->
+          spyOn(atom, 'inDevMode').andReturn false
           try
             a + 1
           catch e
@@ -109,6 +124,7 @@ describe "Notifications", ->
 
       describe "when the error has been reported", ->
         beforeEach ->
+          spyOn(atom, 'inDevMode').andReturn false
           $.ajax.andCallFake (url, settings) -> settings.success(items: [])
           try
             a + 1
@@ -124,6 +140,7 @@ describe "Notifications", ->
 
       describe "when the error has been reported", ->
         beforeEach ->
+          spyOn(atom, 'inDevMode').andReturn false
           $.ajax.andCallFake (url, settings) -> settings.success
             items: [
               {
