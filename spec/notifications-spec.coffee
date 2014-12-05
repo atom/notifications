@@ -46,6 +46,35 @@ describe "Notifications", ->
       expect(notificationContainer.childNodes.length).toBe 5
       expect(notificationContainer.querySelector('atom-notification.fatal')).toBeDefined()
 
+    describe "when a dismissable notification is added", ->
+      it "is removed when Notification::dismiss() is called", ->
+        notification = atom.notifications.addSuccess('A message', dismissable: true)
+        notificationElement = notificationContainer.querySelector('atom-notification.success')
+
+        expect(notificationContainer.childNodes.length).toBe 1
+
+        notification.dismiss()
+
+        advanceClock(NotificationElement::visibilityDuration)
+        expect(notificationElement).toHaveClass 'remove'
+
+        advanceClock(NotificationElement::animationDuration)
+        expect(notificationContainer.childNodes.length).toBe 0
+
+      it "is removed when the close icon is clicked", ->
+        notification = atom.notifications.addSuccess('A message', dismissable: true)
+        notificationElement = notificationContainer.querySelector('atom-notification.success')
+
+        expect(notificationContainer.childNodes.length).toBe 1
+
+        notificationElement.querySelector('.close.icon').click()
+
+        advanceClock(NotificationElement::visibilityDuration)
+        expect(notificationElement).toHaveClass 'remove'
+
+        advanceClock(NotificationElement::animationDuration)
+        expect(notificationContainer.childNodes.length).toBe 0
+
     describe "when an autoclose notification is added", ->
       it "closes and removes the message after a given amount of time", ->
         atom.notifications.addSuccess('A message')

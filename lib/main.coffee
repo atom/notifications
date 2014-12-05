@@ -33,7 +33,7 @@ Notifications =
       options =
         detail: "#{url}:#{line}"
         stack: originalError.stack
-        closable: true
+        dismissable: true
       atom.notifications.addFatalError(message, options)
 
   deactivate: ->

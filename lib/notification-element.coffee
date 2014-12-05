@@ -13,7 +13,10 @@ class NotificationElement extends HTMLElement
 
   initialize: (@model) ->
     @generateMarkup()
-    @autohide() unless @model.isClosable()
+    if @model.isDismissable()
+      @model.onDidDismiss => @removeNotification()
+    else
+      @autohide()
     this
 
   getModel: -> @model
@@ -83,16 +86,19 @@ class NotificationElement extends HTMLElement
       fatalContainer.appendChild(toolbar)
       notificationContent.appendChild(fatalContainer)
 
-    if @model.isClosable()
+    if @model.isDismissable()
       @classList.add('has-close')
       closeButton = document.createElement('button')
       closeButton.classList.add('close', 'icon', 'icon-x')
       closeButton.addEventListener 'click', => @handleRemoveNotificationClick()
       @appendChild(closeButton)
 
-  handleRemoveNotificationClick: ->
+  removeNotification: ->
     @classList.add('remove')
     @removeNotificationAfterTimeout()
+
+  handleRemoveNotificationClick: ->
+    @model.dismiss()
 
   autohide: ->
     setTimeout =>

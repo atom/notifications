@@ -50,7 +50,7 @@ class NotificationsPanelView
   createError: =>
     message = 'Failed to load your user config'
     options =
-      closable: true
+      dismissable: true
       detail: """
         line 6: unexpected newline
         'metrics'::
