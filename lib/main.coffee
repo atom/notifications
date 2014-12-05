@@ -54,6 +54,14 @@ Notifications =
 
 if atom.inDevMode()
   atom.commands.add 'atom-workspace', 'notifications:toggle-dev-panel', -> Notifications.togglePanel()
-  atom.commands.add 'atom-workspace', 'notifications:trigger-error', -> abc + 2 # nope
+  atom.commands.add 'atom-workspace', 'notifications:trigger-error', ->
+    try
+      abc + 2 # nope
+    catch error
+      options =
+        detail: error.stack
+        stack: error.stack
+        dismissable: true
+      atom.notifications.addFatalError(error.message, options)
 
 module.exports = Notifications
