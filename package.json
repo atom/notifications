@@ -2,7 +2,7 @@
   "name": "notifications",
   "main": "./lib/main",
   "version": "0.9.0",
-  "description": "A short description of your package",
+  "description": "A tidy way to display Atom notifications.",
   "repository": "https://github.com/atom/notifications",
   "license": "MIT",
   "engines": {
