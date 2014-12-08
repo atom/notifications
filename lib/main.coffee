@@ -59,9 +59,9 @@ if atom.inDevMode()
       abc + 2 # nope
     catch error
       options =
-        detail: error.stack
+        detail: error.stack.split('\n')[1]
         stack: error.stack
         dismissable: true
-      atom.notifications.addFatalError(error.message, options)
+      atom.notifications.addFatalError("Uncaught #{error.stack.split('\n')[0]}", options)
 
 module.exports = Notifications
