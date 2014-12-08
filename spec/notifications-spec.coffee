@@ -151,6 +151,21 @@ describe "Notifications", ->
           expect(issueBody).toContain 'ReferenceError: a is not defined'
           expect(issueBody).toContain 'Thrown From**: Atom Core'
 
+        it "allows the user to toggle the stack trace", ->
+          notificationContainer = workspaceElement.querySelector('atom-notifications')
+          fatalError = notificationContainer.querySelector('atom-notification.fatal')
+
+          stackToggle = fatalError.querySelector('.stack-toggle')
+          stackContainer = fatalError.querySelector('.stack-container')
+          expect(stackToggle).toExist()
+          expect(stackContainer.style.display).toBe 'none'
+
+          stackToggle.click()
+          expect(stackContainer.style.display).toBe 'block'
+
+          stackToggle.click()
+          expect(stackContainer.style.display).toBe 'none'
+
       describe "when the error has not been reported", ->
         beforeEach ->
           spyOn(atom, 'inDevMode').andReturn false
