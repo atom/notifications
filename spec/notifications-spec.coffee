@@ -151,7 +151,7 @@ describe "Notifications", ->
           expect(issueBody).toContain 'ReferenceError: a is not defined'
           expect(issueBody).toContain 'Thrown From**: Atom Core'
 
-      describe "when the error has been reported", ->
+      describe "when the error has not been reported", ->
         beforeEach ->
           spyOn(atom, 'inDevMode').andReturn false
           $.ajax.andCallFake (url, settings) -> settings.success(items: [])
@@ -166,6 +166,7 @@ describe "Notifications", ->
           expect(button.textContent).toContain 'Create Issue'
           fatalNotification = fatalError.querySelector('.fatal-notification')
           expect(fatalNotification.textContent).toContain 'You can help by creating an issue'
+          expect(button.getAttribute('href')).toContain '%23%23%23%20Steps%20To%20Reproduce'
 
       describe "when the error has been reported", ->
         beforeEach ->

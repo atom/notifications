@@ -142,7 +142,7 @@ class NotificationElement extends HTMLElement
         callback?(null)
 
   getIssueUrl: ->
-    "https://github.com/atom/atom/issues/new?title=#{encodeURI(@getIssueTitle())}&body=#{encodeURI(@getIssueBody())}"
+    "https://github.com/atom/atom/issues/new?title=#{@encodeURI(@getIssueTitle())}&body=#{@encodeURI(@getIssueBody())}"
 
   getIssueTitle: ->
     @model.getMessage()
@@ -179,6 +179,10 @@ class NotificationElement extends HTMLElement
     #{options.stack}
     ```
     """
+
+  encodeURI: (str) ->
+    str = encodeURI(str)
+    str.replace(/#/g, '%23')
 
   getRepoUrl: ->
     packageName = @getPackageName()
