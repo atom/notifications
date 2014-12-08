@@ -22,6 +22,7 @@ class NotificationElement extends HTMLElement
   getModel: -> @model
 
   generateMarkup: ->
+    # OMG we need a data-binding framework
     @classList.add "#{@model.getType()}"
     @classList.add "icon", "icon-#{@model.getIcon()}", "native-key-bindings"
 
@@ -37,18 +38,36 @@ class NotificationElement extends HTMLElement
     notificationContainer.textContent = @model.getMessage()
     notificationContent.appendChild(notificationContainer)
 
-    detail = @model.getDetail()
-    if detail?
+    if detail = @model.getDetail()
+      addSplitLinesToContainer = (container, content) ->
+        for line in content.split('\n')
+          div = document.createElement('div')
+          div.classList.add 'line'
+          div.textContent = line
+          container.appendChild(div)
+        return
+
       @classList.add('has-detail')
       detailContainer = document.createElement('div')
       detailContainer.classList.add('item')
       detailContainer.classList.add('detail')
+      addSplitLinesToContainer(detailContainer, detail)
       notificationContent.appendChild(detailContainer)
 
-      for line in detail.split('\n')
-        div = document.createElement('div')
-        div.textContent = line
-        detailContainer.appendChild(div)
+      if stack = @model.getOptions().stack
+        stackToggle = document.createElement('a')
+        stackContainer = document.createElement('div')
+
+        stackToggle.setAttribute('href', '#')
+        stackToggle.classList.add 'stack-toggle'
+        stackToggle.addEventListener 'click', (e) => @handleStackTraceToggleClick(e, stackContainer)
+
+        stackContainer.classList.add 'stack-container'
+        addSplitLinesToContainer(stackContainer, stack)
+
+        detailContainer.appendChild(stackToggle)
+        detailContainer.appendChild(stackContainer)
+        @handleStackTraceToggleClick({target: stackToggle}, stackContainer)
 
     if @model.type is 'fatal'
       fatalContainer = document.createElement('div')
@@ -113,6 +132,15 @@ class NotificationElement extends HTMLElement
       if notification.isDismissable() and not notification.isDismissed()
         notification.dismiss()
     return
+
+  handleStackTraceToggleClick: (e, container) ->
+    e.preventDefault?()
+    if container.style.display is 'none'
+      e.target.innerHTML = '<span class="icon icon-dash"></span>Hide Stack Trace'
+      container.style.display = 'block'
+    else
+      e.target.innerHTML = '<span class="icon icon-plus"></span>Show Stack Trace'
+      container.style.display = 'none'
 
   autohide: ->
     setTimeout =>
