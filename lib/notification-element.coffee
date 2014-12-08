@@ -23,8 +23,9 @@ class NotificationElement extends HTMLElement
 
   generateMarkup: ->
     @classList.add "#{@model.getType()}"
-    @classList.add "icon"
-    @classList.add "icon-#{@model.getIcon()}"
+    @classList.add "icon", "icon-#{@model.getIcon()}", "native-key-bindings"
+
+    @setAttribute('tabindex', '-1')
 
     notificationContent = document.createElement('div')
     notificationContent.classList.add('content')
