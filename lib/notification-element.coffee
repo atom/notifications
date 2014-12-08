@@ -136,10 +136,10 @@ class NotificationElement extends HTMLElement
   handleStackTraceToggleClick: (e, container) ->
     e.preventDefault?()
     if container.style.display is 'none'
-      e.target.innerHTML = '<span class="icon icon-dash"></span>Hide Stack'
+      e.target.innerHTML = '<span class="icon icon-dash"></span>Hide Stack Trace'
       container.style.display = 'block'
     else
-      e.target.innerHTML = '<span class="icon icon-plus"></span>Show Stack'
+      e.target.innerHTML = '<span class="icon icon-plus"></span>Show Stack Trace'
       container.style.display = 'none'
 
   autohide: ->
