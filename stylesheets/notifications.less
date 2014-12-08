@@ -4,7 +4,7 @@
 @icon-size: 30px;
 @width: 260px;
 @width-detail: 400px;
-@max-height: 500px;
+@max-height: 800px;
 @notification-gap: 2px;
 @font-family-monospace: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 
@@ -132,8 +132,24 @@ atom-notification {
     font-size: .8em;
     background-color: hsla(0,0%,100%,.3);
     background-clip: padding-box;
-    white-space: pre;
-    font-family: @font-family-monospace;
+
+    .line {
+      white-space: pre;
+      font-family: @font-family-monospace;
+    }
+
+    .stack-toggle {
+      display: block;
+      margin-top: @component-padding;
+
+      .icon:before {
+        margin: 0;
+      }
+    }
+
+    .stack-container {
+      margin-top: @component-padding;
+    }
   }
 
   .fatal-notification {
