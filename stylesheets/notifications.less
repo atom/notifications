@@ -35,11 +35,17 @@ atom-notifications {
     .close-all {
       display: block;
     }
+    &.has-close .message {
+      padding-right: @component-padding * 2 + 95px; // space for icon and button
+    }
   }
 
   atom-notification:only-child {
     .close-all {
       display: none;
+    }
+    &.has-close .message {
+      padding-right: @component-padding + 24px; // space for icon
     }
   }
 }
