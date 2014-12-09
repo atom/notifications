@@ -18,6 +18,11 @@ describe "Notifications", ->
   describe "when notifications are added to atom.notifications", ->
     notificationContainer = null
     beforeEach ->
+      enableInitNotification = atom.notifications.addSuccess('A message to trigger initialization', dismissable: true)
+      enableInitNotification.dismiss()
+      advanceClock(NotificationElement::visibilityDuration)
+      advanceClock(NotificationElement::animationDuration)
+
       notificationContainer = workspaceElement.querySelector('atom-notifications')
       spyOn($, 'ajax')
 

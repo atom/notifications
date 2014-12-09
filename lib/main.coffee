@@ -1,23 +1,16 @@
 {Notification, CompositeDisposable} = require 'atom'
 
 Notifications =
+  isInitialized: false
   subscriptions: null
   duplicateTimeDelay: 500
 
   activate: (state) ->
-    NotificationsElement = require './notifications-element'
-    NotificationElement = require './notification-element'
-
     @subscriptions = new CompositeDisposable
-
-    atom.views.addViewProvider Notification, (model) ->
-      new NotificationElement().initialize(model)
-
-    @notificationsElement = new NotificationsElement
-    atom.views.getView(atom.workspace).appendChild(@notificationsElement)
 
     lastNotification = null
     @subscriptions.add atom.notifications.onDidAddNotification (notification) =>
+      @initializeIfNotInitialized()
       if lastNotification?
         # do not show duplicates unless some amount of time has passed
         timeSpan = notification.getTimestamp() - lastNotification.getTimestamp()
@@ -37,9 +30,29 @@ Notifications =
       atom.notifications.addFatalError(message, options)
 
   deactivate: ->
-    @subscriptions?.dispose()
-    @notificationsElement.remove()
+    @subscriptions.dispose()
+    @notificationsElement?.remove()
     @notificationsPanel?.destroy()
+
+    @subscriptions = null
+    @notificationsElement = null
+    @notificationsPanel = null
+
+    @isInitialized = false
+
+  initializeIfNotInitialized: ->
+    return if @isInitialized
+
+    NotificationsElement = require './notifications-element'
+    NotificationElement = require './notification-element'
+
+    @subscriptions.add atom.views.addViewProvider Notification, (model) ->
+      new NotificationElement().initialize(model)
+
+    @notificationsElement = new NotificationsElement
+    atom.views.getView(atom.workspace).appendChild(@notificationsElement)
+
+    @isInitialized = true
 
   togglePanel: ->
     if @notificationsPanel?
