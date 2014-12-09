@@ -186,6 +186,8 @@ class NotificationElement extends HTMLElement
     repoUrl = @getRepoUrl()
     packageName = @getPackageName()
     packageVersion = atom.packages.getActivePackage(packageName)?.metadata?.version if packageName?
+    copyText = ''
+    copyText = '/cc @atom/core' if packageName? and repoUrl?
 
     if packageName? and repoUrl?
       packageMessage = "[#{packageName}](#{repoUrl}) package, v#{packageVersion}"
@@ -213,6 +215,8 @@ class NotificationElement extends HTMLElement
 
     #{options.stack}
     ```
+
+    #{copyText}
     """
 
   encodeURI: (str) ->

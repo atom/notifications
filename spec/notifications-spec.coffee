@@ -134,6 +134,7 @@ describe "Notifications", ->
           expect(issueBody).not.toMatch /Unknown/ig
           expect(issueBody).toContain 'ReferenceError: a is not defined'
           expect(issueBody).toContain 'Thrown From**: [notifications](https://github.com/atom/notifications) package, v'
+          expect(issueBody).toContain 'cc @atom/core'
 
       describe "when an exception is thrown from core", ->
         beforeEach ->
@@ -163,6 +164,7 @@ describe "Notifications", ->
           issueBody = fatalError.getIssueBody()
           expect(issueBody).toContain 'ReferenceError: a is not defined'
           expect(issueBody).toContain '**Thrown From**: Atom Core'
+          expect(issueBody).not.toContain 'cc @atom/core'
 
         it "allows the user to toggle the stack trace", ->
           notificationContainer = workspaceElement.querySelector('atom-notifications')
