@@ -79,9 +79,9 @@ class NotificationElement extends HTMLElement
       repoUrl = @getRepoUrl()
       packageName = @getPackageName()
       if packageName? and repoUrl?
-        fatalNotification.innerHTML = "The error was thrown from the <a href=\"#{repoUrl}\">#{packageName} package</a>, but it may be a bug in Atom."
+        fatalNotification.innerHTML = "The error was thrown from the <a href=\"#{repoUrl}\">#{packageName} package</a>"
       else if packageName?
-        fatalNotification.textContent = 'The error was thrown from the #{packageName} package, but it might be a bug in Atom core.'
+        fatalNotification.textContent = 'The error was thrown from the #{packageName} package, but it may be a bug in Atom core.'
       else
         fatalNotification.textContent = 'This is likely a bug in Atom.'
 
@@ -89,14 +89,17 @@ class NotificationElement extends HTMLElement
       issueButton.setAttribute('href', @getIssueUrl())
       issueButton.classList.add('btn')
       issueButton.classList.add('btn-error')
-      issueButton.textContent = "Create Issue On atom/atom"
+      if packageName? and repoUrl?
+        issueButton.textContent = "Create issue on the #{packageName} package"
+      else
+        issueButton.textContent = "Create issue on atom/atom"
       @fetchIssue (issue) ->
         if issue?
           issueButton.setAttribute('href', issue.html_url)
           issueButton.textContent = "View Issue"
           fatalNotification.textContent += " This issue has already been reported."
         else
-          fatalNotification.textContent += " You can help by creating an issue."
+          fatalNotification.textContent += " You can help by creating an issue. Please explain what actions triggered this error."
 
       toolbar = document.createElement('div')
       toolbar.classList.add('btn-toolbar')
@@ -159,7 +162,10 @@ class NotificationElement extends HTMLElement
 
   fetchIssue: (callback) ->
     url = "https://api.github.com/search/issues"
-    query = "#{@getIssueTitle()} repo:atom/atom state:open"
+    repoUrl = @getRepoUrl()
+    repoUrl = 'atom/atom' unless repoUrl?
+    repo = repoUrl.replace /http(s)?:\/\/(\d+\.)?github.com\//gi, ''
+    query = "#{@getIssueTitle()} repo:#{repo} state:open"
 
     $.ajax "#{url}?q=#{encodeURI(query)}&sort=created",
       accept: 'application/vnd.github.v3+json'
@@ -171,7 +177,9 @@ class NotificationElement extends HTMLElement
         callback?(null)
 
   getIssueUrl: ->
-    "https://github.com/atom/atom/issues/new?title=#{@encodeURI(@getIssueTitle())}&body=#{@encodeURI(@getIssueBody())}"
+    repoUrl = @getRepoUrl()
+    repoUrl = 'https://github.com/atom/atom' unless repoUrl?
+    "#{repoUrl}/issues/new?title=#{@encodeURI(@getIssueTitle())}&body=#{@encodeURI(@getIssueBody())}"
 
   getIssueTitle: ->
     @model.getMessage()
@@ -180,11 +188,14 @@ class NotificationElement extends HTMLElement
     options = @model.getOptions()
     repoUrl = @getRepoUrl()
     packageName = @getPackageName()
+    packageVersion = atom.packages.getActivePackage(packageName)?.metadata?.version if packageName?
+    copyText = ''
+    copyText = '/cc @atom/core' if packageName? and repoUrl?
 
     if packageName? and repoUrl?
-      packageMessage = "[#{packageName}](#{repoUrl}) package"
+      packageMessage = "[#{packageName}](#{repoUrl}) package, v#{packageVersion}"
     else if packageName?
-      packageMessage = "'#{packageName}' package"
+      packageMessage = "'#{packageName}' package, v#{packageVersion}"
     else
       packageMessage = 'Atom Core'
 
@@ -207,6 +218,8 @@ class NotificationElement extends HTMLElement
 
     #{options.stack}
     ```
+
+    #{copyText}
     """
 
   encodeURI: (str) ->

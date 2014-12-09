@@ -125,11 +125,16 @@ describe "Notifications", ->
           expect(fatalError.innerHTML).toContain "<a href=\"https://github.com/atom/notifications\">notifications package</a>"
           expect(fatalError.getPackageName()).toBe 'notifications'
 
+          button = fatalError.querySelector('.btn')
+          expect(button.textContent).toContain 'Create issue on the notifications package'
+          expect(button.getAttribute('href')).toContain 'atom/notifications/issues/new'
+
           issueBody = fatalError.getIssueBody()
           expect(issueBody).toMatch /Atom Version\*\*: [0-9].[0-9]+.[0-9]+/ig
           expect(issueBody).not.toMatch /Unknown/ig
           expect(issueBody).toContain 'ReferenceError: a is not defined'
-          expect(issueBody).toContain 'Thrown From**: [notifications](https://github.com/atom/notifications) package'
+          expect(issueBody).toContain 'Thrown From**: [notifications](https://github.com/atom/notifications) package, v'
+          expect(issueBody).toContain 'cc @atom/core'
 
       describe "when an exception is thrown from core", ->
         beforeEach ->
@@ -152,9 +157,16 @@ describe "Notifications", ->
           expect(fatalError.innerHTML).toContain 'bug in Atom'
           expect(fatalError.getPackageName()).toBeUndefined()
 
+          button = fatalError.querySelector('.btn')
+          expect(button.textContent).toContain 'Create issue on atom/atom'
+          expect(button.getAttribute('href')).toContain 'atom/atom/issues/new'
+
           issueBody = fatalError.getIssueBody()
           expect(issueBody).toContain 'ReferenceError: a is not defined'
-          expect(issueBody).toContain 'Thrown From**: Atom Core'
+          expect(issueBody).toContain '**Thrown From**: Atom Core'
+          expect(issueBody).not.toContain 'cc @atom/core'
+
+          expect($.ajax.mostRecentCall.args[0]).toContain 'atom/atom'
 
         it "allows the user to toggle the stack trace", ->
           notificationContainer = workspaceElement.querySelector('atom-notifications')
@@ -183,7 +195,7 @@ describe "Notifications", ->
         it "asks the user to create an issue", ->
           fatalError = notificationContainer.querySelector('atom-notification.fatal')
           button = fatalError.querySelector('.btn')
-          expect(button.textContent).toContain 'Create Issue'
+          expect(button.textContent).toContain 'Create issue'
           fatalNotification = fatalError.querySelector('.fatal-notification')
           expect(fatalNotification.textContent).toContain 'You can help by creating an issue'
           expect(button.getAttribute('href')).toContain '%23%23%23%20Steps%20To%20Reproduce'
@@ -210,3 +222,4 @@ describe "Notifications", ->
           expect(button.getAttribute('href')).toBe 'http://url.com/ok'
           fatalNotification = fatalError.querySelector('.fatal-notification')
           expect(fatalNotification.textContent).toContain 'already been reported'
+          expect($.ajax.mostRecentCall.args[0]).toContain 'atom/notifications'
