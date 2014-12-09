@@ -90,7 +90,7 @@ class NotificationElement extends HTMLElement
       issueButton.classList.add('btn')
       issueButton.classList.add('btn-error')
       if packageName? and repoUrl?
-        issueButton.textContent = "Create issue on #{packageName}"
+        issueButton.textContent = "Create issue on the #{packageName} package"
       else
         issueButton.textContent = "Create issue on atom/atom"
       @fetchIssue (issue) ->
