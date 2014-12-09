@@ -162,7 +162,10 @@ class NotificationElement extends HTMLElement
 
   fetchIssue: (callback) ->
     url = "https://api.github.com/search/issues"
-    query = "#{@getIssueTitle()} repo:atom/atom state:open"
+    repoUrl = @getRepoUrl()
+    repoUrl = 'atom/atom' unless repoUrl?
+    repo = repoUrl.replace /http(s)?:\/\/(\d+\.)?github.com\//gi, ''
+    query = "#{@getIssueTitle()} repo:#{repo} state:open"
 
     $.ajax "#{url}?q=#{encodeURI(query)}&sort=created",
       accept: 'application/vnd.github.v3+json'

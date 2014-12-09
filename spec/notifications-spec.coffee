@@ -126,7 +126,7 @@ describe "Notifications", ->
           expect(fatalError.getPackageName()).toBe 'notifications'
 
           button = fatalError.querySelector('.btn')
-          expect(button.textContent).toContain 'Create issue on notifications'
+          expect(button.textContent).toContain 'Create issue on the notifications package'
           expect(button.getAttribute('href')).toContain 'atom/notifications/issues/new'
 
           issueBody = fatalError.getIssueBody()
@@ -165,6 +165,8 @@ describe "Notifications", ->
           expect(issueBody).toContain 'ReferenceError: a is not defined'
           expect(issueBody).toContain '**Thrown From**: Atom Core'
           expect(issueBody).not.toContain 'cc @atom/core'
+
+          expect($.ajax.mostRecentCall.args[0]).toContain 'atom/atom'
 
         it "allows the user to toggle the stack trace", ->
           notificationContainer = workspaceElement.querySelector('atom-notifications')
@@ -220,3 +222,4 @@ describe "Notifications", ->
           expect(button.getAttribute('href')).toBe 'http://url.com/ok'
           fatalNotification = fatalError.querySelector('.fatal-notification')
           expect(fatalNotification.textContent).toContain 'already been reported'
+          expect($.ajax.mostRecentCall.args[0]).toContain 'atom/notifications'
