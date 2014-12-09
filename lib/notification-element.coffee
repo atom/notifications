@@ -79,9 +79,9 @@ class NotificationElement extends HTMLElement
       repoUrl = @getRepoUrl()
       packageName = @getPackageName()
       if packageName? and repoUrl?
-        fatalNotification.innerHTML = "The error was thrown from the <a href=\"#{repoUrl}\">#{packageName} package</a>, but it may be a bug in Atom."
+        fatalNotification.innerHTML = "The error was thrown from the <a href=\"#{repoUrl}\">#{packageName} package</a>"
       else if packageName?
-        fatalNotification.textContent = 'The error was thrown from the #{packageName} package, but it might be a bug in Atom core.'
+        fatalNotification.textContent = 'The error was thrown from the #{packageName} package, but it may be a bug in Atom core.'
       else
         fatalNotification.textContent = 'This is likely a bug in Atom.'
 
@@ -89,7 +89,10 @@ class NotificationElement extends HTMLElement
       issueButton.setAttribute('href', @getIssueUrl())
       issueButton.classList.add('btn')
       issueButton.classList.add('btn-error')
-      issueButton.textContent = "Create Issue On atom/atom"
+      if packageName? and repoUrl?
+        issueButton.textContent = "Create issue on #{packageName}"
+      else
+        issueButton.textContent = "Create issue on atom/atom"
       @fetchIssue (issue) ->
         if issue?
           issueButton.setAttribute('href', issue.html_url)
@@ -171,7 +174,9 @@ class NotificationElement extends HTMLElement
         callback?(null)
 
   getIssueUrl: ->
-    "https://github.com/atom/atom/issues/new?title=#{@encodeURI(@getIssueTitle())}&body=#{@encodeURI(@getIssueBody())}"
+    repoUrl = @getRepoUrl()
+    repoUrl = 'https://github.com/atom/atom' unless repoUrl?
+    "#{repoUrl}/issues/new?title=#{@encodeURI(@getIssueTitle())}&body=#{@encodeURI(@getIssueBody())}"
 
   getIssueTitle: ->
     @model.getMessage()
