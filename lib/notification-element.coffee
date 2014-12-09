@@ -99,7 +99,7 @@ class NotificationElement extends HTMLElement
           issueButton.textContent = "View Issue"
           fatalNotification.textContent += " This issue has already been reported."
         else
-          fatalNotification.textContent += " You can help by creating an issue."
+          fatalNotification.textContent += " You can help by creating an issue. Please explain what actions triggered this error."
 
       toolbar = document.createElement('div')
       toolbar.classList.add('btn-toolbar')
