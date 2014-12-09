@@ -185,11 +185,12 @@ class NotificationElement extends HTMLElement
     options = @model.getOptions()
     repoUrl = @getRepoUrl()
     packageName = @getPackageName()
+    packageVersion = atom.packages.getActivePackage(packageName)?.metadata?.version if packageName?
 
     if packageName? and repoUrl?
-      packageMessage = "[#{packageName}](#{repoUrl}) package"
+      packageMessage = "[#{packageName}](#{repoUrl}) package, v#{packageVersion}"
     else if packageName?
-      packageMessage = "'#{packageName}' package"
+      packageMessage = "'#{packageName}' package, v#{packageVersion}"
     else
       packageMessage = 'Atom Core'
 

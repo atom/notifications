@@ -133,7 +133,7 @@ describe "Notifications", ->
           expect(issueBody).toMatch /Atom Version\*\*: [0-9].[0-9]+.[0-9]+/ig
           expect(issueBody).not.toMatch /Unknown/ig
           expect(issueBody).toContain 'ReferenceError: a is not defined'
-          expect(issueBody).toContain 'Thrown From**: [notifications](https://github.com/atom/notifications) package'
+          expect(issueBody).toContain 'Thrown From**: [notifications](https://github.com/atom/notifications) package, v'
 
       describe "when an exception is thrown from core", ->
         beforeEach ->
