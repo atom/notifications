@@ -82,7 +82,7 @@ class NotificationElement extends HTMLElement
       if packageName? and repoUrl?
         fatalNotification.innerHTML = "The error was thrown from the <a href=\"#{repoUrl}\">#{packageName} package</a>"
       else if packageName?
-        fatalNotification.textContent = 'The error was thrown from the #{packageName} package, but it may be a bug in Atom core.'
+        fatalNotification.textContent = "The error was thrown from the #{packageName} package, but it may be a bug in Atom core."
       else
         fatalNotification.textContent = 'This is likely a bug in Atom.'
 
