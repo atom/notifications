@@ -79,36 +79,40 @@ class NotificationElement extends HTMLElement
 
       repoUrl = @getRepoUrl()
       packageName = @getPackageName()
+      showCreateIssueButton = true
       if packageName? and repoUrl?
         fatalNotification.innerHTML = "The error was thrown from the <a href=\"#{repoUrl}\">#{packageName} package</a>"
       else if packageName?
-        fatalNotification.textContent = "The error was thrown from the #{packageName} package, but it may be a bug in Atom core."
+        showCreateIssueButton = false
+        fatalNotification.textContent = "The error was thrown from the #{packageName} package."
       else
         fatalNotification.textContent = 'This is likely a bug in Atom.'
 
-      issueButton = document.createElement('a')
-      issueButton.setAttribute('href', @getIssueUrl())
-      issueButton.classList.add('btn')
-      issueButton.classList.add('btn-error')
-      if packageName? and repoUrl?
-        issueButton.textContent = "Create issue on the #{packageName} package"
-      else
-        issueButton.textContent = "Create issue on atom/atom"
-      @fetchIssue (issue) ->
-        if issue?
-          issueButton.setAttribute('href', issue.html_url)
-          issueButton.textContent = "View Issue"
-          fatalNotification.textContent += " This issue has already been reported."
+      # We only show the create issue button if it's clearly in atom core or in a package with a repo url
+      if showCreateIssueButton
+        issueButton = document.createElement('a')
+        issueButton.setAttribute('href', @getIssueUrl())
+        issueButton.classList.add('btn')
+        issueButton.classList.add('btn-error')
+        if packageName? and repoUrl?
+          issueButton.textContent = "Create issue on the #{packageName} package"
         else
-          fatalNotification.textContent += " You can help by creating an issue. Please explain what actions triggered this error."
+          issueButton.textContent = "Create issue on atom/atom"
+        @fetchIssue (issue) ->
+          if issue?
+            issueButton.setAttribute('href', issue.html_url)
+            issueButton.textContent = "View Issue"
+            fatalNotification.textContent += " This issue has already been reported."
+          else
+            fatalNotification.textContent += " You can help by creating an issue. Please explain what actions triggered this error."
 
-      toolbar = document.createElement('div')
-      toolbar.classList.add('btn-toolbar')
-      toolbar.appendChild(issueButton)
+        toolbar = document.createElement('div')
+        toolbar.classList.add('btn-toolbar')
+        toolbar.appendChild(issueButton)
 
-      fatalContainer.appendChild(fatalNotification)
-      fatalContainer.appendChild(toolbar)
-      notificationContent.appendChild(fatalContainer)
+        fatalContainer.appendChild(fatalNotification)
+        fatalContainer.appendChild(toolbar)
+        notificationContent.appendChild(fatalContainer)
 
     if @model.isDismissable()
       @classList.add('has-close')
