@@ -3,6 +3,7 @@ fs = require 'fs'
 path = require 'path'
 plist = require 'plist'
 StackTraceParser = require 'stacktrace-parser'
+marked = require 'marked'
 $ = require 'jquery'
 
 class NotificationElement extends HTMLElement
@@ -35,7 +36,7 @@ class NotificationElement extends HTMLElement
     notificationContainer = document.createElement('div')
     notificationContainer.classList.add('item')
     notificationContainer.classList.add('message')
-    notificationContainer.textContent = @model.getMessage()
+    notificationContainer.innerHTML = marked(@model.getMessage())
     notificationContent.appendChild(notificationContainer)
 
     if detail = @model.getDetail()

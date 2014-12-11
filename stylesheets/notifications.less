@@ -87,6 +87,9 @@ atom-notification {
     border-top: 1px solid hsla(0,0%,0%,.1);
     &.message {
       border-top: none;
+      p:last-child {
+        margin-bottom: 0;
+      }
     }
   }
 
@@ -192,6 +195,11 @@ atom-notification.success {
 
   a {
     color: darken(@txt, 20%);
+  }
+
+  code {
+    color: darken(@txt, 40%);
+    background-color: desaturate(lighten(@bg, 18%), 5%);
   }
 
   &.icon:before {
