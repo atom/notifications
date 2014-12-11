@@ -23,7 +23,7 @@ class NotificationElement extends HTMLElement
   getModel: -> @model
 
   generateMarkup: ->
-    # OMG we need a data-binding framework
+    # OMG we need a view / data-binding framework
     @classList.add "#{@model.getType()}"
     @classList.add "icon", "icon-#{@model.getIcon()}", "native-key-bindings"
 
