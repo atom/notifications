@@ -33,7 +33,7 @@ describe "Notifications", ->
       notification = notificationContainer.querySelector('atom-notification.success')
       expect(notificationContainer.childNodes.length).toBe 1
       expect(notification).toHaveClass 'success'
-      expect(notification.querySelector('.message').textContent).toBe 'A message'
+      expect(notification.querySelector('.message').textContent.trim()).toBe 'A message'
 
       atom.notifications.addInfo('A message')
       expect(notificationContainer.childNodes.length).toBe 2
