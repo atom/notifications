@@ -223,3 +223,14 @@ describe "Notifications", ->
           fatalNotification = fatalError.querySelector('.fatal-notification')
           expect(fatalNotification.textContent).toContain 'already been reported'
           expect($.ajax.mostRecentCall.args[0]).toContain 'atom/notifications'
+
+      describe "when a BufferedProcessError is thrown", ->
+        it "adds an error to the notifications", ->
+          expect(notificationContainer.querySelector('atom-notification.error')).not.toExist()
+
+          window.onerror('Uncaught BufferedProcessError: Failed to spawn command `bad-command`', 'abc', 2, 3, {name: 'BufferedProcessError'})
+
+          error = notificationContainer.querySelector('atom-notification.error')
+          expect(error).toExist()
+          expect(error.innerHTML).toContain 'Failed to spawn command'
+          expect(error.innerHTML).not.toContain 'BufferedProcessError'
