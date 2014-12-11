@@ -189,7 +189,7 @@ class NotificationElement extends HTMLElement
     options = @model.getOptions()
     repoUrl = @getRepoUrl()
     packageName = @getPackageName()
-    packageVersion = atom.packages.getActivePackage(packageName)?.metadata?.version if packageName?
+    packageVersion = atom.packages.getLoadedPackage(packageName)?.metadata?.version if packageName?
     copyText = ''
     copyText = '/cc @atom/core' if packageName? and repoUrl?
 
@@ -230,7 +230,7 @@ class NotificationElement extends HTMLElement
   getRepoUrl: ->
     packageName = @getPackageName()
     return unless packageName?
-    repo = atom.packages.getActivePackage(packageName)?.metadata?.repository
+    repo = atom.packages.getLoadedPackage(packageName)?.metadata?.repository
     repoUrl = repo?.url ? repo
     repoUrl = repoUrl?.replace(/\.git$/, '')
     repoUrl
