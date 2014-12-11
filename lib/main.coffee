@@ -21,13 +21,16 @@ Notifications =
       lastNotification = notification
 
     @subscriptions.add atom.onWillThrowError ({message, url, line, originalError, preventDefault}) ->
-      return if atom.inDevMode()
-      preventDefault()
-      options =
-        detail: "#{url}:#{line}"
-        stack: originalError.stack
-        dismissable: true
-      atom.notifications.addFatalError(message, options)
+      if originalError.name is 'BufferedProcessError'
+        message = message.replace('Uncaught BufferedProcessError: ', '')
+        atom.notifications.addError(message, dismissable: true)
+      else if !atom.inDevMode()
+        preventDefault()
+        options =
+          detail: "#{url}:#{line}"
+          stack: originalError.stack
+          dismissable: true
+        atom.notifications.addFatalError(message, options)
 
   deactivate: ->
     @subscriptions.dispose()
