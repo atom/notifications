@@ -6,6 +6,8 @@ StackTraceParser = require 'stacktrace-parser'
 marked = require 'marked'
 $ = require 'jquery'
 
+spawnSync = require('child_process').spawnSync
+
 class NotificationElement extends HTMLElement
   animationDuration: 700
   visibilityDuration: 5000
