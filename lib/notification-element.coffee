@@ -44,7 +44,15 @@ class NotificationElement extends HTMLElement
         for line in content.split('\n')
           div = document.createElement('div')
           div.classList.add 'line'
-          div.textContent = line
+          tag = line.match(/(\/.*:\d+)/)
+          if tag
+            tag = tag[1]
+            idx = line.indexOf tag
+            line = line.substr(0, idx) + "<a href='#'>#{tag}</a>" + line.substr(idx+tag.length)
+            $(div).html(line)
+          else
+            div.textContent = line
+
           container.appendChild(div)
         return
 
@@ -54,6 +62,16 @@ class NotificationElement extends HTMLElement
       detailContainer.classList.add('detail')
       addSplitLinesToContainer(detailContainer, detail)
       notificationContent.appendChild(detailContainer)
+
+      $(detailContainer).on 'click', '.line a', (e)->
+        [path, lineNumber, colNum] = e.target.textContent.split(":")
+        colNum ?= 0
+        atom.workspace.open(path).done ->
+          return unless lineNumber >= 0
+          if textEditor = atom.workspace.getActiveTextEditor()
+            position = [lineNumber - 1, colNum - 1]
+            textEditor.scrollToBufferPosition(position, center: true)
+            textEditor.setCursorBufferPosition(position)
 
       if stack = @model.getOptions().stack
         stackToggle = document.createElement('a')
