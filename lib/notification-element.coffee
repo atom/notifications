@@ -229,8 +229,7 @@ class NotificationElement extends HTMLElement
 
   encodeURI: (str) ->
     str = encodeURI(str)
-    str.replace(/#/g, '%23')
-    str.replace(/;/g, '%3B')
+    str.replace(/#/g, '%23').replace(/;/g, '%3B')
 
   getRepoUrl: ->
     packageName = @getPackageName()
