@@ -45,7 +45,7 @@ class NotificationsPanelView
   getElement: -> @element
 
   createFatalError: =>
-    atom.workspaceView.trigger('notifications:trigger-error')
+    atom.commands.dispatch(atom.views.getView(atom.workspace), 'notifications:trigger-error')
 
   createError: =>
     message = 'Failed to load your user config'
