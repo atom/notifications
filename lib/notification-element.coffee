@@ -1,12 +1,10 @@
-os = require 'os'
 fs = require 'fs'
 path = require 'path'
-plist = require 'plist'
 StackTraceParser = require 'stacktrace-parser'
 marked = require 'marked'
 $ = require 'jquery'
 
-spawnSync = require('child_process').spawnSync
+UserUtilities = require './user-utilities'
 
 class NotificationElement extends HTMLElement
   animationDuration: 700
@@ -209,10 +207,6 @@ class NotificationElement extends HTMLElement
     """
     #{@model.getMessage()}
 
-    **Atom Version**: #{atom.getVersion()}
-    **System**: #{@getOSMarketingVersion()}
-    **Thrown From**: #{packageMessage}
-
     ### Steps To Reproduce
 
     1. ...
@@ -225,6 +219,12 @@ class NotificationElement extends HTMLElement
 
     #{options.stack}
     ```
+
+    ### System Information
+
+    **Atom Version**: #{atom.getVersion()}
+    **System**: #{UserUtilities.getOSVersion()}
+    **Thrown From**: #{packageMessage}
 
     #{copyText}
     """
@@ -269,28 +269,5 @@ class NotificationElement extends HTMLElement
     for pack in atom.packages.getLoadedPackages()
       @packagePathsByPackageName[pack.name] = pack.path
     @packagePathsByPackageName
-
-  # OS version strings lifted from https://github.com/lee-dohm/bug-report
-  getOSMarketingVersion: ->
-    switch os.platform()
-      when 'darwin' then @macVersionText()
-      when 'win32' then @winVersionText()
-      else "#{os.platform()} #{os.release()}"
-
-  macVersionText: (info = @macVersionInfo()) ->
-    return 'Unknown OS X version' unless info.ProductName and info.ProductVersion
-
-    "#{info.ProductName} #{info.ProductVersion}"
-
-  macVersionInfo: ->
-    try
-      text = fs.readFileSync('/System/Library/CoreServices/SystemVersion.plist', 'utf8')
-      plist.parse(text)
-    catch e
-      {}
-
-  winVersionText: ->
-    info = spawnSync('systeminfo').stdout.toString()
-    if (res = /OS.Name.\s+(.*)$/im.exec(info)) then res[1] else 'Unknown Windows Version'
 
 module.exports = NotificationElement = document.registerElement 'atom-notification', prototype: NotificationElement.prototype
