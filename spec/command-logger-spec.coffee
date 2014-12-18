@@ -11,6 +11,7 @@ describe 'CommandLogger', ->
   beforeEach ->
     workspaceElement = atom.views.getView(atom.workspace)
     logger = new CommandLogger
+    logger.start()
 
   describe 'logging of commands', ->
     it 'catches the name of the command', ->
@@ -87,16 +88,6 @@ describe 'CommandLogger', ->
           2x -0:00.0 foo:bar (atom-workspace.workspace.scrollbars-visible-when-scrolling)
         ```
       """
-
-    it 'empties the log after `getText()` is called', ->
-      dispatch('foo:bar')
-      logger.getText()
-
-      for i in [0...logger.logSize]
-        event = logger.eventLog[i]
-        expect(event.name).toBeNull()
-        expect(event.count).toBe 0
-        expect(event.time).toBeNull()
 
     it 'logs the external data event as the last event', ->
       dispatch('foo:bar')

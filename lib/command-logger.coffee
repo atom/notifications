@@ -21,6 +21,12 @@ tenMinutes = 10 * 60 * 1000
 # It uses an array as a circular data structure to log only the most recent commands.
 module.exports =
 class CommandLogger
+  @instance: ->
+    @_instance ?= new CommandLogger
+
+  @start: ->
+    @instance().start()
+
   # Public: Format of time information.
   dateFmt: '-m:ss.S'
 
@@ -30,6 +36,8 @@ class CommandLogger
   # Public: Creates a new logger.
   constructor: ->
     @initLog()
+
+  start: ->
     atom.commands.onWillDispatch (event) =>
       @logCommand(event)
 
@@ -43,15 +51,12 @@ class CommandLogger
     lastTime = @calculateLastEventTime(externalData)
 
     @eachEvent (event) =>
-      return true if event.time > lastTime
-      return false if not event.name or lastTime - event.time >= tenMinutes
-
+      return if event.time > lastTime
+      return if not event.name or lastTime - event.time >= tenMinutes
       lines.push(@formatEvent(event, lastTime))
 
     if externalData
       lines.push("     #{@formatTime(0)} #{externalData.title}")
-
-    @initLog()
 
     lines.unshift('```')
     lines.push('```')
@@ -116,6 +121,7 @@ class CommandLogger
   eachEvent: (fn) ->
     for offset in [1..@logSize]
       fn(@eventLog[(@logIndex + offset) % @logSize])
+    return
 
   # Private: Format the command count for reporting.
   #
