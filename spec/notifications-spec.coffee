@@ -138,6 +138,16 @@ describe "Notifications", ->
           expect(issueBody).toContain '# User'
           expect(issueBody).toContain 'notifications, v'
 
+        it "contains core and notifications config values", ->
+          atom.config.set('notifications.something', 10)
+          notificationContainer = workspaceElement.querySelector('atom-notifications')
+          fatalError = notificationContainer.querySelector('atom-notification.fatal')
+
+          issueBody = fatalError.getIssueBody()
+          expect(issueBody).toContain '"core":'
+          expect(issueBody).toContain '"notifications":'
+          expect(issueBody).not.toContain '"editor":'
+
       describe "when an exception is thrown from core", ->
         beforeEach ->
           atom.commands.dispatch(workspaceElement, 'some-package:a-command')
@@ -173,14 +183,21 @@ describe "Notifications", ->
 
           expect($.ajax.mostRecentCall.args[0]).toContain 'atom/atom'
 
+        it "contains core and editor config values", ->
+          notificationContainer = workspaceElement.querySelector('atom-notifications')
+          fatalError = notificationContainer.querySelector('atom-notification.fatal')
+
+          issueBody = fatalError.getIssueBody()
+          expect(issueBody).toContain '"core":'
+          expect(issueBody).toContain '"editor":'
+          expect(issueBody).not.toContain '"notifications":'
+
         it "contains the commands that the user run in the issue body", ->
           notificationContainer = workspaceElement.querySelector('atom-notifications')
           fatalError = notificationContainer.querySelector('atom-notification.fatal')
 
           issueBody = fatalError.getIssueBody()
           expect(issueBody).toContain 'some-package:a-command'
-
-          expect($.ajax.mostRecentCall.args[0]).toContain 'atom/atom'
 
         it "allows the user to toggle the stack trace", ->
           notificationContainer = workspaceElement.querySelector('atom-notifications')

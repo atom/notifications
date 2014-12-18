@@ -37,6 +37,18 @@ module.exports =
     if (res = /OS.Name.\s+(.*)$/im.exec(info)) then res[1] else 'Unknown Windows Version'
 
   ###
+  Section: Config Values
+  ###
+
+  getConfigForPackage: (packageName) ->
+    config = core: atom.config.settings.core
+    if packageName?
+      config[packageName] = atom.config.settings[packageName]
+    else
+      config.editor = atom.config.settings.editor
+    config
+
+  ###
   Section: Installed Packages
   ###
 

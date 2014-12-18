@@ -197,6 +197,7 @@ class NotificationElement extends HTMLElement
     packageName = @getPackageName()
     packageVersion = atom.packages.getLoadedPackage(packageName)?.metadata?.version if packageName?
     installedPackages = UserUtilities.getInstalledPackages()
+    userConfig = UserUtilities.getConfigForPackage(packageName)
     copyText = ''
     copyText = '/cc @atom/core' if packageName? and repoUrl?
 
@@ -231,6 +232,12 @@ class NotificationElement extends HTMLElement
 
       #{CommandLogger.instance().getText()}
 
+      ### Config
+
+      ```
+      #{JSON.stringify(userConfig, null, 2)}
+      ```
+
       ### Installed Packages
 
       ```coffee
@@ -242,7 +249,7 @@ class NotificationElement extends HTMLElement
       ```
 
       #{copyText}
-      """
+    """
 
   encodeURI: (str) ->
     str = encodeURI(str)
