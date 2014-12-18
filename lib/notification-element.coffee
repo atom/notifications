@@ -190,10 +190,12 @@ class NotificationElement extends HTMLElement
     @model.getMessage()
 
   getIssueBody: ->
+    message = @model.getMessage()
     options = @model.getOptions()
     repoUrl = @getRepoUrl()
     packageName = @getPackageName()
     packageVersion = atom.packages.getLoadedPackage(packageName)?.metadata?.version if packageName?
+    installedPackages = UserUtilities.getInstalledPackages()
     copyText = ''
     copyText = '/cc @atom/core' if packageName? and repoUrl?
 
@@ -205,29 +207,39 @@ class NotificationElement extends HTMLElement
       packageMessage = 'Atom Core'
 
     """
-    #{@model.getMessage()}
+      ### Steps To Reproduce
 
-    ### Steps To Reproduce
+      1. ...
+      2. ...
 
-    1. ...
-    2. ...
+      ### Stack Trace
 
-    ### Stack Trace
+      #{message}
 
-    ```
-    At #{options.detail}
+      ```
+      At #{options.detail}
 
-    #{options.stack}
-    ```
+      #{options.stack}
+      ```
 
-    ### System Information
+      ### System Information
 
-    **Atom Version**: #{atom.getVersion()}
-    **System**: #{UserUtilities.getOSVersion()}
-    **Thrown From**: #{packageMessage}
+      **Atom Version**: #{atom.getVersion()}
+      **System**: #{UserUtilities.getOSVersion()}
+      **Thrown From**: #{packageMessage}
 
-    #{copyText}
-    """
+      #### Installed Packages
+
+      ```coffee
+      # User
+      #{installedPackages.user.join('\n')}
+
+      # Dev
+      #{installedPackages.dev.join('\n')}
+      ```
+
+      #{copyText}
+      """
 
   encodeURI: (str) ->
     str = encodeURI(str)

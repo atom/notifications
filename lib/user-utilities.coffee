@@ -41,29 +41,15 @@ module.exports =
   ###
 
   # Returns an object of arrays {dev: ['some-package, v0.2.3', ...], user: [...]}
-  getInstalledPackages: (callback) ->
-    args = ['ls', '--json']
-    runCommand args, (code, stdout, stderr) ->
-      if code is 0
-        packages = JSON.parse(stdout)
-        activePackages =
-          dev: filterActivePackages(packages.dev)
-          user: filterActivePackages(packages.user)
-        console.log activePackages
-        callback(activePackages) if callback?
+  getInstalledPackages: ->
+    args = ['ls', '--json', '--no-color']
+    stdout = spawnSync(atom.packages.getApmPath(), args).stdout.toString()
+    packages = JSON.parse(stdout)
+    activePackages =
+      dev: @filterActivePackages(packages.dev)
+      user: @filterActivePackages(packages.user)
 
   filterActivePackages: (packages) ->
     "#{pack.name}, v#{pack.version}" for pack in (packages ? []) when atom.packages.getActivePackage(pack.name)?
 
-  runCommand: (args, callback) ->
-    command = atom.packages.getApmPath()
-    outputLines = []
-    stdout = (lines) -> outputLines.push(lines)
-    errorLines = []
-    stderr = (lines) -> errorLines.push(lines)
-    exit = (code) ->
-      callback(code, outputLines.join('\n'), errorLines.join('\n'))
-
-    args.push('--no-color')
-    {BufferedProcess} = require 'atom'
-    new BufferedProcess({command, args, stdout, stderr, exit})
+window.getInstalledPackages = module.exports.getInstalledPackages

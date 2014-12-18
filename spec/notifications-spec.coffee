@@ -135,6 +135,8 @@ describe "Notifications", ->
           expect(issueBody).toContain 'ReferenceError: a is not defined'
           expect(issueBody).toContain 'Thrown From**: [notifications](https://github.com/atom/notifications) package, v'
           expect(issueBody).toContain 'cc @atom/core'
+          expect(issueBody).toContain '# User'
+          expect(issueBody).toContain 'notifications, v'
 
       describe "when an exception is thrown from core", ->
         beforeEach ->
