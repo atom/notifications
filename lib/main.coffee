@@ -1,4 +1,5 @@
 {Notification, CompositeDisposable} = require 'atom'
+CommandLogger = require './command-logger'
 
 Notifications =
   isInitialized: false
@@ -6,6 +7,7 @@ Notifications =
   duplicateTimeDelay: 500
 
   activate: (state) ->
+    CommandLogger.start()
     @subscriptions = new CompositeDisposable
 
     lastNotification = null

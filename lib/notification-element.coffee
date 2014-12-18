@@ -5,6 +5,7 @@ marked = require 'marked'
 $ = require 'jquery'
 
 UserUtilities = require './user-utilities'
+CommandLogger = require './command-logger'
 
 class NotificationElement extends HTMLElement
   animationDuration: 700
@@ -207,10 +208,14 @@ class NotificationElement extends HTMLElement
       packageMessage = 'Atom Core'
 
     """
-      ### Steps To Reproduce
+      [Enter steps to reproduce below:]
 
       1. ...
       2. ...
+
+      **Atom Version**: #{atom.getVersion()}
+      **System**: #{UserUtilities.getOSVersion()}
+      **Thrown From**: #{packageMessage}
 
       ### Stack Trace
 
@@ -222,13 +227,11 @@ class NotificationElement extends HTMLElement
       #{options.stack}
       ```
 
-      ### System Information
+      ### Commands
 
-      **Atom Version**: #{atom.getVersion()}
-      **System**: #{UserUtilities.getOSVersion()}
-      **Thrown From**: #{packageMessage}
+      #{CommandLogger.instance().getText()}
 
-      #### Installed Packages
+      ### Installed Packages
 
       ```coffee
       # User

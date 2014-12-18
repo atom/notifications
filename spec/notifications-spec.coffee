@@ -140,6 +140,9 @@ describe "Notifications", ->
 
       describe "when an exception is thrown from core", ->
         beforeEach ->
+          atom.commands.dispatch(workspaceElement, 'some-package:a-command')
+          atom.commands.dispatch(workspaceElement, 'some-package:a-command')
+          atom.commands.dispatch(workspaceElement, 'some-package:a-command')
           spyOn(atom, 'inDevMode').andReturn false
           try
             a + 1
@@ -167,6 +170,15 @@ describe "Notifications", ->
           expect(issueBody).toContain 'ReferenceError: a is not defined'
           expect(issueBody).toContain '**Thrown From**: Atom Core'
           expect(issueBody).not.toContain 'cc @atom/core'
+
+          expect($.ajax.mostRecentCall.args[0]).toContain 'atom/atom'
+
+        it "contains the commands that the user run in the issue body", ->
+          notificationContainer = workspaceElement.querySelector('atom-notifications')
+          fatalError = notificationContainer.querySelector('atom-notification.fatal')
+
+          issueBody = fatalError.getIssueBody()
+          expect(issueBody).toContain 'some-package:a-command'
 
           expect($.ajax.mostRecentCall.args[0]).toContain 'atom/atom'
 
@@ -200,7 +212,7 @@ describe "Notifications", ->
           expect(button.textContent).toContain 'Create issue'
           fatalNotification = fatalError.querySelector('.fatal-notification')
           expect(fatalNotification.textContent).toContain 'You can help by creating an issue'
-          expect(button.getAttribute('href')).toContain '%23%23%23%20Steps%20To%20Reproduce'
+          expect(button.getAttribute('href')).toContain '%20steps%20to%20reproduce'
 
       describe "when the error has been reported", ->
         beforeEach ->
