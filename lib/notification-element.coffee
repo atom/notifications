@@ -1,5 +1,6 @@
 fs = require 'fs'
 path = require 'path'
+async = require 'async'
 StackTraceParser = require 'stacktrace-parser'
 marked = require 'marked'
 $ = require 'jquery'
@@ -99,13 +100,20 @@ class NotificationElement extends HTMLElement
           issueButton.textContent = "Create issue on the #{packageName} package"
         else
           issueButton.textContent = "Create issue on atom/atom"
-        @fetchIssue (issue) ->
-          if issue?
-            issueButton.setAttribute('href', issue.html_url)
+
+        async.parallel
+          issue: (callback) =>
+            @fetchIssue (issue) => callback(null, issue)
+          shortUrl: (callback) =>
+            @getShortUrl (url) -> callback(null, url)
+        , (err, result) ->
+          if result.issue?
+            issueButton.setAttribute('href', result.issue.html_url)
             issueButton.textContent = "View Issue"
             fatalNotification.textContent += " This issue has already been reported."
           else
             fatalNotification.textContent += " You can help by creating an issue. Please explain what actions triggered this error."
+            issueButton.setAttribute('href', result.shortUrl)
 
         toolbar = document.createElement('div')
         toolbar.classList.add('btn-toolbar')
@@ -181,6 +189,21 @@ class NotificationElement extends HTMLElement
           for issue in data.items
             return callback?(issue) if issue.title.indexOf(@getIssueTitle()) > -1
         callback?(null)
+
+  getShortUrl: (callback) ->
+    url = 'http://git.io'
+
+    # request = require 'request'
+    # request.post(url, form: url: @getIssueUrl()).on 'response', (response) ->
+    #   console.log 'short', response.headers['location']
+    #   callback(response.headers['location'])
+
+    $.ajax url,
+      type: 'POST'
+      data: url: @getIssueUrl()
+      success: (data, status, xhr) =>
+        console.log 'short', xhr.getResponseHeader('Location')
+        callback(xhr.getResponseHeader('Location'))
 
   getIssueUrl: ->
     repoUrl = @getRepoUrl()
