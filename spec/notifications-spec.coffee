@@ -183,7 +183,8 @@ describe "Notifications", ->
           expect(issueBody).toContain '**Thrown From**: Atom Core'
           expect(issueBody).not.toContain 'cc @atom/core'
 
-          expect($.ajax.mostRecentCall.args[0]).toContain 'atom/atom'
+          expect($.ajax.calls[0].args[0]).toContain 'atom/atom'
+          expect($.ajax.calls[1].args[0]).toContain 'git.io'
 
         it "contains core and editor config values", ->
           notificationContainer = workspaceElement.querySelector('atom-notifications')
@@ -219,7 +220,11 @@ describe "Notifications", ->
       describe "when the error has not been reported", ->
         beforeEach ->
           spyOn(atom, 'inDevMode').andReturn false
-          $.ajax.andCallFake (url, settings) -> settings.success(items: [])
+          $.ajax.andCallFake (url, settings) ->
+            if url.indexOf('git.io') > -1
+              settings.success('--', '201', {getResponseHeader: -> 'http://git.io/cats'})
+            else
+              settings.success(items: [])
           try
             a + 1
           catch e
@@ -231,18 +236,22 @@ describe "Notifications", ->
           expect(button.textContent).toContain 'Create issue'
           fatalNotification = fatalError.querySelector('.fatal-notification')
           expect(fatalNotification.textContent).toContain 'You can help by creating an issue'
-          expect(button.getAttribute('href')).toContain '%20steps%20to%20reproduce'
+          expect(button.getAttribute('href')).toContain 'git.io'
 
       describe "when the error has been reported", ->
         beforeEach ->
           spyOn(atom, 'inDevMode').andReturn false
-          $.ajax.andCallFake (url, settings) -> settings.success
-            items: [
-              {
-                title: 'ReferenceError: a is not defined'
-                html_url: 'http://url.com/ok'
-              }
-            ]
+          $.ajax.andCallFake (url, settings) ->
+            if url.indexOf('git.io') > -1
+              settings.success('--', '201', {getResponseHeader: -> 'http://git.io/cats'})
+            else
+              settings.success
+                items: [
+                  {
+                    title: 'ReferenceError: a is not defined'
+                    html_url: 'http://url.com/ok'
+                  }
+                ]
           try
             a + 1
           catch e
@@ -255,7 +264,7 @@ describe "Notifications", ->
           expect(button.getAttribute('href')).toBe 'http://url.com/ok'
           fatalNotification = fatalError.querySelector('.fatal-notification')
           expect(fatalNotification.textContent).toContain 'already been reported'
-          expect($.ajax.mostRecentCall.args[0]).toContain 'atom/notifications'
+          expect($.ajax.calls[0].args[0]).toContain 'atom/notifications'
 
       describe "when a BufferedProcessError is thrown", ->
         it "adds an error to the notifications", ->
