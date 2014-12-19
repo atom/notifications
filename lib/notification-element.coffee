@@ -1,12 +1,11 @@
-os = require 'os'
 fs = require 'fs'
 path = require 'path'
-plist = require 'plist'
 StackTraceParser = require 'stacktrace-parser'
 marked = require 'marked'
 $ = require 'jquery'
 
-spawnSync = require('child_process').spawnSync
+UserUtilities = require './user-utilities'
+CommandLogger = require './command-logger'
 
 class NotificationElement extends HTMLElement
   animationDuration: 700
@@ -192,10 +191,13 @@ class NotificationElement extends HTMLElement
     @model.getMessage()
 
   getIssueBody: ->
+    message = @model.getMessage()
     options = @model.getOptions()
     repoUrl = @getRepoUrl()
     packageName = @getPackageName()
     packageVersion = atom.packages.getLoadedPackage(packageName)?.metadata?.version if packageName?
+    installedPackages = UserUtilities.getInstalledPackages()
+    userConfig = UserUtilities.getConfigForPackage(packageName)
     copyText = ''
     copyText = '/cc @atom/core' if packageName? and repoUrl?
 
@@ -207,26 +209,46 @@ class NotificationElement extends HTMLElement
       packageMessage = 'Atom Core'
 
     """
-    #{@model.getMessage()}
+      [Enter steps to reproduce below:]
 
-    **Atom Version**: #{atom.getVersion()}
-    **System**: #{@getOSMarketingVersion()}
-    **Thrown From**: #{packageMessage}
+      1. ...
+      2. ...
 
-    ### Steps To Reproduce
+      **Atom Version**: #{atom.getVersion()}
+      **System**: #{UserUtilities.getOSVersion()}
+      **Thrown From**: #{packageMessage}
 
-    1. ...
-    2. ...
+      ### Stack Trace
 
-    ### Stack Trace
+      #{message}
 
-    ```
-    At #{options.detail}
+      ```
+      At #{options.detail}
 
-    #{options.stack}
-    ```
+      #{options.stack}
+      ```
 
-    #{copyText}
+      ### Commands
+
+      #{CommandLogger.instance().getText()}
+
+      ### Config
+
+      ```
+      #{JSON.stringify(userConfig, null, 2)}
+      ```
+
+      ### Installed Packages
+
+      ```coffee
+      # User
+      #{installedPackages.user.join('\n')}
+
+      # Dev
+      #{installedPackages.dev.join('\n')}
+      ```
+
+      #{copyText}
     """
 
   encodeURI: (str) ->
@@ -269,28 +291,5 @@ class NotificationElement extends HTMLElement
     for pack in atom.packages.getLoadedPackages()
       @packagePathsByPackageName[pack.name] = pack.path
     @packagePathsByPackageName
-
-  # OS version strings lifted from https://github.com/lee-dohm/bug-report
-  getOSMarketingVersion: ->
-    switch os.platform()
-      when 'darwin' then @macVersionText()
-      when 'win32' then @winVersionText()
-      else "#{os.platform()} #{os.release()}"
-
-  macVersionText: (info = @macVersionInfo()) ->
-    return 'Unknown OS X version' unless info.ProductName and info.ProductVersion
-
-    "#{info.ProductName} #{info.ProductVersion}"
-
-  macVersionInfo: ->
-    try
-      text = fs.readFileSync('/System/Library/CoreServices/SystemVersion.plist', 'utf8')
-      plist.parse(text)
-    catch e
-      {}
-
-  winVersionText: ->
-    info = spawnSync('systeminfo').stdout.toString()
-    if (res = /OS.Name.\s+(.*)$/im.exec(info)) then res[1] else 'Unknown Windows Version'
 
 module.exports = NotificationElement = document.registerElement 'atom-notification', prototype: NotificationElement.prototype

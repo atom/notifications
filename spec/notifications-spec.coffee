@@ -135,9 +135,24 @@ describe "Notifications", ->
           expect(issueBody).toContain 'ReferenceError: a is not defined'
           expect(issueBody).toContain 'Thrown From**: [notifications](https://github.com/atom/notifications) package, v'
           expect(issueBody).toContain 'cc @atom/core'
+          expect(issueBody).toContain '# User'
+          expect(issueBody).toContain 'notifications, v'
+
+        it "contains core and notifications config values", ->
+          atom.config.set('notifications.something', 10)
+          notificationContainer = workspaceElement.querySelector('atom-notifications')
+          fatalError = notificationContainer.querySelector('atom-notification.fatal')
+
+          issueBody = fatalError.getIssueBody()
+          expect(issueBody).toContain '"core":'
+          expect(issueBody).toContain '"notifications":'
+          expect(issueBody).not.toContain '"editor":'
 
       describe "when an exception is thrown from core", ->
         beforeEach ->
+          atom.commands.dispatch(workspaceElement, 'some-package:a-command')
+          atom.commands.dispatch(workspaceElement, 'some-package:a-command')
+          atom.commands.dispatch(workspaceElement, 'some-package:a-command')
           spyOn(atom, 'inDevMode').andReturn false
           try
             a + 1
@@ -167,6 +182,22 @@ describe "Notifications", ->
           expect(issueBody).not.toContain 'cc @atom/core'
 
           expect($.ajax.mostRecentCall.args[0]).toContain 'atom/atom'
+
+        it "contains core and editor config values", ->
+          notificationContainer = workspaceElement.querySelector('atom-notifications')
+          fatalError = notificationContainer.querySelector('atom-notification.fatal')
+
+          issueBody = fatalError.getIssueBody()
+          expect(issueBody).toContain '"core":'
+          expect(issueBody).toContain '"editor":'
+          expect(issueBody).not.toContain '"notifications":'
+
+        it "contains the commands that the user run in the issue body", ->
+          notificationContainer = workspaceElement.querySelector('atom-notifications')
+          fatalError = notificationContainer.querySelector('atom-notification.fatal')
+
+          issueBody = fatalError.getIssueBody()
+          expect(issueBody).toContain 'some-package:a-command'
 
         it "allows the user to toggle the stack trace", ->
           notificationContainer = workspaceElement.querySelector('atom-notifications')
@@ -198,7 +229,7 @@ describe "Notifications", ->
           expect(button.textContent).toContain 'Create issue'
           fatalNotification = fatalError.querySelector('.fatal-notification')
           expect(fatalNotification.textContent).toContain 'You can help by creating an issue'
-          expect(button.getAttribute('href')).toContain '%23%23%23%20Steps%20To%20Reproduce'
+          expect(button.getAttribute('href')).toContain '%20steps%20to%20reproduce'
 
       describe "when the error has been reported", ->
         beforeEach ->
