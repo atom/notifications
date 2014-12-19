@@ -1,7 +1,7 @@
 os = require 'os'
 fs = require 'fs'
 plist = require 'plist'
-spawnSync = require('child_process').spawnSync
+{spawnSync} = require 'child_process'
 
 ###
 A collection of methods for retrieving information about the user's system for
@@ -63,5 +63,3 @@ module.exports =
 
   filterActivePackages: (packages) ->
     "#{pack.name}, v#{pack.version}" for pack in (packages ? []) when atom.packages.getActivePackage(pack.name)?
-
-window.getInstalledPackages = module.exports.getInstalledPackages
