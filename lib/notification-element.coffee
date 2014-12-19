@@ -112,8 +112,8 @@ class NotificationElement extends HTMLElement
             issueButton.textContent = "View Issue"
             fatalNotification.textContent += " This issue has already been reported."
           else
-            fatalNotification.textContent += " You can help by creating an issue. Please explain what actions triggered this error."
             issueButton.setAttribute('href', result.shortUrl)
+            fatalNotification.textContent += " You can help by creating an issue. Please explain what actions triggered this error."
 
         toolbar = document.createElement('div')
         toolbar.classList.add('btn-toolbar')
@@ -191,18 +191,10 @@ class NotificationElement extends HTMLElement
         callback?(null)
 
   getShortUrl: (callback) ->
-    url = 'http://git.io'
-
-    # request = require 'request'
-    # request.post(url, form: url: @getIssueUrl()).on 'response', (response) ->
-    #   console.log 'short', response.headers['location']
-    #   callback(response.headers['location'])
-
-    $.ajax url,
+    $.ajax 'http://git.io',
       type: 'POST'
       data: url: @getIssueUrl()
       success: (data, status, xhr) =>
-        console.log 'short', xhr.getResponseHeader('Location')
         callback(xhr.getResponseHeader('Location'))
 
   getIssueUrl: ->

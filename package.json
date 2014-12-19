@@ -14,7 +14,6 @@
     "marked": "^0.3",
     "moment": "^2.8.4",
     "plist": "^1.1.0",
-    "request": "^2.51.0",
     "stacktrace-parser": "0.1.1"
   }
 }
