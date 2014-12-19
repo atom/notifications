@@ -112,7 +112,7 @@ class NotificationElement extends HTMLElement
             issueButton.textContent = "View Issue"
             fatalNotification.textContent += " This issue has already been reported."
           else
-            issueButton.setAttribute('href', result.shortUrl)
+            issueButton.setAttribute('href', result.shortUrl) if result.shortUrl?
             fatalNotification.textContent += " You can help by creating an issue. Please explain what actions triggered this error."
 
         toolbar = document.createElement('div')
@@ -188,14 +188,18 @@ class NotificationElement extends HTMLElement
         if data.items?
           for issue in data.items
             return callback?(issue) if issue.title.indexOf(@getIssueTitle()) > -1
-        callback?(null)
+        callback(null)
+      error: ->
+        callback(null)
 
   getShortUrl: (callback) ->
     $.ajax 'http://git.io',
       type: 'POST'
       data: url: @getIssueUrl()
-      success: (data, status, xhr) =>
+      success: (data, status, xhr) ->
         callback(xhr.getResponseHeader('Location'))
+      error: ->
+        callback(null)
 
   getIssueUrl: ->
     repoUrl = @getRepoUrl()
