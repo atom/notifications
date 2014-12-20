@@ -8,6 +8,9 @@ describe 'CommandLogger', ->
   dispatch = (command) ->
     atom.commands.dispatch(workspaceElement, command)
 
+  removeScrollbarClass = (str) ->
+    str.replace /\.scrollbars-visible-(when-scrolling|always)/g, ''
+
   beforeEach ->
     workspaceElement = atom.views.getView(atom.workspace)
     logger = new CommandLogger
@@ -60,9 +63,9 @@ describe 'CommandLogger', ->
     it 'formats commands with the time, name and source', ->
       atom.commands.dispatch(workspaceElement, 'foo:bar')
 
-      expect(logger.getText()).toBe """
+      expect(removeScrollbarClass(logger.getText())).toBe """
         ```
-             -0:00.0 foo:bar (atom-workspace.workspace.scrollbars-visible-when-scrolling)
+             -0:00.0 foo:bar (atom-workspace.workspace)
         ```
       """
 
@@ -71,11 +74,11 @@ describe 'CommandLogger', ->
       dispatch('foo:second')
       dispatch('foo:third')
 
-      expect(logger.getText()).toBe """
+      expect(removeScrollbarClass(logger.getText())).toBe """
         ```
-             -0:00.0 foo:first (atom-workspace.workspace.scrollbars-visible-when-scrolling)
-             -0:00.0 foo:second (atom-workspace.workspace.scrollbars-visible-when-scrolling)
-             -0:00.0 foo:third (atom-workspace.workspace.scrollbars-visible-when-scrolling)
+             -0:00.0 foo:first (atom-workspace.workspace)
+             -0:00.0 foo:second (atom-workspace.workspace)
+             -0:00.0 foo:third (atom-workspace.workspace)
         ```
       """
 
@@ -83,9 +86,9 @@ describe 'CommandLogger', ->
       dispatch('foo:bar')
       dispatch('foo:bar')
 
-      expect(logger.getText()).toBe """
+      expect(removeScrollbarClass(logger.getText())).toBe """
         ```
-          2x -0:00.0 foo:bar (atom-workspace.workspace.scrollbars-visible-when-scrolling)
+          2x -0:00.0 foo:bar (atom-workspace.workspace)
         ```
       """
 
@@ -95,9 +98,9 @@ describe 'CommandLogger', ->
         time: Date.now()
         title: 'bummer'
 
-      expect(logger.getText(event)).toBe """
+      expect(removeScrollbarClass(logger.getText(event))).toBe """
         ```
-             -0:00.0 foo:bar (atom-workspace.workspace.scrollbars-visible-when-scrolling)
+             -0:00.0 foo:bar (atom-workspace.workspace)
              -0:00.0 bummer
         ```
       """
