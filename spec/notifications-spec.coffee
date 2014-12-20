@@ -159,9 +159,8 @@ describe "Notifications", ->
           try
             a + 1
           catch e
-            stackLines = e.stack.split('\n')
-            stackLines.splice(1, 1) # strip out the notifications reference
-            e.stack = stackLines.join('\n')
+            # Mung the stack so it looks like its from core
+            e.stack = e.stack.replace(/notifications/g, 'core')
             window.onerror.call(window, e.toString(), 'abc', 2, 3, e)
 
         it "displays a fatal error with the package name in the error", ->
