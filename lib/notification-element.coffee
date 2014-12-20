@@ -261,10 +261,10 @@ class NotificationElement extends HTMLElement
 
       ```coffee
       # User
-      #{installedPackages.user.join('\n')}
+      #{installedPackages.user.join('\n') or 'No installed packages'}
 
       # Dev
-      #{installedPackages.dev.join('\n')}
+      #{installedPackages.dev.join('\n') or 'No dev packages'}
       ```
 
       #{copyText}
