@@ -253,7 +253,7 @@ class NotificationElement extends HTMLElement
 
       ### Config
 
-      ```
+      ```json
       #{JSON.stringify(userConfig, null, 2)}
       ```
 
