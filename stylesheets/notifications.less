@@ -19,6 +19,7 @@ atom-notifications {
   font-size: 1.2em;
   overflow-x: hidden;
   overflow-y: auto;
+  pointer-events: none;
   &::-webkit-scrollbar {
     display: none;
   }
@@ -58,7 +59,7 @@ atom-notification {
   margin-bottom: @notification-gap;
   border-radius: @component-border-radius;
   word-wrap: break-word;
-  pointer-events: auto; // Enable again
+  pointer-events: auto;
 
   &.icon:before {
     position: absolute;
