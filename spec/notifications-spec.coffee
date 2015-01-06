@@ -302,3 +302,35 @@ describe "Notifications", ->
           expect(error).toExist()
           expect(error.innerHTML).toContain 'Failed to spawn command'
           expect(error.innerHTML).not.toContain 'BufferedProcessError'
+
+      describe "when a spawn ENOENT error is thrown", ->
+        beforeEach ->
+          spyOn(atom, 'inDevMode').andReturn false
+
+        describe "when the binary has no path", ->
+          beforeEach ->
+            try
+              a + 1
+            catch e
+              e.code = 'ENOENT'
+              message = 'Error: spawn some_binary ENOENT'
+              window.onerror.call(window, message, 'abc', 2, 3, e)
+
+          it "displays a dismissable error without the stack trace", ->
+            notificationContainer = workspaceElement.querySelector('atom-notifications')
+            error = notificationContainer.querySelector('atom-notification.error')
+            expect(error.textContent).toContain "'some_binary' could not be spawned"
+
+        describe "when the binary has /atom in the path", ->
+          beforeEach ->
+            try
+              a + 1
+            catch e
+              e.code = 'ENOENT'
+              message = 'Error: spawn /opt/atom/Atom Helper (deleted) ENOENT'
+              window.onerror.call(window, message, 'abc', 2, 3, e)
+
+          it "displays a fatal error", ->
+            notificationContainer = workspaceElement.querySelector('atom-notifications')
+            error = notificationContainer.querySelector('atom-notification.fatal')
+            expect(error).toExist()

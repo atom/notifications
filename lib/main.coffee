@@ -26,6 +26,15 @@ Notifications =
       if originalError.name is 'BufferedProcessError'
         message = message.replace('Uncaught BufferedProcessError: ', '')
         atom.notifications.addError(message, dismissable: true)
+
+      else if originalError.code is 'ENOENT' and not /\/atom/i.test(message) and match = /spawn (.+) ENOENT/.exec(message)
+        message = """
+          '#{match[1]}' could not be spawned.
+          Is it installed and on your path?
+          If so please open an issue on the package spawning the process.
+        """
+        atom.notifications.addError(message, dismissable: true)
+
       else if !atom.inDevMode()
         preventDefault()
         options =
