@@ -108,6 +108,33 @@ describe "Notifications", ->
           expect(notificationContainer.childNodes.length).toBe 0
           expect(fatalError).toBe null
 
+      describe "when there are multiple packages in the stack trace", ->
+        fatalError = null
+        beforeEach ->
+          stack = """
+            TypeError: undefined is not a function
+              at Object.module.exports.Pane.promptToSaveItem [as defaultSavePrompt] (/Applications/Atom.app/Contents/Resources/app/src/pane.js:490:23)
+              at Pane.promptToSaveItem (/Users/someguy/.atom/packages/save-session/lib/save-prompt.coffee:21:15)
+              at Pane.module.exports.Pane.destroyItem (/Applications/Atom.app/Contents/Resources/app/src/pane.js:442:18)
+              at HTMLDivElement.<anonymous> (/Applications/Atom.app/Contents/Resources/app/node_modules/tabs/lib/tab-bar-view.js:174:22)
+              at space-pen-ul.jQuery.event.dispatch (/Applications/Atom.app/Contents/Resources/app/node_modules/archive-view/node_modules/atom-space-pen-views/node_modules/space-pen/vendor/jquery.js:4676:9)
+              at space-pen-ul.elemData.handle (/Applications/Atom.app/Contents/Resources/app/node_modules/archive-view/node_modules/atom-space-pen-views/node_modules/space-pen/vendor/jquery.js:4360:46)
+          """
+          detail = 'ok'
+
+          atom.notifications.addFatalError('TypeError: undefined', {detail, stack})
+          notificationContainer = workspaceElement.querySelector('atom-notifications')
+          fatalError = notificationContainer.querySelector('atom-notification.fatal')
+
+          fs = require 'fs'
+          spyOn(fs, 'realpathSync').andCallFake (p) -> p
+          spyOn(fatalError, 'getPackagePathsByPackageName').andCallFake ->
+            'save-session': '/Users/someguy/.atom/packages/save-session'
+            'tabs': '/Applications/Atom.app/Contents/Resources/app/node_modules/tabs'
+
+        it "chooses the first package in the trace", ->
+          expect(fatalError.getPackageName()).toBe 'save-session'
+
       describe "when an exception is thrown from a package", ->
         beforeEach ->
           spyOn(atom, 'inDevMode').andReturn false
