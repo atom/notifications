@@ -1,11 +1,13 @@
-NotificationElement = require '../lib/notification-element'
 $ = require 'jquery'
+{Notification} = require 'atom'
+NotificationElement = require '../lib/notification-element'
 
 describe "Notifications", ->
   [workspaceElement, activationPromise] = []
 
   beforeEach ->
     workspaceElement = atom.views.getView(atom.workspace)
+    atom.notifications.clear()
     activationPromise = atom.packages.activatePackage('notifications')
 
     waitsForPromise ->
@@ -14,6 +16,29 @@ describe "Notifications", ->
   describe "when the package is activated", ->
     it "attaches an atom-notifications element to the dom", ->
       expect(workspaceElement.querySelector('atom-notifications')).toBeDefined()
+
+  describe "when there are notifications before activation", ->
+    beforeEach ->
+      atom.packages.deactivatePackage('notifications')
+
+    it "displays all non displayed notifications", ->
+      warning = new Notification('warning', 'Un-displayed warning')
+      error = new Notification('error', 'Displayed error')
+      error.setDisplayed(true)
+
+      atom.notifications.addNotification(error)
+      atom.notifications.addNotification(warning)
+
+      activationPromise = atom.packages.activatePackage('notifications')
+      waitsForPromise ->
+        activationPromise
+
+      runs ->
+        notificationContainer = workspaceElement.querySelector('atom-notifications')
+        notification = notificationContainer.querySelector('atom-notification.warning')
+        expect(notification).toExist()
+        notification = notificationContainer.querySelector('atom-notification.error')
+        expect(notification).not.toExist()
 
   describe "when notifications are added to atom.notifications", ->
     notificationContainer = null
