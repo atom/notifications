@@ -5,22 +5,19 @@ Notifications =
   isInitialized: false
   subscriptions: null
   duplicateTimeDelay: 500
+  lastNotification: null
+
+  config:
+    showErrorsInDevMode:
+      type: 'boolean'
+      default: false
 
   activate: (state) ->
     CommandLogger.start()
     @subscriptions = new CompositeDisposable
 
-    lastNotification = null
-    @subscriptions.add atom.notifications.onDidAddNotification (notification) =>
-      @initializeIfNotInitialized()
-      if lastNotification?
-        # do not show duplicates unless some amount of time has passed
-        timeSpan = notification.getTimestamp() - lastNotification.getTimestamp()
-        unless timeSpan < @duplicateTimeDelay and notification.isEqual(lastNotification)
-          @notificationsElement.appendChild(atom.views.getView(notification))
-      else
-        @notificationsElement.appendChild(atom.views.getView(notification))
-      lastNotification = notification
+    @addNotificationView(notification) for notification in atom.notifications.getNotifications()
+    @subscriptions.add atom.notifications.onDidAddNotification (notification) => @addNotificationView(notification)
 
     @subscriptions.add atom.onWillThrowError ({message, url, line, originalError, preventDefault}) ->
       if originalError.name is 'BufferedProcessError'
@@ -35,7 +32,7 @@ Notifications =
         """
         atom.notifications.addError(message, dismissable: true)
 
-      else if !atom.inDevMode()
+      else if !atom.inDevMode() or atom.config.get('notifications.showErrorsInDevMode')
         preventDefault()
         options =
           detail: "#{url}:#{line}"
@@ -78,6 +75,21 @@ Notifications =
       NotificationsPanelView = require './notifications-panel-view'
       Notifications.notificationsPanelView = new NotificationsPanelView
       Notifications.notificationsPanel = atom.workspace.addBottomPanel(item: Notifications.notificationsPanelView.getElement())
+
+  addNotificationView: (notification) ->
+    @initializeIfNotInitialized()
+    return if notification.wasDisplayed()
+
+    if @lastNotification?
+      # do not show duplicates unless some amount of time has passed
+      timeSpan = notification.getTimestamp() - @lastNotification.getTimestamp()
+      unless timeSpan < @duplicateTimeDelay and notification.isEqual(@lastNotification)
+        @notificationsElement.appendChild(atom.views.getView(notification))
+    else
+      @notificationsElement.appendChild(atom.views.getView(notification))
+
+    notification.setDisplayed(true)
+    @lastNotification = notification
 
 if atom.inDevMode()
   atom.commands.add 'atom-workspace', 'notifications:toggle-dev-panel', -> Notifications.togglePanel()
