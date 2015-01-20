@@ -4,7 +4,9 @@
 @icon-size: 30px;
 @width: 450px;
 @width-detail: 450px;
-@max-height: 800px;
+@max-height-message: 200px;
+@max-height-detail: 500px;
+@max-height: @max-height-message + @max-height-detail + 100px; // 100px for footer. This is only used for the closing animation
 @notification-gap: 2px;
 @font-family-monospace: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 
@@ -72,14 +74,6 @@ atom-notification {
     border-radius: @component-border-radius 0 0 @component-border-radius;
   }
 
-  .content {
-    max-height: inherit;
-    overflow-y: auto;
-    &::-webkit-scrollbar {
-      display: none;
-    }
-  }
-
   // .item's are used as general containers
   .item {
     padding: @component-padding;
@@ -94,6 +88,11 @@ atom-notification {
 
   &.has-close .message {
     padding-right: @component-padding + 24px; // space for icon
+  }
+
+  .message {
+    max-height: @max-height-message;
+    overflow-y: auto;
   }
 
   .close-all.btn {
@@ -134,6 +133,8 @@ atom-notification {
     font-size: .8em;
     background-color: hsla(0,0%,100%,.3);
     background-clip: padding-box;
+    max-height: @max-height-detail;
+    overflow-y: auto;
 
     .line {
       white-space: pre;
