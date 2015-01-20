@@ -58,8 +58,6 @@ atom-notification {
   width: @width;
   padding-left: @icon-size;
   max-height: @max-height;
-  margin-bottom: @notification-gap;
-  border-radius: @component-border-radius;
   word-wrap: break-word;
   pointer-events: auto;
 
@@ -68,7 +66,7 @@ atom-notification {
     top: 0;
     left: 0;
     width: @icon-size;
-    height: 100%;
+    height: calc(100% ~"-" @notification-gap );
     padding-top: @component-padding;
     text-align: center;
     border-radius: @component-border-radius 0 0 @component-border-radius;
@@ -88,6 +86,11 @@ atom-notification {
 
   &.has-close .message {
     padding-right: @component-padding + 24px; // space for icon
+  }
+
+  .content {
+    margin-bottom: @notification-gap;
+    border-radius: 0 @component-border-radius @component-border-radius 0;
   }
 
   .message {
@@ -190,8 +193,11 @@ atom-notification.success {
 // Mixins -------------------------------
 
 .notification(@txt; @bg) {
-  color: darken(@txt, 40%);
-  background-color: lighten(@bg, 25%);
+
+  .content {
+    color: darken(@txt, 40%);
+    background-color: lighten(@bg, 25%);
+  }
 
   a {
     color: darken(@txt, 20%);
@@ -254,8 +260,8 @@ atom-notification {
 }
 
 @-webkit-keyframes notification-shrink {
-    0% {  opacity: 0; max-height: @max-height; margin-bottom: @notification-gap; transform: scale(.8); }
-  100% {  opacity: 0; max-height: 0;           margin-bottom: 0;            transform: scale(.8); }
+    0% {  opacity: 0; max-height: @max-height; transform: scale(.8); }
+  100% {  opacity: 0; max-height: 0;           transform: scale(.8); }
 }
 
 @-webkit-keyframes notification-shake {
