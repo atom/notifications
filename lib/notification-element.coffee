@@ -110,15 +110,15 @@ class NotificationElement extends HTMLElement
       async.parallel
         issue: (callback) =>
           @issue.fetchIssue (issue) => callback(null, issue)
-        shortUrl: (callback) =>
-          @issue.getShortUrl (url) -> callback(null, url)
+        systemUrl: (callback) =>
+          @issue.getIssueUrlForSystem (url) -> callback(null, url)
       , (err, result) ->
         if result.issue?
           issueButton.setAttribute('href', result.issue.html_url)
           issueButton.textContent = "View Issue"
           fatalNotification.textContent += " This issue has already been reported."
         else
-          issueButton.setAttribute('href', result.shortUrl) if result.shortUrl?
+          issueButton.setAttribute('href', result.systemUrl) if result.systemUrl?
           fatalNotification.textContent += " You can help by creating an issue. Please explain what actions triggered this error."
 
   removeNotification: ->

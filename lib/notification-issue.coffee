@@ -28,14 +28,18 @@ class NotificationIssue
       error: ->
         callback(null)
 
-  getShortUrl: (callback) ->
-    $.ajax 'http://git.io',
-      type: 'POST'
-      data: url: @getIssueUrl()
-      success: (data, status, xhr) ->
-        callback(xhr.getResponseHeader('Location'))
-      error: ->
-        callback(null)
+  getIssueUrlForSystem: (callback) ->
+    if UserUtilities.getPlatform() is 'win32'
+      # win32 can only handle a 2048 length link, so we use the shortener.
+      $.ajax 'http://git.io',
+        type: 'POST'
+        data: url: @getIssueUrl()
+        success: (data, status, xhr) ->
+          callback(xhr.getResponseHeader('Location'))
+        error: ->
+          callback(null)
+    else
+      callback(@getIssueUrl())
 
   getIssueUrl: ->
     repoUrl = @getRepoUrl()

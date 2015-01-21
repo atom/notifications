@@ -234,9 +234,6 @@ describe "Notifications", ->
           expect(issueBody).toContain '**Thrown From**: Atom Core'
           expect(issueBody).not.toContain 'cc @atom/core'
 
-          expect($.ajax.calls[0].args[0]).toContain 'atom/atom'
-          expect($.ajax.calls[1].args[0]).toContain 'git.io'
-
         it "contains core and editor config values", ->
           notificationContainer = workspaceElement.querySelector('atom-notifications')
           fatalError = notificationContainer.querySelector('atom-notification.fatal')
@@ -271,23 +268,45 @@ describe "Notifications", ->
       describe "when the error has not been reported", ->
         beforeEach ->
           spyOn(atom, 'inDevMode').andReturn false
-          $.ajax.andCallFake (url, settings) ->
-            if url.indexOf('git.io') > -1
-              settings.success('--', '201', {getResponseHeader: -> 'http://git.io/cats'})
-            else
-              settings.success(items: [])
-          try
-            a + 1
-          catch e
-            window.onerror.call(window, e.toString(), 'abc', 2, 3, e)
 
-        it "asks the user to create an issue", ->
-          fatalError = notificationContainer.querySelector('atom-notification.fatal')
-          button = fatalError.querySelector('.btn')
-          expect(button.textContent).toContain 'Create issue'
-          fatalNotification = fatalError.querySelector('.fatal-notification')
-          expect(fatalNotification.textContent).toContain 'You can help by creating an issue'
-          expect(button.getAttribute('href')).toContain 'git.io'
+        describe "when the system is darwin", ->
+          beforeEach ->
+            $.ajax.andCallFake (url, settings) -> settings.success(items: [])
+
+            try
+              a + 1
+            catch e
+              window.onerror.call(window, e.toString(), 'abc', 2, 3, e)
+
+          it "asks the user to create an issue", ->
+            fatalError = notificationContainer.querySelector('atom-notification.fatal')
+            button = fatalError.querySelector('.btn')
+            expect(button.textContent).toContain 'Create issue'
+            fatalNotification = fatalError.querySelector('.fatal-notification')
+            expect(fatalNotification.textContent).toContain 'You can help by creating an issue'
+            expect(button.getAttribute('href')).toContain 'github.com/atom/notifications/issues/new'
+
+        describe "when the system is win32", ->
+          beforeEach ->
+            UserUtilities = require '../lib/user-utilities'
+            spyOn(UserUtilities, 'getPlatform').andReturn 'win32'
+
+            $.ajax.andCallFake (url, settings) ->
+              if url.indexOf('git.io') > -1
+                settings.success('--', '201', {getResponseHeader: -> 'http://git.io/cats'})
+              else
+                settings.success(items: [])
+
+            try
+              a + 1
+            catch e
+              window.onerror.call(window, e.toString(), 'abc', 2, 3, e)
+
+          it "uses a shortened url via git.io", ->
+            fatalError = notificationContainer.querySelector('atom-notification.fatal')
+            button = fatalError.querySelector('.btn')
+            expect(button.textContent).toContain 'Create issue'
+            expect(button.getAttribute('href')).toContain 'git.io'
 
       describe "when the error has been reported", ->
         beforeEach ->

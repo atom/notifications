@@ -14,9 +14,12 @@ module.exports =
   Section: System Information
   ###
 
+  getPlatform: ->
+    os.platform()
+
   # OS version strings lifted from https://github.com/lee-dohm/bug-report
   getOSVersion: ->
-    switch os.platform()
+    switch @getPlatform()
       when 'darwin' then @macVersionText()
       when 'win32' then @winVersionText()
       else "#{os.platform()} #{os.release()}"
@@ -33,7 +36,7 @@ module.exports =
       {}
 
   winVersionText: ->
-    info = spawnSync('systeminfo').stdout.toString()
+    info = spawnSync('systeminfo').stdout?.toString() ? ''
     if (res = /OS.Name.\s+(.*)$/im.exec(info)) then res[1] else 'Unknown Windows Version'
 
   ###
