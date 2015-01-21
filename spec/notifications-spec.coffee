@@ -153,12 +153,12 @@ describe "Notifications", ->
 
           fs = require 'fs'
           spyOn(fs, 'realpathSync').andCallFake (p) -> p
-          spyOn(fatalError, 'getPackagePathsByPackageName').andCallFake ->
+          spyOn(fatalError.issue, 'getPackagePathsByPackageName').andCallFake ->
             'save-session': '/Users/someguy/.atom/packages/save-session'
             'tabs': '/Applications/Atom.app/Contents/Resources/app/node_modules/tabs'
 
         it "chooses the first package in the trace", ->
-          expect(fatalError.getPackageName()).toBe 'save-session'
+          expect(fatalError.issue.getPackageName()).toBe 'save-session'
 
       describe "when an exception is thrown from a package", ->
         beforeEach ->
@@ -175,13 +175,13 @@ describe "Notifications", ->
           expect(fatalError).toHaveClass 'has-close'
           expect(fatalError.innerHTML).toContain 'ReferenceError: a is not defined'
           expect(fatalError.innerHTML).toContain "<a href=\"https://github.com/atom/notifications\">notifications package</a>"
-          expect(fatalError.getPackageName()).toBe 'notifications'
+          expect(fatalError.issue.getPackageName()).toBe 'notifications'
 
           button = fatalError.querySelector('.btn')
           expect(button.textContent).toContain 'Create issue on the notifications package'
           expect(button.getAttribute('href')).toContain 'atom/notifications/issues/new'
 
-          issueBody = fatalError.getIssueBody()
+          issueBody = fatalError.issue.getIssueBody()
           expect(issueBody).toMatch /Atom Version\*\*: [0-9].[0-9]+.[0-9]+/ig
           expect(issueBody).not.toMatch /Unknown/ig
           expect(issueBody).toContain 'ReferenceError: a is not defined'
@@ -197,7 +197,7 @@ describe "Notifications", ->
           notificationContainer = workspaceElement.querySelector('atom-notifications')
           fatalError = notificationContainer.querySelector('atom-notification.fatal')
 
-          issueBody = fatalError.getIssueBody()
+          issueBody = fatalError.issue.getIssueBody()
           expect(issueBody).toContain '"core":'
           expect(issueBody).toContain '"notifications":'
           expect(issueBody).not.toContain '"editor":'
@@ -223,13 +223,13 @@ describe "Notifications", ->
           expect(fatalError).toHaveClass 'has-close'
           expect(fatalError.innerHTML).toContain 'ReferenceError: a is not defined'
           expect(fatalError.innerHTML).toContain 'bug in Atom'
-          expect(fatalError.getPackageName()).toBeUndefined()
+          expect(fatalError.issue.getPackageName()).toBeUndefined()
 
           button = fatalError.querySelector('.btn')
           expect(button.textContent).toContain 'Create issue on atom/atom'
           expect(button.getAttribute('href')).toContain 'atom/atom/issues/new'
 
-          issueBody = fatalError.getIssueBody()
+          issueBody = fatalError.issue.getIssueBody()
           expect(issueBody).toContain 'ReferenceError: a is not defined'
           expect(issueBody).toContain '**Thrown From**: Atom Core'
           expect(issueBody).not.toContain 'cc @atom/core'
@@ -241,7 +241,7 @@ describe "Notifications", ->
           notificationContainer = workspaceElement.querySelector('atom-notifications')
           fatalError = notificationContainer.querySelector('atom-notification.fatal')
 
-          issueBody = fatalError.getIssueBody()
+          issueBody = fatalError.issue.getIssueBody()
           expect(issueBody).toContain '"core":'
           expect(issueBody).toContain '"editor":'
           expect(issueBody).not.toContain '"notifications":'
@@ -250,7 +250,7 @@ describe "Notifications", ->
           notificationContainer = workspaceElement.querySelector('atom-notifications')
           fatalError = notificationContainer.querySelector('atom-notification.fatal')
 
-          issueBody = fatalError.getIssueBody()
+          issueBody = fatalError.issue.getIssueBody()
           expect(issueBody).toContain 'some-package:a-command'
 
         it "allows the user to toggle the stack trace", ->
