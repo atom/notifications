@@ -72,6 +72,22 @@ atom-notification {
     border-radius: @component-border-radius 0 0 @component-border-radius;
   }
 
+  .meta,
+  .close,
+  .detail,
+  .stack-toggle,
+  .stack-container {
+    display: none;
+  }
+
+  &.fatal .meta,
+  &.has-close .close,
+  &.has-detail .detail,
+  &.has-stack .stack-toggle,
+  &.has-stack .stack-container {
+    display: block;
+  }
+
   // .item's are used as general containers
   .item {
     padding: @component-padding;
