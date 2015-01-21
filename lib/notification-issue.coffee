@@ -141,8 +141,7 @@ class NotificationIssue
     return
 
   getPackagePathsByPackageName: ->
-    return @packagePathsByPackageName if @packagePathsByPackageName?
-    @packagePathsByPackageName = {}
+    packagePathsByPackageName = {}
     for pack in atom.packages.getLoadedPackages()
-      @packagePathsByPackageName[pack.name] = pack.path
-    @packagePathsByPackageName
+      packagePathsByPackageName[pack.name] = pack.path
+    packagePathsByPackageName
