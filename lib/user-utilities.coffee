@@ -1,6 +1,8 @@
+$ = require 'jquery'
 os = require 'os'
 fs = require 'fs'
 plist = require 'plist'
+semver = require 'semver'
 {spawnSync} = require 'child_process'
 
 ###
@@ -14,9 +16,12 @@ module.exports =
   Section: System Information
   ###
 
+  getPlatform: ->
+    os.platform()
+
   # OS version strings lifted from https://github.com/lee-dohm/bug-report
   getOSVersion: ->
-    switch os.platform()
+    switch @getPlatform()
       when 'darwin' then @macVersionText()
       when 'win32' then @winVersionText()
       else "#{os.platform()} #{os.release()}"
@@ -33,7 +38,7 @@ module.exports =
       {}
 
   winVersionText: ->
-    info = spawnSync('systeminfo').stdout.toString()
+    info = spawnSync('systeminfo').stdout?.toString() ? ''
     if (res = /OS.Name.\s+(.*)$/im.exec(info)) then res[1] else 'Unknown Windows Version'
 
   ###
@@ -63,3 +68,24 @@ module.exports =
 
   filterActivePackages: (packages) ->
     "#{pack.name}, v#{pack.version}" for pack in (packages ? []) when atom.packages.getActivePackage(pack.name)?
+
+  getPackageVersion: (packageName) ->
+    pack = atom.packages.getLoadedPackage(packageName)
+    pack.metadata.version
+
+  getLatestPackageData: (packageName) ->
+    packagesUrl = 'https://atom.io/api/packages'
+    new Promise (resolve, reject) ->
+      $.ajax "#{packagesUrl}/#{packageName}",
+        accept: 'application/vnd.github.v3+json'
+        contentType: "application/json"
+        success: (data) -> resolve(data)
+        error: (error) -> reject(error)
+
+  checkPackageUpToDate: (packageName) ->
+    @getLatestPackageData(packageName).then (latestPackageData) =>
+      installedVersion = @getPackageVersion(packageName)
+      upToDate = semver.gte(installedVersion, latestPackageData.releases.latest)
+      latestVersion = latestPackageData.releases.latest
+      isCore = latestPackageData.repository.url.startsWith('https://github.com/atom/')
+      { isCore, upToDate, latestVersion, installedVersion }
