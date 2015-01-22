@@ -114,13 +114,13 @@ class NotificationElement extends HTMLElement
       promises.push UserUtilities.checkPackageUpToDate(packageName) if packageName?
 
       Promise.all(promises).then (allData) ->
-        [issue, newIssueUrl, latestPackage] = allData
+        [issue, newIssueUrl, packageCheck] = allData
 
         if issue?
           issueButton.setAttribute('href', issue.html_url)
           issueButton.textContent = "View Issue"
           fatalNotification.textContent += " This issue has already been reported."
-        else if latestPackage? and !latestPackage.upToDate and !latestPackage.isCore
+        else if packageCheck? and !packageCheck.upToDate and !packageCheck.isCore
           issueButton.setAttribute('href', '#')
           issueButton.textContent = "Check for package updates"
           issueButton.addEventListener 'click', (e) ->
@@ -129,8 +129,8 @@ class NotificationElement extends HTMLElement
             atom.commands.dispatch(atom.views.getView(atom.workspace), command)
 
           fatalNotification.textContent += """
-            #{packageName} is out of date: #{latestPackage.installedVersion} installed;
-            #{latestPackage.latestVersion} latest.
+            #{packageName} is out of date: #{packageCheck.installedVersion} installed;
+            #{packageCheck.latestVersion} latest.
             Upgrading to the latest version may fix this issue.
           """
         else
