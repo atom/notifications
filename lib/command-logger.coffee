@@ -48,7 +48,7 @@ class CommandLogger
   # Returns a {String} of the Markdown for the report.
   getText: (externalData) ->
     lines = []
-    lastTime = @calculateLastEventTime(externalData)
+    lastTime = Date.now()
 
     @eachEvent (event) =>
       return if event.time > lastTime
