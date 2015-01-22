@@ -10,36 +10,36 @@ module.exports =
 class NotificationIssue
   constructor: (@notification) ->
 
-  fetchIssue: (callback) ->
+  findSimilarIssue: ->
     url = "https://api.github.com/search/issues"
     repoUrl = @getRepoUrl()
     repoUrl = 'atom/atom' unless repoUrl?
     repo = repoUrl.replace /http(s)?:\/\/(\d+\.)?github.com\//gi, ''
     query = "#{@getIssueTitle()} repo:#{repo} state:open"
 
-    $.ajax "#{url}?q=#{encodeURI(query)}&sort=created",
-      accept: 'application/vnd.github.v3+json'
-      contentType: "application/json"
-      success: (data) =>
-        if data.items?
-          for issue in data.items
-            return callback?(issue) if issue.title.indexOf(@getIssueTitle()) > -1
-        callback(null)
-      error: ->
-        callback(null)
-
-  getIssueUrlForSystem: (callback) ->
-    if UserUtilities.getPlatform() is 'win32'
-      # win32 can only handle a 2048 length link, so we use the shortener.
-      $.ajax 'http://git.io',
-        type: 'POST'
-        data: url: @getIssueUrl()
-        success: (data, status, xhr) ->
-          callback(xhr.getResponseHeader('Location'))
+    new Promise (resolve, reject) =>
+      $.ajax "#{url}?q=#{encodeURI(query)}&sort=created",
+        accept: 'application/vnd.github.v3+json'
+        contentType: "application/json"
+        success: (data) =>
+          if data.items?
+            for issue in data.items
+              return resolve(issue) if issue.title.indexOf(@getIssueTitle()) > -1
+          resolve(null)
         error: ->
-          callback(null)
-    else
-      callback(@getIssueUrl())
+          resolve(null)
+
+  getIssueUrlForSystem: ->
+    new Promise (resolve, reject) =>
+      if UserUtilities.getPlatform() is 'win32'
+        # win32 can only handle a 2048 length link, so we use the shortener.
+        $.ajax 'http://git.io',
+          type: 'POST'
+          data: url: @getIssueUrl()
+          success: (data, status, xhr) -> resolve(xhr.getResponseHeader('Location'))
+          error: (error) -> reject(error)
+      else
+        resolve(@getIssueUrl())
 
   getIssueUrl: ->
     repoUrl = @getRepoUrl()

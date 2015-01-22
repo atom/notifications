@@ -2,6 +2,12 @@ $ = require 'jquery'
 {Notification} = require 'atom'
 NotificationElement = require '../lib/notification-element'
 
+generateException = ->
+  try
+    a + 1
+  catch e
+    window.onerror.call(window, e.toString(), 'abc', 2, 3, e)
+
 describe "Notifications", ->
   [workspaceElement, activationPromise] = []
 
@@ -271,7 +277,13 @@ describe "Notifications", ->
 
         describe "when the system is darwin", ->
           beforeEach ->
-            $.ajax.andCallFake (url, settings) -> settings.success(items: [])
+            $.ajax.andCallFake (url, settings) ->
+              if url.indexOf('atom.io') > -1
+                settings.success
+                  repository: url: 'https://github.com/atom/notifications'
+                  releases: latest: '0.0.0'
+              else
+                settings.success(items: [])
 
             try
               a + 1
@@ -294,6 +306,10 @@ describe "Notifications", ->
             $.ajax.andCallFake (url, settings) ->
               if url.indexOf('git.io') > -1
                 settings.success('--', '201', {getResponseHeader: -> 'http://git.io/cats'})
+              else if url.indexOf('atom.io') > -1
+                settings.success
+                  repository: url: 'https://github.com/atom/notifications'
+                  releases: latest: '0.0.0'
               else
                 settings.success(items: [])
 
@@ -308,12 +324,57 @@ describe "Notifications", ->
             expect(button.textContent).toContain 'Create issue'
             expect(button.getAttribute('href')).toContain 'git.io'
 
+      describe "when the package is out of date", ->
+        [packageUrl, installedVersion] = []
+
+        beforeEach ->
+          installedVersion = '0.9.0'
+          UserUtilities = require '../lib/user-utilities'
+          spyOn(UserUtilities, 'getPackageVersion').andCallFake -> installedVersion
+          spyOn(atom, 'inDevMode').andReturn false
+
+          $.ajax.andCallFake (url, settings) ->
+            if url.indexOf('atom.io') > -1
+              settings.success
+                repository: url: packageUrl
+                releases: latest: '0.10.0'
+            else
+              settings.success(items: [])
+
+        describe "when the package is a non-core package", ->
+          beforeEach ->
+            packageUrl = 'https://github.com/someguy/notifications'
+            generateException()
+
+          it "asks the user to update their packages", ->
+            fatalError = notificationContainer.querySelector('atom-notification.fatal')
+            fatalNotification = fatalError.querySelector('.fatal-notification')
+            button = fatalError.querySelector('.btn')
+
+            expect(button.textContent).toContain 'Check for package updates'
+            expect(fatalNotification.textContent).toContain 'Upgrading to the latest'
+            expect(button.getAttribute('href')).toBe '#'
+
+        describe "when the package is a core package", ->
+          beforeEach ->
+            packageUrl = 'https://github.com/atom/notifications'
+            generateException()
+
+          it "ignores the out of date package because they cant upgrade it without upgrading atom", ->
+            fatalError = notificationContainer.querySelector('atom-notification.fatal')
+            button = fatalError.querySelector('.btn')
+            expect(button.textContent).toContain 'Create issue'
+
       describe "when the error has been reported", ->
         beforeEach ->
           spyOn(atom, 'inDevMode').andReturn false
           $.ajax.andCallFake (url, settings) ->
             if url.indexOf('git.io') > -1
               settings.success('--', '201', {getResponseHeader: -> 'http://git.io/cats'})
+            else if url.indexOf('atom.io') > -1
+              settings.success
+                repository: url: 'https://github.com/atom/notifications'
+                releases: latest: '0.0.0'
             else
               settings.success
                 items: [

@@ -1,10 +1,10 @@
 fs = require 'fs'
 path = require 'path'
-async = require 'async'
 marked = require 'marked'
 
 NotificationIssue = require './notification-issue'
 TemplateHelper = require './template-helper'
+UserUtilities = require './user-utilities'
 
 NotificationTemplate = """
   <div class="content">
@@ -83,43 +83,62 @@ class NotificationElement extends HTMLElement
     @renderFatalError() if @model.getType() is 'fatal'
 
   renderFatalError: ->
+    repoUrl = @issue.getRepoUrl()
+    packageName = @issue.getPackageName()
+
     fatalContainer = @querySelector('.meta')
     fatalContainer.appendChild(TemplateHelper.render(@fatalTemplate))
     fatalNotification = @querySelector('.fatal-notification')
 
-    repoUrl = @issue.getRepoUrl()
-    packageName = @issue.getPackageName()
-    showCreateIssueButton = true
+    issueButton = fatalContainer.querySelector('.btn')
+
     if packageName? and repoUrl?
-      fatalNotification.innerHTML = "The error was thrown from the <a href=\"#{repoUrl}\">#{packageName} package</a>"
+      fatalNotification.innerHTML = "The error was thrown from the <a href=\"#{repoUrl}\">#{packageName} package</a>. "
     else if packageName?
-      showCreateIssueButton = false
-      fatalNotification.textContent = "The error was thrown from the #{packageName} package."
+      issueButton.remove()
+      fatalNotification.textContent = "The error was thrown from the #{packageName} package. "
     else
-      fatalNotification.textContent = 'This is likely a bug in Atom.'
+      fatalNotification.textContent = "This is likely a bug in Atom. "
 
     # We only show the create issue button if it's clearly in atom core or in a package with a repo url
-    if showCreateIssueButton
-      issueButton = fatalContainer.querySelector('.btn')
+    if issueButton.parentNode?
       issueButton.setAttribute('href', @issue.getIssueUrl())
       if packageName? and repoUrl?
         issueButton.textContent = "Create issue on the #{packageName} package"
       else
         issueButton.textContent = "Create issue on atom/atom"
 
-      async.parallel
-        issue: (callback) =>
-          @issue.fetchIssue (issue) => callback(null, issue)
-        systemUrl: (callback) =>
-          @issue.getIssueUrlForSystem (url) -> callback(null, url)
-      , (err, result) ->
-        if result.issue?
-          issueButton.setAttribute('href', result.issue.html_url)
+      promises = []
+      promises.push @issue.findSimilarIssue()
+      promises.push @issue.getIssueUrlForSystem()
+      promises.push UserUtilities.checkPackageUpToDate(packageName) if packageName?
+
+      Promise.all(promises).then (allData) ->
+        [issue, newIssueUrl, latestPackage] = allData
+
+        if issue?
+          issueButton.setAttribute('href', issue.html_url)
           issueButton.textContent = "View Issue"
           fatalNotification.textContent += " This issue has already been reported."
+        else if latestPackage? and !latestPackage.upToDate and !latestPackage.isCore
+          issueButton.setAttribute('href', '#')
+          issueButton.textContent = "Check for package updates"
+          issueButton.addEventListener 'click', (e) ->
+            e.preventDefault()
+            command = 'settings-view:check-for-package-updates'
+            atom.commands.dispatch(atom.views.getView(atom.workspace), command)
+
+          fatalNotification.textContent += """
+            #{packageName} is out of date: #{latestPackage.installedVersion} installed;
+            #{latestPackage.latestVersion} latest.
+            Upgrading to the latest version may fix this issue.
+          """
         else
-          issueButton.setAttribute('href', result.systemUrl) if result.systemUrl?
+          issueButton.setAttribute('href', newIssueUrl) if newIssueUrl?
           fatalNotification.textContent += " You can help by creating an issue. Please explain what actions triggered this error."
+      .catch (e) ->
+        console.error e.message
+        console.error e.stack
 
   removeNotification: ->
     @classList.add('remove')
