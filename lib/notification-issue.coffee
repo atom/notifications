@@ -27,10 +27,8 @@ class NotificationIssue
             for issue in data.items
               issues[issue.state] = issue if issue.title.indexOf(@getIssueTitle()) > -1 and not issues[issue.state]?
             return resolve(issues) if issues.open? or issues.closed?
-
           resolve(null)
-        error: ->
-          resolve(null)
+        error: (e) -> reject(e)
 
   getIssueUrlForSystem: ->
     new Promise (resolve, reject) =>
