@@ -32,84 +32,95 @@ class NotificationIssue
 
   getIssueUrlForSystem: ->
     new Promise (resolve, reject) =>
-      if UserUtilities.getPlatform() is 'win32'
-        # win32 can only handle a 2048 length link, so we use the shortener.
-        $.ajax 'http://git.io',
-          type: 'POST'
-          data: url: @getIssueUrl()
-          success: (data, status, xhr) -> resolve(xhr.getResponseHeader('Location'))
-          error: (error) -> reject(error)
-      else
-        resolve(@getIssueUrl())
+      @getIssueUrl().then (issueUrl) ->
+        if UserUtilities.getPlatform() is 'win32'
+          # win32 can only handle a 2048 length link, so we use the shortener.
+          $.ajax 'http://git.io',
+            type: 'POST'
+            data: url: issueUrl
+            success: (data, status, xhr) -> resolve(xhr.getResponseHeader('Location'))
+            error: (error) -> reject(error)
+        else
+          resolve(issueUrl)
 
   getIssueUrl: ->
-    repoUrl = @getRepoUrl()
-    repoUrl = 'https://github.com/atom/atom' unless repoUrl?
-    "#{repoUrl}/issues/new?title=#{@encodeURI(@getIssueTitle())}&body=#{@encodeURI(@getIssueBody())}"
+    @getIssueBody().then (issueBody) =>
+      repoUrl = @getRepoUrl()
+      repoUrl = 'https://github.com/atom/atom' unless repoUrl?
+      "#{repoUrl}/issues/new?title=#{@encodeURI(@getIssueTitle())}&body=#{@encodeURI(issueBody)}"
 
   getIssueTitle: ->
     @notification.getMessage()
 
   getIssueBody: ->
-    message = @notification.getMessage()
-    options = @notification.getOptions()
-    repoUrl = @getRepoUrl()
-    packageName = @getPackageName()
-    packageVersion = atom.packages.getLoadedPackage(packageName)?.metadata?.version if packageName?
-    installedPackages = UserUtilities.getInstalledPackages()
-    userConfig = UserUtilities.getConfigForPackage(packageName)
-    copyText = ''
-    copyText = '/cc @atom/core' if packageName? and repoUrl?
+    new Promise (resolve, reject) =>
+      return resolve(@issueBody) if @issueBody
 
-    if packageName? and repoUrl?
-      packageMessage = "[#{packageName}](#{repoUrl}) package, v#{packageVersion}"
-    else if packageName?
-      packageMessage = "'#{packageName}' package, v#{packageVersion}"
-    else
-      packageMessage = 'Atom Core'
+      systemPromise = UserUtilities.getOSVersion()
+      installedPackagesPromise = UserUtilities.getInstalledPackages()
 
-    """
-      [Enter steps to reproduce below:]
+      Promise.all([systemPromise, installedPackagesPromise]).then (all) =>
+        [systemName, installedPackages] = all
 
-      1. ...
-      2. ...
+        message = @notification.getMessage()
+        options = @notification.getOptions()
+        repoUrl = @getRepoUrl()
+        packageName = @getPackageName()
+        packageVersion = atom.packages.getLoadedPackage(packageName)?.metadata?.version if packageName?
+        userConfig = UserUtilities.getConfigForPackage(packageName)
+        copyText = ''
+        copyText = '/cc @atom/core' if packageName? and repoUrl?
 
-      **Atom Version**: #{atom.getVersion()}
-      **System**: #{UserUtilities.getOSVersion()}
-      **Thrown From**: #{packageMessage}
+        if packageName? and repoUrl?
+          packageMessage = "[#{packageName}](#{repoUrl}) package, v#{packageVersion}"
+        else if packageName?
+          packageMessage = "'#{packageName}' package, v#{packageVersion}"
+        else
+          packageMessage = 'Atom Core'
 
-      ### Stack Trace
+        @issueBody = """
+          [Enter steps to reproduce below:]
 
-      #{message}
+          1. ...
+          2. ...
 
-      ```
-      At #{options.detail}
+          **Atom Version**: #{atom.getVersion()}
+          **System**: #{systemName}
+          **Thrown From**: #{packageMessage}
 
-      #{options.stack}
-      ```
+          ### Stack Trace
 
-      ### Commands
+          #{message}
 
-      #{CommandLogger.instance().getText()}
+          ```
+          At #{options.detail}
 
-      ### Config
+          #{options.stack}
+          ```
 
-      ```json
-      #{JSON.stringify(userConfig, null, 2)}
-      ```
+          ### Commands
 
-      ### Installed Packages
+          #{CommandLogger.instance().getText()}
 
-      ```coffee
-      # User
-      #{installedPackages.user.join('\n') or 'No installed packages'}
+          ### Config
 
-      # Dev
-      #{installedPackages.dev.join('\n') or 'No dev packages'}
-      ```
+          ```json
+          #{JSON.stringify(userConfig, null, 2)}
+          ```
 
-      #{copyText}
-    """
+          ### Installed Packages
+
+          ```coffee
+          # User
+          #{installedPackages.user.join('\n') or 'No installed packages'}
+
+          # Dev
+          #{installedPackages.dev.join('\n') or 'No dev packages'}
+          ```
+
+          #{copyText}
+        """
+        resolve(@issueBody)
 
   encodeURI: (str) ->
     str = encodeURI(str)

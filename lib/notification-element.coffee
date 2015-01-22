@@ -97,7 +97,8 @@ class NotificationElement extends HTMLElement
     atom.tooltips.add(copyReportButton, title: copyReportButton.getAttribute('title'))
     copyReportButton.addEventListener 'click', (e) =>
       e.preventDefault()
-      atom.clipboard.write(@issue.getIssueBody())
+      @issue.getIssueBody().then (issueBody) ->
+        atom.clipboard.write(issueBody)
 
     if packageName? and repoUrl?
       fatalNotification.innerHTML = "The error was thrown from the <a href=\"#{repoUrl}\">#{packageName} package</a>. "
