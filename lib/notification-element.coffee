@@ -24,6 +24,7 @@ FatalMetaNotificationTemplate = """
   <div class="fatal-notification"></div>
   <div class="btn-toolbar">
     <a href="#" class="btn-issue btn btn-error"></a>
+    <a href="#" class="btn-copy-report icon icon-clippy" title="Copy error report to clipboard"></a>
   </div>
 """
 
@@ -91,6 +92,12 @@ class NotificationElement extends HTMLElement
     fatalNotification = @querySelector('.fatal-notification')
 
     issueButton = fatalContainer.querySelector('.btn-issue')
+
+    copyReportButton = fatalContainer.querySelector('.btn-copy-report')
+    atom.tooltips.add(copyReportButton, title: copyReportButton.getAttribute('title'))
+    copyReportButton.addEventListener 'click', (e) =>
+      e.preventDefault()
+      atom.clipboard.write(@issue.getIssueBody())
 
     if packageName? and repoUrl?
       fatalNotification.innerHTML = "The error was thrown from the <a href=\"#{repoUrl}\">#{packageName} package</a>. "
