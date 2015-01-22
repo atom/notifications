@@ -23,7 +23,7 @@ NotificationTemplate = """
 FatalMetaNotificationTemplate = """
   <div class="fatal-notification"></div>
   <div class="btn-toolbar">
-    <a href="#" class="btn btn-error"></a>
+    <a href="#" class="btn-issue btn btn-error"></a>
   </div>
 """
 
@@ -90,7 +90,7 @@ class NotificationElement extends HTMLElement
     fatalContainer.appendChild(TemplateHelper.render(@fatalTemplate))
     fatalNotification = @querySelector('.fatal-notification')
 
-    issueButton = fatalContainer.querySelector('.btn')
+    issueButton = fatalContainer.querySelector('.btn-issue')
 
     if packageName? and repoUrl?
       fatalNotification.innerHTML = "The error was thrown from the <a href=\"#{repoUrl}\">#{packageName} package</a>. "
@@ -109,18 +109,19 @@ class NotificationElement extends HTMLElement
         issueButton.textContent = "Create issue on atom/atom"
 
       promises = []
-      promises.push @issue.findSimilarIssue()
+      promises.push @issue.findSimilarIssues()
       promises.push @issue.getIssueUrlForSystem()
       promises.push UserUtilities.checkPackageUpToDate(packageName) if packageName?
 
       Promise.all(promises).then (allData) ->
-        [issue, newIssueUrl, packageCheck] = allData
+        [issues, newIssueUrl, packageCheck] = allData
 
-        if issue?
+        if issues?.open or issues?.closed
+          issue = issues.open or issues.closed
           issueButton.setAttribute('href', issue.html_url)
           issueButton.textContent = "View Issue"
           fatalNotification.textContent += " This issue has already been reported."
-        else if packageCheck? and !packageCheck.upToDate and !packageCheck.isCore
+        else if packageCheck? and not packageCheck.upToDate and not packageCheck.isCore
           issueButton.setAttribute('href', '#')
           issueButton.textContent = "Check for package updates"
           issueButton.addEventListener 'click', (e) ->

@@ -10,12 +10,12 @@ module.exports =
 class NotificationIssue
   constructor: (@notification) ->
 
-  findSimilarIssue: ->
+  findSimilarIssues: ->
     url = "https://api.github.com/search/issues"
     repoUrl = @getRepoUrl()
     repoUrl = 'atom/atom' unless repoUrl?
     repo = repoUrl.replace /http(s)?:\/\/(\d+\.)?github.com\//gi, ''
-    query = "#{@getIssueTitle()} repo:#{repo} state:open"
+    query = "#{@getIssueTitle()} repo:#{repo}"
 
     new Promise (resolve, reject) =>
       $.ajax "#{url}?q=#{encodeURI(query)}&sort=created",
@@ -23,8 +23,11 @@ class NotificationIssue
         contentType: "application/json"
         success: (data) =>
           if data.items?
+            issues = {}
             for issue in data.items
-              return resolve(issue) if issue.title.indexOf(@getIssueTitle()) > -1
+              issues[issue.state] = issue if issue.title.indexOf(@getIssueTitle()) > -1 and not issues[issue.state]?
+            return resolve(issues) if issues.open? or issues.closed?
+
           resolve(null)
         error: ->
           resolve(null)

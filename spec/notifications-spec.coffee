@@ -8,6 +8,26 @@ generateException = ->
   catch e
     window.onerror.call(window, e.toString(), 'abc', 2, 3, e)
 
+# shortenerResponse
+# packageResponse
+# issuesResponse
+generateFakeAjaxResponses = (options) ->
+  $.ajax.andCallFake (url, settings) ->
+    if url.indexOf('git.io') > -1
+      response = options?.shortenerResponse ? ['--', '201', {getResponseHeader: -> 'http://git.io/cats'}]
+      settings.success.apply(settings, response)
+    else if url.indexOf('atom.io') > -1
+      response = options?.packageResponse ? {
+        repository: url: 'https://github.com/atom/notifications'
+        releases: latest: '0.0.0'
+      }
+      settings.success(response)
+    else
+      response = options?.issuesResponse ? {
+        items: []
+      }
+      settings.success(response)
+
 describe "Notifications", ->
   [workspaceElement, activationPromise] = []
 
@@ -277,18 +297,8 @@ describe "Notifications", ->
 
         describe "when the system is darwin", ->
           beforeEach ->
-            $.ajax.andCallFake (url, settings) ->
-              if url.indexOf('atom.io') > -1
-                settings.success
-                  repository: url: 'https://github.com/atom/notifications'
-                  releases: latest: '0.0.0'
-              else
-                settings.success(items: [])
-
-            try
-              a + 1
-            catch e
-              window.onerror.call(window, e.toString(), 'abc', 2, 3, e)
+            generateFakeAjaxResponses()
+            generateException()
 
           it "asks the user to create an issue", ->
             fatalError = notificationContainer.querySelector('atom-notification.fatal')
@@ -303,20 +313,8 @@ describe "Notifications", ->
             UserUtilities = require '../lib/user-utilities'
             spyOn(UserUtilities, 'getPlatform').andReturn 'win32'
 
-            $.ajax.andCallFake (url, settings) ->
-              if url.indexOf('git.io') > -1
-                settings.success('--', '201', {getResponseHeader: -> 'http://git.io/cats'})
-              else if url.indexOf('atom.io') > -1
-                settings.success
-                  repository: url: 'https://github.com/atom/notifications'
-                  releases: latest: '0.0.0'
-              else
-                settings.success(items: [])
-
-            try
-              a + 1
-            catch e
-              window.onerror.call(window, e.toString(), 'abc', 2, 3, e)
+            generateFakeAjaxResponses()
+            generateException()
 
           it "uses a shortened url via git.io", ->
             fatalError = notificationContainer.querySelector('atom-notification.fatal')
@@ -325,25 +323,18 @@ describe "Notifications", ->
             expect(button.getAttribute('href')).toContain 'git.io'
 
       describe "when the package is out of date", ->
-        [packageUrl, installedVersion] = []
-
         beforeEach ->
           installedVersion = '0.9.0'
           UserUtilities = require '../lib/user-utilities'
           spyOn(UserUtilities, 'getPackageVersion').andCallFake -> installedVersion
           spyOn(atom, 'inDevMode').andReturn false
 
-          $.ajax.andCallFake (url, settings) ->
-            if url.indexOf('atom.io') > -1
-              settings.success
-                repository: url: packageUrl
-                releases: latest: '0.10.0'
-            else
-              settings.success(items: [])
-
         describe "when the package is a non-core package", ->
           beforeEach ->
-            packageUrl = 'https://github.com/someguy/notifications'
+            generateFakeAjaxResponses
+              packageResponse:
+                repository: url: 'https://github.com/someguy/notifications'
+                releases: latest: '0.10.0'
             generateException()
 
           it "asks the user to update their packages", ->
@@ -357,7 +348,10 @@ describe "Notifications", ->
 
         describe "when the package is a core package", ->
           beforeEach ->
-            packageUrl = 'https://github.com/atom/notifications'
+            generateFakeAjaxResponses
+              packageResponse:
+                repository: url: 'https://github.com/atom/notifications'
+                releases: latest: '0.10.0'
             generateException()
 
           it "ignores the out of date package because they cant upgrade it without upgrading atom", ->
@@ -368,34 +362,48 @@ describe "Notifications", ->
       describe "when the error has been reported", ->
         beforeEach ->
           spyOn(atom, 'inDevMode').andReturn false
-          $.ajax.andCallFake (url, settings) ->
-            if url.indexOf('git.io') > -1
-              settings.success('--', '201', {getResponseHeader: -> 'http://git.io/cats'})
-            else if url.indexOf('atom.io') > -1
-              settings.success
-                repository: url: 'https://github.com/atom/notifications'
-                releases: latest: '0.0.0'
-            else
-              settings.success
+
+        describe "when the issue is open", ->
+          beforeEach ->
+            generateFakeAjaxResponses
+              issuesResponse:
                 items: [
                   {
                     title: 'ReferenceError: a is not defined'
                     html_url: 'http://url.com/ok'
+                    state: 'open'
                   }
                 ]
-          try
-            a + 1
-          catch e
-            window.onerror.call(window, e.toString(), 'abc', 2, 3, e)
+            generateException()
 
-        it "asks the user to create an issue", ->
-          fatalError = notificationContainer.querySelector('atom-notification.fatal')
-          button = fatalError.querySelector('.btn')
-          expect(button.textContent).toContain 'View Issue'
-          expect(button.getAttribute('href')).toBe 'http://url.com/ok'
-          fatalNotification = fatalError.querySelector('.fatal-notification')
-          expect(fatalNotification.textContent).toContain 'already been reported'
-          expect($.ajax.calls[0].args[0]).toContain 'atom/notifications'
+          it "shows the user a view issue button", ->
+            fatalError = notificationContainer.querySelector('atom-notification.fatal')
+            button = fatalError.querySelector('.btn')
+            fatalNotification = fatalError.querySelector('.fatal-notification')
+
+            expect(button.textContent).toContain 'View Issue'
+            expect(button.getAttribute('href')).toBe 'http://url.com/ok'
+            expect(fatalNotification.textContent).toContain 'already been reported'
+            expect($.ajax.calls[0].args[0]).toContain 'atom/notifications'
+
+        describe "when the issue is closed", ->
+          beforeEach ->
+            generateFakeAjaxResponses
+              issuesResponse:
+                items: [
+                  {
+                    title: 'ReferenceError: a is not defined'
+                    html_url: 'http://url.com/closed'
+                    state: 'closed'
+                  }
+                ]
+            generateException()
+
+          it "shows the user a view issue button", ->
+            fatalError = notificationContainer.querySelector('atom-notification.fatal')
+            button = fatalError.querySelector('.btn')
+            expect(button.textContent).toContain 'View Issue'
+            expect(button.getAttribute('href')).toBe 'http://url.com/closed'
 
       describe "when a BufferedProcessError is thrown", ->
         it "adds an error to the notifications", ->
