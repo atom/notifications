@@ -3,7 +3,7 @@ os = require 'os'
 fs = require 'fs'
 plist = require 'plist'
 semver = require 'semver'
-{spawnSync} = require 'child_process'
+{BufferedProcess} = require 'atom'
 
 ###
 A collection of methods for retrieving information about the user's system for
@@ -21,25 +21,39 @@ module.exports =
 
   # OS version strings lifted from https://github.com/lee-dohm/bug-report
   getOSVersion: ->
-    switch @getPlatform()
-      when 'darwin' then @macVersionText()
-      when 'win32' then @winVersionText()
-      else "#{os.platform()} #{os.release()}"
+    new Promise (resolve, reject) =>
+      switch @getPlatform()
+        when 'darwin' then resolve(@macVersionText())
+        when 'win32' then resolve(@winVersionText())
+        else resolve("#{os.platform()} #{os.release()}")
 
-  macVersionText: (info = @macVersionInfo()) ->
-    return 'Unknown OS X version' unless info.ProductName and info.ProductVersion
-    "#{info.ProductName} #{info.ProductVersion}"
+  macVersionText: ->
+    @macVersionInfo().then (info) ->
+      return 'Unknown OS X version' unless info.ProductName and info.ProductVersion
+      "#{info.ProductName} #{info.ProductVersion}"
 
   macVersionInfo: ->
-    try
-      text = fs.readFileSync('/System/Library/CoreServices/SystemVersion.plist', 'utf8')
-      plist.parse(text)
-    catch e
-      {}
+    new Promise (resolve, reject) ->
+      try
+        fs.readFile '/System/Library/CoreServices/SystemVersion.plist', 'utf8', (error, text) ->
+          resolve(plist.parse(text))
+      catch e
+        resolve('Unknown OSX version')
 
   winVersionText: ->
-    info = spawnSync('systeminfo').stdout?.toString() ? ''
-    if (res = /OS.Name.\s+(.*)$/im.exec(info)) then res[1] else 'Unknown Windows Version'
+    new Promise (resolve, reject) ->
+      data = []
+      systemInfo = new BufferedProcess
+        command: 'systeminfo'
+        stdout: (oneLine) -> data.push(oneLine)
+        exit: =>
+          info = data.join('\n')
+          info = if (res = /OS.Name.\s+(.*)$/im.exec(info)) then res[1] else 'Unknown Windows Version'
+          resolve(info)
+
+      systemInfo.onWillThrowError ({handle}) ->
+        handle()
+        resolve('Unknown Windows Version')
 
   ###
   Section: Config Values
@@ -57,14 +71,20 @@ module.exports =
   Section: Installed Packages
   ###
 
-  # Returns an object of arrays {dev: ['some-package, v0.2.3', ...], user: [...]}
+  # Returns a promise. Resolves with object of arrays {dev: ['some-package, v0.2.3', ...], user: [...]}
   getInstalledPackages: ->
-    args = ['ls', '--json', '--no-color']
-    stdout = spawnSync(atom.packages.getApmPath(), args).stdout.toString()
-    packages = JSON.parse(stdout)
-    activePackages =
-      dev: @filterActivePackages(packages.dev)
-      user: @filterActivePackages(packages.user)
+    new Promise (resolve, reject) =>
+      data = []
+      new BufferedProcess
+        command: atom.packages.getApmPath()
+        args: ['ls', '--json', '--no-color']
+        stdout: (oneLine) -> data.push(oneLine)
+        exit: =>
+          stdout = data.join('\n')
+          packages = JSON.parse(stdout)
+          resolve
+            dev: @filterActivePackages(packages.dev)
+            user: @filterActivePackages(packages.user)
 
   filterActivePackages: (packages) ->
     "#{pack.name}, v#{pack.version}" for pack in (packages ? []) when atom.packages.getActivePackage(pack.name)?

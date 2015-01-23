@@ -2,32 +2,6 @@ $ = require 'jquery'
 {Notification} = require 'atom'
 NotificationElement = require '../lib/notification-element'
 
-generateException = ->
-  try
-    a + 1
-  catch e
-    window.onerror.call(window, e.toString(), 'abc', 2, 3, e)
-
-# shortenerResponse
-# packageResponse
-# issuesResponse
-generateFakeAjaxResponses = (options) ->
-  $.ajax.andCallFake (url, settings) ->
-    if url.indexOf('git.io') > -1
-      response = options?.shortenerResponse ? ['--', '201', {getResponseHeader: -> 'http://git.io/cats'}]
-      settings.success.apply(settings, response)
-    else if url.indexOf('atom.io') > -1
-      response = options?.packageResponse ? {
-        repository: url: 'https://github.com/atom/notifications'
-        releases: latest: '0.0.0'
-      }
-      settings.success(response)
-    else
-      response = options?.issuesResponse ? {
-        items: []
-      }
-      settings.success(response)
-
 describe "Notifications", ->
   [workspaceElement, activationPromise] = []
 
@@ -145,22 +119,19 @@ describe "Notifications", ->
         expect(notificationContainer.childNodes.length).toBe 0
 
     describe "when an exception is thrown", ->
+      [notificationContainer, fatalError, issueBody] = []
       describe "when the editor is in dev mode", ->
         beforeEach ->
           spyOn(atom, 'inDevMode').andReturn true
-          try
-            a + 1
-          catch e
-            window.onerror.call(window, e.toString(), 'abc', 2, 3, e)
-
-        it "does not display a notification", ->
+          generateException()
           notificationContainer = workspaceElement.querySelector('atom-notifications')
           fatalError = notificationContainer.querySelector('atom-notification.fatal')
+
+        it "does not display a notification", ->
           expect(notificationContainer.childNodes.length).toBe 0
           expect(fatalError).toBe null
 
       describe "when there are multiple packages in the stack trace", ->
-        fatalError = null
         beforeEach ->
           stack = """
             TypeError: undefined is not a function
@@ -188,45 +159,47 @@ describe "Notifications", ->
 
       describe "when an exception is thrown from a package", ->
         beforeEach ->
+          issueBody = null
           spyOn(atom, 'inDevMode').andReturn false
-          try
-            a + 1
-          catch e
-            window.onerror.call(window, e.toString(), 'abc', 2, 3, e)
-
-        it "displays a fatal error with the package name in the error", ->
+          generateFakeAjaxResponses()
+          generateException()
           notificationContainer = workspaceElement.querySelector('atom-notifications')
           fatalError = notificationContainer.querySelector('atom-notification.fatal')
-          expect(notificationContainer.childNodes.length).toBe 1
-          expect(fatalError).toHaveClass 'has-close'
-          expect(fatalError.innerHTML).toContain 'ReferenceError: a is not defined'
-          expect(fatalError.innerHTML).toContain "<a href=\"https://github.com/atom/notifications\">notifications package</a>"
-          expect(fatalError.issue.getPackageName()).toBe 'notifications'
 
-          button = fatalError.querySelector('.btn')
-          expect(button.textContent).toContain 'Create issue on the notifications package'
-          expect(button.getAttribute('href')).toContain 'atom/notifications/issues/new'
+        it "displays a fatal error with the package name in the error", ->
+          waitsForPromise ->
+            fatalError.getRenderPromise().then -> issueBody = fatalError.issue.issueBody
 
-          issueBody = fatalError.issue.getIssueBody()
-          expect(issueBody).toMatch /Atom Version\*\*: [0-9].[0-9]+.[0-9]+/ig
-          expect(issueBody).not.toMatch /Unknown/ig
-          expect(issueBody).toContain 'ReferenceError: a is not defined'
-          expect(issueBody).toContain 'Thrown From**: [notifications](https://github.com/atom/notifications) package, v'
-          expect(issueBody).toContain 'cc @atom/core'
-          expect(issueBody).toContain '# User'
+          runs ->
+            expect(notificationContainer.childNodes.length).toBe 1
+            expect(fatalError).toHaveClass 'has-close'
+            expect(fatalError.innerHTML).toContain 'ReferenceError: a is not defined'
+            expect(fatalError.innerHTML).toContain "<a href=\"https://github.com/atom/notifications\">notifications package</a>"
+            expect(fatalError.issue.getPackageName()).toBe 'notifications'
 
-          # FIXME: this doesnt work on the test server. `apm ls` is not working for some reason.
-          # expect(issueBody).toContain 'notifications, v'
+            button = fatalError.querySelector('.btn')
+            expect(button.textContent).toContain 'Create issue on the notifications package'
+            expect(button.getAttribute('href')).toContain 'atom/notifications/issues/new'
+
+            expect(issueBody).toMatch /Atom Version\*\*: [0-9].[0-9]+.[0-9]+/ig
+            expect(issueBody).not.toMatch /Unknown/ig
+            expect(issueBody).toContain 'ReferenceError: a is not defined'
+            expect(issueBody).toContain 'Thrown From**: [notifications](https://github.com/atom/notifications) package, v'
+            expect(issueBody).toContain 'cc @atom/core'
+            expect(issueBody).toContain '# User'
+
+            # FIXME: this doesnt work on the test server. `apm ls` is not working for some reason.
+            # expect(issueBody).toContain 'notifications, v'
 
         it "contains core and notifications config values", ->
           atom.config.set('notifications.something', 10)
-          notificationContainer = workspaceElement.querySelector('atom-notifications')
-          fatalError = notificationContainer.querySelector('atom-notification.fatal')
+          waitsForPromise ->
+            fatalError.getRenderPromise().then -> issueBody = fatalError.issue.issueBody
 
-          issueBody = fatalError.issue.getIssueBody()
-          expect(issueBody).toContain '"core":'
-          expect(issueBody).toContain '"notifications":'
-          expect(issueBody).not.toContain '"editor":'
+          runs ->
+            expect(issueBody).toContain '"core":'
+            expect(issueBody).toContain '"notifications":'
+            expect(issueBody).not.toContain '"editor":'
 
       describe "when an exception is thrown from core", ->
         beforeEach ->
@@ -234,6 +207,7 @@ describe "Notifications", ->
           atom.commands.dispatch(workspaceElement, 'some-package:a-command')
           atom.commands.dispatch(workspaceElement, 'some-package:a-command')
           spyOn(atom, 'inDevMode').andReturn false
+          generateFakeAjaxResponses()
           try
             a + 1
           catch e
@@ -241,9 +215,12 @@ describe "Notifications", ->
             e.stack = e.stack.replace(/notifications/g, 'core')
             window.onerror.call(window, e.toString(), 'abc', 2, 3, e)
 
-        it "displays a fatal error with the package name in the error", ->
           notificationContainer = workspaceElement.querySelector('atom-notifications')
           fatalError = notificationContainer.querySelector('atom-notification.fatal')
+          waitsForPromise ->
+            fatalError.getRenderPromise().then -> issueBody = fatalError.issue.issueBody
+
+        it "displays a fatal error with the package name in the error", ->
           expect(notificationContainer.childNodes.length).toBe 1
           expect(fatalError).toBeDefined()
           expect(fatalError).toHaveClass 'has-close'
@@ -255,31 +232,19 @@ describe "Notifications", ->
           expect(button.textContent).toContain 'Create issue on atom/atom'
           expect(button.getAttribute('href')).toContain 'atom/atom/issues/new'
 
-          issueBody = fatalError.issue.getIssueBody()
           expect(issueBody).toContain 'ReferenceError: a is not defined'
           expect(issueBody).toContain '**Thrown From**: Atom Core'
           expect(issueBody).not.toContain 'cc @atom/core'
 
         it "contains core and editor config values", ->
-          notificationContainer = workspaceElement.querySelector('atom-notifications')
-          fatalError = notificationContainer.querySelector('atom-notification.fatal')
-
-          issueBody = fatalError.issue.getIssueBody()
           expect(issueBody).toContain '"core":'
           expect(issueBody).toContain '"editor":'
           expect(issueBody).not.toContain '"notifications":'
 
         it "contains the commands that the user run in the issue body", ->
-          notificationContainer = workspaceElement.querySelector('atom-notifications')
-          fatalError = notificationContainer.querySelector('atom-notification.fatal')
-
-          issueBody = fatalError.issue.getIssueBody()
           expect(issueBody).toContain 'some-package:a-command'
 
         it "allows the user to toggle the stack trace", ->
-          notificationContainer = workspaceElement.querySelector('atom-notifications')
-          fatalError = notificationContainer.querySelector('atom-notification.fatal')
-
           stackToggle = fatalError.querySelector('.stack-toggle')
           stackContainer = fatalError.querySelector('.stack-container')
           expect(stackToggle).toExist()
@@ -299,12 +264,14 @@ describe "Notifications", ->
           beforeEach ->
             generateFakeAjaxResponses()
             generateException()
+            fatalError = notificationContainer.querySelector('atom-notification.fatal')
+            waitsForPromise ->
+              fatalError.getRenderPromise().then -> issueBody = fatalError.issue.issueBody
 
           it "asks the user to create an issue", ->
-            fatalError = notificationContainer.querySelector('atom-notification.fatal')
             button = fatalError.querySelector('.btn')
-            expect(button.textContent).toContain 'Create issue'
             fatalNotification = fatalError.querySelector('.fatal-notification')
+            expect(button.textContent).toContain 'Create issue'
             expect(fatalNotification.textContent).toContain 'You can help by creating an issue'
             expect(button.getAttribute('href')).toContain 'github.com/atom/notifications/issues/new'
 
@@ -315,9 +282,11 @@ describe "Notifications", ->
 
             generateFakeAjaxResponses()
             generateException()
+            fatalError = notificationContainer.querySelector('atom-notification.fatal')
+            waitsForPromise ->
+              fatalError.getRenderPromise().then -> issueBody = fatalError.issue.issueBody
 
           it "uses a shortened url via git.io", ->
-            fatalError = notificationContainer.querySelector('atom-notification.fatal')
             button = fatalError.querySelector('.btn')
             expect(button.textContent).toContain 'Create issue'
             expect(button.getAttribute('href')).toContain 'git.io'
@@ -336,9 +305,11 @@ describe "Notifications", ->
                 repository: url: 'https://github.com/someguy/notifications'
                 releases: latest: '0.10.0'
             generateException()
+            fatalError = notificationContainer.querySelector('atom-notification.fatal')
+            waitsForPromise ->
+              fatalError.getRenderPromise().then -> issueBody = fatalError.issue.issueBody
 
           it "asks the user to update their packages", ->
-            fatalError = notificationContainer.querySelector('atom-notification.fatal')
             fatalNotification = fatalError.querySelector('.fatal-notification')
             button = fatalError.querySelector('.btn')
 
@@ -375,12 +346,13 @@ describe "Notifications", ->
                   }
                 ]
             generateException()
+            fatalError = notificationContainer.querySelector('atom-notification.fatal')
+            waitsForPromise ->
+              fatalError.getRenderPromise().then -> issueBody = fatalError.issue.issueBody
 
           it "shows the user a view issue button", ->
-            fatalError = notificationContainer.querySelector('atom-notification.fatal')
-            button = fatalError.querySelector('.btn')
             fatalNotification = fatalError.querySelector('.fatal-notification')
-
+            button = fatalError.querySelector('.btn')
             expect(button.textContent).toContain 'View Issue'
             expect(button.getAttribute('href')).toBe 'http://url.com/ok'
             expect(fatalNotification.textContent).toContain 'already been reported'
@@ -398,9 +370,11 @@ describe "Notifications", ->
                   }
                 ]
             generateException()
+            fatalError = notificationContainer.querySelector('atom-notification.fatal')
+            waitsForPromise ->
+              fatalError.getRenderPromise().then -> issueBody = fatalError.issue.issueBody
 
           it "shows the user a view issue button", ->
-            fatalError = notificationContainer.querySelector('atom-notification.fatal')
             button = fatalError.querySelector('.btn')
             expect(button.textContent).toContain 'View Issue'
             expect(button.getAttribute('href')).toBe 'http://url.com/closed'
@@ -447,3 +421,37 @@ describe "Notifications", ->
             notificationContainer = workspaceElement.querySelector('atom-notifications')
             error = notificationContainer.querySelector('atom-notification.fatal')
             expect(error).toExist()
+
+generateException = ->
+  try
+    a + 1
+  catch e
+    window.onerror.call(window, e.toString(), 'abc', 2, 3, e)
+
+# shortenerResponse
+# packageResponse
+# issuesResponse
+generateFakeAjaxResponses = (options) ->
+  $.ajax.andCallFake (url, settings) ->
+    if url.indexOf('git.io') > -1
+      response = options?.shortenerResponse ? ['--', '201', {getResponseHeader: -> 'http://git.io/cats'}]
+      settings.success.apply(settings, response)
+    else if url.indexOf('atom.io') > -1
+      response = options?.packageResponse ? {
+        repository: url: 'https://github.com/atom/notifications'
+        releases: latest: '0.0.0'
+      }
+      settings.success(response)
+    else
+      response = options?.issuesResponse ? {
+        items: []
+      }
+      settings.success(response)
+
+window.waitsForPromise = (fn) ->
+  promise = fn()
+  window.waitsFor 5000, (moveOn) ->
+    promise.then(moveOn)
+    promise.catch (error) ->
+      jasmine.getEnv().currentSpec.fail("Expected promise to be resolved, but it was rejected with #{jasmine.pp(error)}")
+      moveOn()

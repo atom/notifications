@@ -74,7 +74,7 @@ class CommandLogger
   #   * `type` Name {String} of the command
   #   * `target` {String} describing where the command was triggered
   logCommand: (command) ->
-    {type: name, target: source} = command
+    {type: name, target: source, time} = command
     return if command.detail?.jQueryTrigger
     return if name of ignoredCommands
 
@@ -88,7 +88,7 @@ class CommandLogger
       event.name   = name
       event.source = source
       event.count  = 1
-      event.time   = Date.now()
+      event.time   = time ? Date.now()
 
   # Private: Calculates the time of the last event to be reported.
   #
