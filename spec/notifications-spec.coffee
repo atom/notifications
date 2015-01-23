@@ -166,16 +166,6 @@ describe "Notifications", ->
           notificationContainer = workspaceElement.querySelector('atom-notifications')
           fatalError = notificationContainer.querySelector('atom-notification.fatal')
 
-        it "contains core and notifications config values", ->
-          atom.config.set('notifications.something', 10)
-          waitsForPromise ->
-            fatalError.getRenderPromise().then -> issueBody = fatalError.issue.issueBody
-
-          runs ->
-            expect(issueBody).toContain '"core":'
-            expect(issueBody).toContain '"notifications":'
-            expect(issueBody).not.toContain '"editor":'
-
         it "displays a fatal error with the package name in the error", ->
           waitsForPromise ->
             fatalError.getRenderPromise().then -> issueBody = fatalError.issue.issueBody
@@ -200,6 +190,16 @@ describe "Notifications", ->
 
             # FIXME: this doesnt work on the test server. `apm ls` is not working for some reason.
             # expect(issueBody).toContain 'notifications, v'
+
+        it "contains core and notifications config values", ->
+          atom.config.set('notifications.something', 10)
+          waitsForPromise ->
+            fatalError.getRenderPromise().then -> issueBody = fatalError.issue.issueBody
+
+          runs ->
+            expect(issueBody).toContain '"core":'
+            expect(issueBody).toContain '"notifications":'
+            expect(issueBody).not.toContain '"editor":'
 
       describe "when an exception is thrown from core", ->
         beforeEach ->
