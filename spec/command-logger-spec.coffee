@@ -105,27 +105,19 @@ describe 'CommandLogger', ->
         ```
       """
 
-    it 'does not report anything after the external data event', ->
-      event =
-        time: Date.now() - 10 * 1000
-        title: 'bummer'
-      dispatch('foo:bar')
-
-      expect(logger.getText(event)).toBe """
-        ```
-             -0:00.0 bummer
-        ```
-      """
-
     it 'does not report anything older than ten minutes', ->
-      dispatch('foo:bar')
-      event =
-        time: Date.now() + 11 * 60 * 1000
-        title: 'bummer'
+      logger.logCommand
+        type: 'foo:bar'
+        time: Date.now() - 11 * 60 * 1000
+        target: nodeName: 'DIV'
 
-      expect(logger.getText(event)).toBe """
+      logger.logCommand
+        type: 'wow:bummer'
+        target: nodeName: 'DIV'
+
+      expect(logger.getText()).toBe """
         ```
-             -0:00.0 bummer
+             -0:00.0 wow:bummer (div)
         ```
       """
 
