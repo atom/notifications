@@ -85,7 +85,6 @@ module.exports =
           resolve
             dev: @filterActivePackages(packages.dev)
             user: @filterActivePackages(packages.user)
-      return
 
   filterActivePackages: (packages) ->
     "#{pack.name}, v#{pack.version}" for pack in (packages ? []) when atom.packages.getActivePackage(pack.name)?
