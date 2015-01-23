@@ -37,10 +37,10 @@ class NotificationElement extends HTMLElement
 
   initialize: (@model) ->
     @issue = new NotificationIssue(@model) if @model.getType() is 'fatal'
-    @renderPromise = @render()
-    @renderPromise.catch (e) ->
+    @renderPromise = @render().catch (e) ->
       console.error e.message
       console.error e.stack
+
     if @model.isDismissable()
       @model.onDidDismiss => @removeNotification()
     else
