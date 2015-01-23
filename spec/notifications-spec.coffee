@@ -448,8 +448,8 @@ generateFakeAjaxResponses = (options) ->
       }
       settings.success(response)
 
-window.waitsForPromise = (promise) ->
-  promise = promise()
+window.waitsForPromise = (fn) ->
+  promise = fn()
   window.waitsFor 5000, (moveOn) ->
     promise.then(moveOn)
     promise.catch (error) ->
