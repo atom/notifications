@@ -38,10 +38,12 @@ class NotificationIssue
           $.ajax 'http://git.io',
             type: 'POST'
             data: url: issueUrl
-            success: (data, status, xhr) -> resolve(xhr.getResponseHeader('Location'))
+            success: (data, status, xhr) ->
+              resolve(xhr.getResponseHeader('Location'))
             error: (error) -> reject(error)
         else
           resolve(issueUrl)
+      return
 
   getIssueUrl: ->
     @getIssueBody().then (issueBody) =>

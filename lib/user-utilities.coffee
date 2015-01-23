@@ -43,13 +43,17 @@ module.exports =
   winVersionText: ->
     new Promise (resolve, reject) ->
       data = []
-      new BufferedProcess
+      systemInfo = new BufferedProcess
         command: 'systeminfo'
         stdout: (oneLine) -> data.push(oneLine)
         exit: =>
           info = data.join('\n')
           info = if (res = /OS.Name.\s+(.*)$/im.exec(info)) then res[1] else 'Unknown Windows Version'
           resolve(info)
+
+      systemInfo.onWillThrowError ({handle}) ->
+        handle()
+        resolve('Unknown Windows Version')
 
   ###
   Section: Config Values

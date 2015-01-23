@@ -37,7 +37,10 @@ class NotificationElement extends HTMLElement
 
   initialize: (@model) ->
     @issue = new NotificationIssue(@model) if @model.getType() is 'fatal'
-    @render()
+    @renderPromise = @render()
+    @renderPromise.catch (e) ->
+      console.error e.message
+      console.error e.stack
     if @model.isDismissable()
       @model.onDidDismiss => @removeNotification()
     else
@@ -45,6 +48,8 @@ class NotificationElement extends HTMLElement
     this
 
   getModel: -> @model
+
+  getRenderPromise: -> @renderPromise
 
   render: ->
     @classList.add "#{@model.getType()}"
@@ -81,7 +86,10 @@ class NotificationElement extends HTMLElement
       closeAllButton.classList.add @getButtonClass()
       closeAllButton.addEventListener 'click', => @handleRemoveAllNotificationsClick()
 
-    @renderFatalError() if @model.getType() is 'fatal'
+    if @model.getType() is 'fatal'
+        @renderFatalError()
+      else
+        Promise.resolve()
 
   renderFatalError: ->
     repoUrl = @issue.getRepoUrl()
@@ -110,7 +118,6 @@ class NotificationElement extends HTMLElement
 
     # We only show the create issue button if it's clearly in atom core or in a package with a repo url
     if issueButton.parentNode?
-      issueButton.setAttribute('href', @issue.getIssueUrl())
       if packageName? and repoUrl?
         issueButton.textContent = "Create issue on the #{packageName} package"
       else
@@ -121,14 +128,14 @@ class NotificationElement extends HTMLElement
       promises.push @issue.getIssueUrlForSystem()
       promises.push UserUtilities.checkPackageUpToDate(packageName) if packageName?
 
-      Promise.all(promises).then (allData) ->
+      Promise.all(promises).then (allData) =>
         [issues, newIssueUrl, packageCheck] = allData
 
         if issues?.open or issues?.closed
           issue = issues.open or issues.closed
           issueButton.setAttribute('href', issue.html_url)
           issueButton.textContent = "View Issue"
-          fatalNotification.textContent += " This issue has already been reported."
+          fatalNotification.innerHTML += " This issue has already been reported."
         else if packageCheck? and not packageCheck.upToDate and not packageCheck.isCore
           issueButton.setAttribute('href', '#')
           issueButton.textContent = "Check for package updates"
@@ -137,17 +144,17 @@ class NotificationElement extends HTMLElement
             command = 'settings-view:check-for-package-updates'
             atom.commands.dispatch(atom.views.getView(atom.workspace), command)
 
-          fatalNotification.textContent += """
+          fatalNotification.innerHTML += """
             #{packageName} is out of date: #{packageCheck.installedVersion} installed;
             #{packageCheck.latestVersion} latest.
             Upgrading to the latest version may fix this issue.
           """
         else
           issueButton.setAttribute('href', newIssueUrl) if newIssueUrl?
-          fatalNotification.textContent += " You can help by creating an issue. Please explain what actions triggered this error."
-      .catch (e) ->
-        console.error e.message
-        console.error e.stack
+          fatalNotification.innerHTML += " You can help by creating an issue. Please explain what actions triggered this error."
+        return
+    else
+      Promise.resolve()
 
   removeNotification: ->
     @classList.add('remove')
