@@ -185,7 +185,6 @@ describe "Notifications", ->
             expect(issueBody).not.toMatch /Unknown/ig
             expect(issueBody).toContain 'ReferenceError: a is not defined'
             expect(issueBody).toContain 'Thrown From**: [notifications](https://github.com/atom/notifications) package, v'
-            expect(issueBody).toContain 'cc @atom/core'
             expect(issueBody).toContain '# User'
 
             # FIXME: this doesnt work on the test server. `apm ls` is not working for some reason.
@@ -234,7 +233,6 @@ describe "Notifications", ->
 
           expect(issueBody).toContain 'ReferenceError: a is not defined'
           expect(issueBody).toContain '**Thrown From**: Atom Core'
-          expect(issueBody).not.toContain 'cc @atom/core'
 
         it "contains core and editor config values", ->
           expect(issueBody).toContain '"core":'

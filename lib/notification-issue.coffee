@@ -71,7 +71,6 @@ class NotificationIssue
         packageVersion = atom.packages.getLoadedPackage(packageName)?.metadata?.version if packageName?
         userConfig = UserUtilities.getConfigForPackage(packageName)
         copyText = ''
-        copyText = '/cc @atom/core' if packageName? and repoUrl?
 
         if packageName? and repoUrl?
           packageMessage = "[#{packageName}](#{repoUrl}) package, v#{packageVersion}"
