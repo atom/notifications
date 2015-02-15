@@ -159,6 +159,7 @@ class NotificationElement extends HTMLElement
   removeNotification: ->
     @classList.add('remove')
     @removeNotificationAfterTimeout()
+    atom.workspace.getActivePane().activate()
 
   handleRemoveNotificationClick: ->
     @model.dismiss()
