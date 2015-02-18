@@ -1,7 +1,7 @@
 # Originally from lee-dohm/bug-report
 # https://github.com/lee-dohm/bug-report/blob/master/lib/command-logger.coffee
 
-moment = require 'moment'
+moment = null
 
 # Command names that are ignored and not included in the log. This uses an Object to provide fast
 # string matching.
@@ -162,6 +162,7 @@ class CommandLogger
   #
   # Returns the {String} format of the command time.
   formatTime: (time) ->
+    moment ?= require 'moment'
     moment(time).format(@dateFmt)
 
   # Private: Initializes the log structure for speed.

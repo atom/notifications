@@ -1,5 +1,4 @@
 {Notification, CompositeDisposable} = require 'atom'
-CommandLogger = require './command-logger'
 
 Notifications =
   isInitialized: false
@@ -13,6 +12,7 @@ Notifications =
       default: false
 
   activate: (state) ->
+    CommandLogger = require './command-logger'
     CommandLogger.start()
     @subscriptions = new CompositeDisposable
 
