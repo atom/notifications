@@ -40,6 +40,8 @@ Notifications =
           dismissable: true
         atom.notifications.addFatalError(message, options)
 
+    atom.commands.add 'atom-workspace', 'notifications:toggle-logs', -> Notifications.toggleLogs()
+
   deactivate: ->
     @subscriptions.dispose()
     @notificationsElement?.remove()
@@ -75,6 +77,17 @@ Notifications =
       NotificationsPanelView = require './notifications-panel-view'
       Notifications.notificationsPanelView = new NotificationsPanelView
       Notifications.notificationsPanel = atom.workspace.addBottomPanel(item: Notifications.notificationsPanelView.getElement())
+
+  toggleLogs: ->
+    if @logsPanel?
+      if Notifications.logsPanel.isVisible()
+        Notifications.logsPanel.hide()
+      else
+        Notifications.logsPanel.show()
+    else
+      LogsPanelView = require './logs-panel-view'
+      Notifications.logsPanelView = new LogsPanelView
+      Notifications.logsPanel = atom.workspace.addBottomPanel(item: Notifications.logsPanelView.getElement())
 
   addNotificationView: (notification) ->
     @initializeIfNotInitialized()
