@@ -76,7 +76,7 @@ class NotificationElement extends HTMLElement
         addSplitLinesToContainer(stackContainer, stack)
 
         stackToggle.addEventListener 'click', (e) => @handleStackTraceToggleClick(e, stackContainer)
-        @handleStackTraceToggleClick({target: stackToggle}, stackContainer)
+        @handleStackTraceToggleClick({currentTarget: stackToggle}, stackContainer)
 
     if @model.isDismissable()
       closeButton = @querySelector('.close')
@@ -173,10 +173,10 @@ class NotificationElement extends HTMLElement
   handleStackTraceToggleClick: (e, container) ->
     e.preventDefault?()
     if container.style.display is 'none'
-      e.target.innerHTML = '<span class="icon icon-dash"></span>Hide Stack Trace'
+      e.currentTarget.innerHTML = '<span class="icon icon-dash"></span>Hide Stack Trace'
       container.style.display = 'block'
     else
-      e.target.innerHTML = '<span class="icon icon-plus"></span>Show Stack Trace'
+      e.currentTarget.innerHTML = '<span class="icon icon-plus"></span>Show Stack Trace'
       container.style.display = 'none'
 
   autohide: ->
