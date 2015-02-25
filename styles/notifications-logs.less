@@ -2,12 +2,14 @@
 @import "octicon-mixins";
 
 @icon-size: 30px;
+@max-height: 300px;
 @font-family-monospace: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 
 .notifications-logs {
   display: block;
   overflow-x: hidden;
   overflow-y: auto;
+  max-height: @max-height;
 
   atom-notification {
     display: block;
