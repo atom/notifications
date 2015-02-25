@@ -49,171 +49,174 @@ atom-notifications {
       padding-right: @component-padding + 24px; // space for icon
     }
   }
-}
 
-atom-notification {
-  float: right;
-  clear: right;
-  position: relative;
-  width: @width;
-  padding-left: @icon-size;
-  max-height: @max-height;
-  word-wrap: break-word;
-  pointer-events: auto;
 
-  &.icon:before {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: @icon-size;
-    height: calc(100% ~"-" @notification-gap );
-    padding-top: @component-padding;
-    text-align: center;
-    border-radius: @component-border-radius 0 0 @component-border-radius;
-  }
+  atom-notification {
+    float: right;
+    clear: right;
+    position: relative;
+    width: @width;
+    padding-left: @icon-size;
+    max-height: @max-height;
+    word-wrap: break-word;
+    pointer-events: auto;
 
-  .meta,
-  .close,
-  .detail,
-  .stack-toggle,
-  .stack-container {
-    display: none;
-  }
-
-  &.fatal .meta,
-  &.has-close .close,
-  &.has-detail .detail,
-  &.has-stack .stack-toggle,
-  &.has-stack .stack-container {
-    display: block;
-  }
-
-  // .item's are used as general containers
-  .item {
-    padding: @component-padding;
-    border-top: 1px solid hsla(0,0%,0%,.1);
-    &.message {
-      border-top: none;
-      p:last-child {
-        margin-bottom: 0;
-      }
-    }
-  }
-
-  &.has-close .message {
-    padding-right: @component-padding + 24px; // space for icon
-  }
-
-  .content {
-    margin-bottom: @notification-gap;
-    border-radius: 0 @component-border-radius @component-border-radius 0;
-  }
-
-  .message {
-    max-height: @max-height-message;
-    overflow-y: auto;
-  }
-
-  .close-all.btn {
-    position: absolute;
-    top: 7px;
-    right: 38px;
-    background: none;
-  }
-
-  .close {
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 38px;
-    height: 38px;
-    line-height: 38px;
-    text-align: center;
-    font-size: 16px;
-    text-shadow: none;
-    color: inherit;
-    opacity: .3;
-    &:hover, &:focus {
-      opacity: 1;
-      color: inherit;
-    }
-    &:active {
-      opacity: .2;
-    }
-    &:before {
-      margin: 0;
-      color: inherit;
-    }
-  }
-
-  &.has-detail {
-    width: @width-detail;
-  }
-
-  .detail {
-    font-size: .8em;
-    background-color: hsla(0,0%,100%,.3);
-    background-clip: padding-box;
-    max-height: @max-height-detail;
-    overflow-y: auto;
-
-    .line {
-      white-space: pre;
-      font-family: @font-family-monospace;
+    &.icon:before {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: @icon-size;
+      height: calc(100% ~"-" @notification-gap );
+      padding-top: @component-padding;
+      text-align: center;
+      border-radius: @component-border-radius 0 0 @component-border-radius;
     }
 
-    .stack-toggle {
-      display: block;
-      margin-top: @component-padding;
-
-      .icon:before {
-        margin: 0;
-      }
-    }
-
+    .meta,
+    .close,
+    .detail,
+    .stack-toggle,
     .stack-container {
-      margin-top: @component-padding;
+      display: none;
+    }
+
+    &.fatal .meta,
+    &.has-close .close,
+    &.has-detail .detail,
+    &.has-stack .stack-toggle,
+    &.has-stack .stack-container {
+      display: block;
+    }
+
+    // .item's are used as general containers
+    .item {
+      padding: @component-padding;
+      border-top: 1px solid hsla(0,0%,0%,.1);
+      &.message {
+        border-top: none;
+        p:last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
+
+    &.has-close .message {
+      padding-right: @component-padding + 24px; // space for icon
+    }
+
+    .content {
+      margin-bottom: @notification-gap;
+      border-radius: 0 @component-border-radius @component-border-radius 0;
+    }
+
+    .message {
+      max-height: @max-height-message;
+      overflow-y: auto;
+    }
+
+    .close-all.btn {
+      position: absolute;
+      top: 7px;
+      right: 38px;
+      background: none;
+    }
+
+    .close {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 38px;
+      height: 38px;
+      line-height: 38px;
+      text-align: center;
+      font-size: 16px;
+      text-shadow: none;
+      color: inherit;
+      opacity: .3;
+      &:hover, &:focus {
+        opacity: 1;
+        color: inherit;
+      }
+      &:active {
+        opacity: .2;
+      }
+      &:before {
+        margin: 0;
+        color: inherit;
+      }
+    }
+
+    &.has-detail {
+      width: @width-detail;
+    }
+
+    .detail {
+      font-size: .8em;
+      background-color: hsla(0,0%,100%,.3);
+      background-clip: padding-box;
+      max-height: @max-height-detail;
+      overflow-y: auto;
+
+      .line {
+        white-space: pre;
+        font-family: @font-family-monospace;
+      }
+
+      .stack-toggle {
+        display: block;
+        margin-top: @component-padding;
+
+        .icon:before {
+          margin: 0;
+        }
+      }
+
+      .stack-container {
+        margin-top: @component-padding;
+      }
+    }
+
+    .fatal-notification {
+      font-size: .8em;
+    }
+
+    .btn-toolbar {
+      margin-top:  @component-padding;
+    }
+
+    .btn-copy-report {
+      vertical-align: middle;
     }
   }
 
-  .fatal-notification {
-    font-size: .8em;
-  }
-
-  .btn-toolbar {
-    margin-top:  @component-padding;
-  }
-
-  .btn-copy-report {
-    vertical-align: middle;
-  }
 }
+
 
 // Types -------------------------------
 
-atom-notification.fatal {
-  .notification(@text-color-error; @background-color-error);
+atom-notifications {
+  atom-notification.fatal {
+    .notification(@text-color-error; @background-color-error);
+  }
+
+  atom-notification.error {
+    .notification(@text-color-error; @background-color-error);
+  }
+
+  atom-notification.warning {
+    .notification(@text-color-warning; @background-color-warning);
+  }
+
+  atom-notification.info {
+    .notification(@text-color-info; @background-color-info);
+  }
+
+  atom-notification.success {
+    .notification(@text-color-success; @background-color-success);
+  }
 }
 
-atom-notification.error {
-  .notification(@text-color-error; @background-color-error);
-}
-
-atom-notification.warning {
-  .notification(@text-color-warning; @background-color-warning);
-}
-
-atom-notification.info {
-  .notification(@text-color-info; @background-color-info);
-}
-
-atom-notification.success {
-  .notification(@text-color-success; @background-color-success);
-}
-
-
-// Mixins -------------------------------
-
+// Type Mixin
 .notification(@txt; @bg) {
 
   .content {
@@ -251,7 +254,7 @@ atom-notification.success {
 
 // Animations -------------------------------
 
-atom-notification {
+atom-notifications atom-notification {
   -webkit-animation: notification-show .16s cubic-bezier(0.175, 0.885, 0.32, 1.27499);
 
   &[type="fatal"] {
