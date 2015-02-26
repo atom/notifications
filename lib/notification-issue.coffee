@@ -145,10 +145,10 @@ class NotificationIssue
         packagePaths[packageName] = fs.realpathSync(packagePath)
 
     getPackageName = (filePath) ->
-      for packageName, packagePath of packagePaths
+      for packName, packagePath of packagePaths
         continue if filePath is 'node.js'
         relativePath = path.relative(packagePath, filePath)
-        return packageName unless /^\.\./.test(relativePath)
+        return packName unless /^\.\./.test(relativePath)
       null
 
     if options.detail? and packageName = getPackageName(options.detail)
