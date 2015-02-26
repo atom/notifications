@@ -254,6 +254,22 @@ describe "Notifications", ->
           stackToggle.click()
           expect(stackContainer.style.display).toBe 'none'
 
+      describe "when the there is an error searching for the issue", ->
+        beforeEach ->
+          spyOn(atom, 'inDevMode').andReturn false
+          generateFakeAjaxResponses(issuesErrorResponse: '403')
+          generateException()
+          fatalError = notificationContainer.querySelector('atom-notification.fatal')
+          waitsForPromise ->
+            fatalError.getRenderPromise().then -> issueBody = fatalError.issue.issueBody
+
+        it "asks the user to create an issue", ->
+          button = fatalError.querySelector('.btn')
+          fatalNotification = fatalError.querySelector('.fatal-notification')
+          expect(button.textContent).toContain 'Create issue'
+          expect(fatalNotification.textContent).toContain 'You can help by creating an issue'
+          expect(button.getAttribute('href')).toContain 'github.com/atom/notifications/issues/new'
+
       describe "when the error has not been reported", ->
         beforeEach ->
           spyOn(atom, 'inDevMode').andReturn false
@@ -441,10 +457,13 @@ generateFakeAjaxResponses = (options) ->
       }
       settings.success(response)
     else
-      response = options?.issuesResponse ? {
-        items: []
-      }
-      settings.success(response)
+      if options?.issuesErrorResponse?
+        settings.error?({}, options.issuesErrorResponse, null)
+      else
+        response = options?.issuesResponse ? {
+          items: []
+        }
+        settings.success(response)
 
 window.waitsForPromise = (fn) ->
   promise = fn()

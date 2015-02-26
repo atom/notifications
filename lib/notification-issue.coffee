@@ -28,7 +28,7 @@ class NotificationIssue
               issues[issue.state] = issue if issue.title.indexOf(@getIssueTitle()) > -1 and not issues[issue.state]?
             return resolve(issues) if issues.open? or issues.closed?
           resolve(null)
-        error: (e) -> reject(e)
+        error: -> resolve(null)
 
   getIssueUrlForSystem: ->
     new Promise (resolve, reject) =>
@@ -40,7 +40,7 @@ class NotificationIssue
             data: url: issueUrl
             success: (data, status, xhr) ->
               resolve(xhr.getResponseHeader('Location'))
-            error: (error) -> reject(error)
+            error: -> resolve(issueUrl)
         else
           resolve(issueUrl)
       return
