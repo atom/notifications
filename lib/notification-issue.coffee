@@ -137,24 +137,33 @@ class NotificationIssue
 
   getPackageName: ->
     options = @notification.getOptions()
-    return unless options.stack?
-    stack = StackTraceParser.parse(options.stack)
+    return unless options.stack? or options.detail?
 
     packagePaths = @getPackagePathsByPackageName()
     for packageName, packagePath of packagePaths
       if packagePath.indexOf('.atom/dev/packages') > -1 or packagePath.indexOf('.atom/packages') > -1
         packagePaths[packageName] = fs.realpathSync(packagePath)
 
-    for i in [0...stack.length]
-      {file} = stack[i]
-
-      # Empty when it was run from the dev console
-      return unless file
-
+    getPackageName = (filePath) ->
       for packageName, packagePath of packagePaths
-        continue if file is 'node.js'
-        relativePath = path.relative(packagePath, file)
+        continue if filePath is 'node.js'
+        relativePath = path.relative(packagePath, filePath)
         return packageName unless /^\.\./.test(relativePath)
+      null
+
+    if options.detail? and packageName = getPackageName(options.detail)
+      return packageName
+
+    if options.stack?
+      stack = StackTraceParser.parse(options.stack)
+      for i in [0...stack.length]
+        {file} = stack[i]
+
+        # Empty when it was run from the dev console
+        return unless file
+        packageName = getPackageName(file)
+        return packageName if packageName?
+
     return
 
   getPackagePathsByPackageName: ->

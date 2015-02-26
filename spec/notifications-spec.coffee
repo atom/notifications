@@ -200,6 +200,29 @@ describe "Notifications", ->
             expect(issueBody).toContain '"notifications":'
             expect(issueBody).not.toContain '"editor":'
 
+      describe "when an exception is thrown from a package without a trace, but with a URL", ->
+        beforeEach ->
+          issueBody = null
+          spyOn(atom, 'inDevMode').andReturn false
+          generateFakeAjaxResponses()
+          try
+            a + 1
+          catch e
+            # Pull the file path from the stack
+            filePath = e.stack.split('\n')[1].match(/\(([^:]+)/)[1]
+            window.onerror.call(window, e.toString(), filePath, 2, 3, message: e.toString(), stack: undefined)
+
+          notificationContainer = workspaceElement.querySelector('atom-notifications')
+          fatalError = notificationContainer.querySelector('atom-notification.fatal')
+
+        it "detects the package name from the URL", ->
+          waitsForPromise -> fatalError.getRenderPromise()
+
+          runs ->
+            expect(fatalError.innerHTML).toContain 'ReferenceError: a is not defined'
+            expect(fatalError.innerHTML).toContain "<a href=\"https://github.com/atom/notifications\">notifications package</a>"
+            expect(fatalError.issue.getPackageName()).toBe 'notifications'
+
       describe "when an exception is thrown from core", ->
         beforeEach ->
           atom.commands.dispatch(workspaceElement, 'some-package:a-command')
