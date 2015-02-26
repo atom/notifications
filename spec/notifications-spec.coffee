@@ -235,7 +235,7 @@ describe "Notifications", ->
           catch e
             # Mung the stack so it looks like its from core
             e.stack = e.stack.replace(/notifications/g, 'core')
-            window.onerror.call(window, e.toString(), 'abc', 2, 3, e)
+            window.onerror.call(window, e.toString(), '/dev/null', 2, 3, e)
 
           notificationContainer = workspaceElement.querySelector('atom-notifications')
           fatalError = notificationContainer.querySelector('atom-notification.fatal')
@@ -463,7 +463,7 @@ generateException = ->
   try
     a + 1
   catch e
-    window.onerror.call(window, e.toString(), 'abc', 2, 3, e)
+    window.onerror.call(window, e.toString(), '/dev/null', 2, 3, e)
 
 # shortenerResponse
 # packageResponse
