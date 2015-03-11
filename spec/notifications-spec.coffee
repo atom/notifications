@@ -92,18 +92,27 @@ describe "Notifications", ->
         expect(notificationContainer.childNodes.length).toBe 0
 
       it "is removed when the close icon is clicked", ->
-        notification = atom.notifications.addSuccess('A message', dismissable: true)
-        notificationElement = notificationContainer.querySelector('atom-notification.success')
+        jasmine.attachToDOM(workspaceElement)
 
-        expect(notificationContainer.childNodes.length).toBe 1
+        waitsForPromise ->
+          atom.workspace.open()
 
-        notificationElement.querySelector('.close.icon').click()
+        runs ->
+          notification = atom.notifications.addSuccess('A message', dismissable: true)
+          notificationElement = notificationContainer.querySelector('atom-notification.success')
 
-        advanceClock(NotificationElement::visibilityDuration)
-        expect(notificationElement).toHaveClass 'remove'
+          expect(notificationContainer.childNodes.length).toBe 1
 
-        advanceClock(NotificationElement::animationDuration)
-        expect(notificationContainer.childNodes.length).toBe 0
+          notificationElement.focus()
+          notificationElement.querySelector('.close.icon').click()
+
+          expect(atom.views.getView(atom.workspace.getActiveTextEditor())).toHaveFocus()
+
+          advanceClock(NotificationElement::visibilityDuration)
+          expect(notificationElement).toHaveClass 'remove'
+
+          advanceClock(NotificationElement::animationDuration)
+          expect(notificationContainer.childNodes.length).toBe 0
 
     describe "when an autoclose notification is added", ->
       it "closes and removes the message after a given amount of time", ->
