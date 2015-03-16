@@ -41,8 +41,7 @@ Notifications =
         atom.notifications.addFatalError(message, options)
         
     @subscriptions.add atom.commands.add 'core:cancel': ->
-      atom.notifications.getNotifications().forEach (notification) ->
-        notification.dismiss()
+      notification.dismiss() for notification in atom.notifications.getNotifications()
 
   deactivate: ->
     @subscriptions.dispose()
