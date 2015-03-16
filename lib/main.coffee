@@ -39,8 +39,8 @@ Notifications =
           stack: originalError.stack
           dismissable: true
         atom.notifications.addFatalError(message, options)
-        
-    @subscriptions.add atom.commands.add 'core:cancel': ->
+
+    @subscriptions.add atom.commands.add 'atom-workspace', 'core:cancel', ->
       notification.dismiss() for notification in atom.notifications.getNotifications()
 
   deactivate: ->
