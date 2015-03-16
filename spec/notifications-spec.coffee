@@ -114,6 +114,20 @@ describe "Notifications", ->
           advanceClock(NotificationElement::animationDuration)
           expect(notificationContainer.childNodes.length).toBe 0
 
+      it "is removed when core:cancel is triggered", ->
+        notification = atom.notifications.addSuccess('A message', dismissable: true)
+        notificationElement = notificationContainer.querySelector('atom-notification.success')
+
+        expect(notificationContainer.childNodes.length).toBe 1
+
+        atom.commands.dispatch(workspaceElement, 'core:cancel')
+
+        advanceClock(NotificationElement::visibilityDuration * 3)
+        expect(notificationElement).toHaveClass 'remove'
+
+        advanceClock(NotificationElement::animationDuration * 3)
+        expect(notificationContainer.childNodes.length).toBe 0
+
     describe "when an autoclose notification is added", ->
       it "closes and removes the message after a given amount of time", ->
         atom.notifications.addSuccess('A message')
