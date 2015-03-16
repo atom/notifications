@@ -39,6 +39,10 @@ Notifications =
           stack: originalError.stack
           dismissable: true
         atom.notifications.addFatalError(message, options)
+        
+      @subscriptions.add atom.commands.add 'core:cancel': ->
+        atom.notifications.getNotifications().forEach (notification) ->
+          notification.dismiss()
 
   deactivate: ->
     @subscriptions.dispose()
