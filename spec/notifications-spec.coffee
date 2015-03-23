@@ -1,4 +1,6 @@
 $ = require 'jquery'
+fs = require 'fs-plus'
+temp = require('temp').track()
 {Notification} = require 'atom'
 NotificationElement = require '../lib/notification-element'
 
@@ -171,8 +173,7 @@ describe "Notifications", ->
           notificationContainer = workspaceElement.querySelector('atom-notifications')
           fatalError = notificationContainer.querySelector('atom-notification.fatal')
 
-          fs = require 'fs'
-          spyOn(fs, 'realpathSync').andCallFake (p) -> p
+          spyOn(require('fs'), 'realpathSync').andCallFake (p) -> p
           spyOn(fatalError.issue, 'getPackagePathsByPackageName').andCallFake ->
             'save-session': '/Users/someguy/.atom/packages/save-session'
             'tabs': '/Applications/Atom.app/Contents/Resources/app/node_modules/tabs'
@@ -222,6 +223,41 @@ describe "Notifications", ->
             expect(issueBody).toContain '"core":'
             expect(issueBody).toContain '"notifications":'
             expect(issueBody).not.toContain '"editor":'
+
+      describe "when an exception is thrown from an unloaded package", ->
+        beforeEach ->
+          spyOn(atom, 'inDevMode').andReturn false
+
+          generateFakeAjaxResponses()
+
+          packagesDir = temp.mkdirSync('atom-packages-')
+          atom.packages.packageDirPaths.push(path.join(packagesDir, '.atom', 'packages'))
+          packageDir = path.join(packagesDir, '.atom', 'packages', 'unloaded')
+          fs.writeFileSync path.join(packageDir, 'package.json'), """
+            {
+              "name": "unloaded",
+              "version": "1.0.0",
+              "repository": "https://github.com/atom/notifications"
+            }
+          """
+
+          stack = "Error\n  at #{path.join(packageDir, 'index.js')}:1:1"
+          detail = 'ReferenceError: unloaded error'
+          message = "Error"
+          atom.notifications.addFatalError(message, {stack, detail, dismissable: true})
+          notificationContainer = workspaceElement.querySelector('atom-notifications')
+          fatalError = notificationContainer.querySelector('atom-notification.fatal')
+
+        it "displays a fatal error with the package name in the error", ->
+          waitsForPromise ->
+            fatalError.getRenderPromise()
+
+          runs ->
+            expect(notificationContainer.childNodes.length).toBe 1
+            expect(fatalError).toHaveClass 'has-close'
+            expect(fatalError.innerHTML).toContain 'ReferenceError: unloaded error'
+            expect(fatalError.innerHTML).toContain "<a href=\"https://github.com/atom/notifications\">unloaded package</a>"
+            expect(fatalError.issue.getPackageName()).toBe 'unloaded'
 
       describe "when an exception is thrown from a package without a trace, but with a URL", ->
         beforeEach ->

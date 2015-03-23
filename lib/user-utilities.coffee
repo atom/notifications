@@ -91,7 +91,7 @@ module.exports =
 
   getPackageVersion: (packageName) ->
     pack = atom.packages.getLoadedPackage(packageName)
-    pack.metadata.version
+    pack?.metadata.version
 
   getLatestPackageData: (packageName) ->
     packagesUrl = 'https://atom.io/api/packages'
@@ -105,7 +105,7 @@ module.exports =
   checkPackageUpToDate: (packageName) ->
     @getLatestPackageData(packageName).then (latestPackageData) =>
       installedVersion = @getPackageVersion(packageName)
-      upToDate = semver.gte(installedVersion, latestPackageData.releases.latest)
+      upToDate = installedVersion? and semver.gte(installedVersion, latestPackageData.releases.latest)
       latestVersion = latestPackageData.releases.latest
       isCore = latestPackageData.repository.url.startsWith('https://github.com/atom/')
       { isCore, upToDate, latestVersion, installedVersion }

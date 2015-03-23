@@ -132,8 +132,29 @@ class NotificationIssue
     return unless packageName?
     repo = atom.packages.getLoadedPackage(packageName)?.metadata?.repository
     repoUrl = repo?.url ? repo
+    unless repoUrl
+      if packagePath = atom.packages.resolvePackagePath(packageName)
+        try
+          repo = JSON.parse(fs.readFileSync(path.join(packagePath, 'package.json')))?.repository
+          repoUrl = repo?.url ? repo
+
     repoUrl = repoUrl?.replace(/\.git$/, '')
     repoUrl
+
+  getPackageNameFromFilePath: (filePath) ->
+    return unless filePath
+
+    packageName = /\/\.atom\/dev\/packages\/([^\/]+)\//.exec(filePath)?[1]
+    return packageName if packageName
+
+    packageName = /\\\.atom\\dev\\packages\\([^\\]+)\\/.exec(filePath)?[1]
+    return packageName if packageName
+
+    packageName = /\/\.atom\/packages\/([^\/]+)\//.exec(filePath)?[1]
+    return packageName if packageName
+
+    packageName = /\\\.atom\\packages\\([^\\]+)\\/.exec(filePath)?[1]
+    return packageName if packageName
 
   getPackageName: ->
     options = @notification.getOptions()
@@ -144,12 +165,12 @@ class NotificationIssue
       if packagePath.indexOf('.atom/dev/packages') > -1 or packagePath.indexOf('.atom/packages') > -1
         packagePaths[packageName] = fs.realpathSync(packagePath)
 
-    getPackageName = (filePath) ->
+    getPackageName = (filePath) =>
       for packName, packagePath of packagePaths
         continue if filePath is 'node.js'
         relativePath = path.relative(packagePath, filePath)
         return packName unless /^\.\./.test(relativePath)
-      null
+      @getPackageNameFromFilePath(filePath)
 
     if options.detail? and packageName = getPackageName(options.detail)
       return packageName
