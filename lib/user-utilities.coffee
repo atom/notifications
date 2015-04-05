@@ -89,6 +89,22 @@ module.exports =
   filterActivePackages: (packages) ->
     "#{pack.name}, v#{pack.version}" for pack in (packages ? []) when atom.packages.getActivePackage(pack.name)?
 
+  getLatestAtomData: ->
+    atomUrl = 'https://atom.io/api/updates'
+    new Promise (resolve, reject) ->
+      $.ajax atomUrl,
+        accept: 'application/vnd.github.v3+json'
+        contentType: "application/json"
+        success: (data) -> resolve(data)
+        error: (error) -> reject(error)
+
+  checkAtomUpToDate: ->
+    @getLatestAtomData().then (latestAtomData) =>
+      installedVersion = atom.getVersion()
+      latestVersion = latestAtomData.name
+      upToDate = installedVersion? and semver.gte(installedVersion, latestVersion)
+      { upToDate, latestVersion, installedVersion }
+
   getPackageVersion: (packageName) ->
     pack = atom.packages.getLoadedPackage(packageName)
     pack?.metadata.version
