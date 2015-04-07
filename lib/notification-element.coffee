@@ -126,10 +126,11 @@ class NotificationElement extends HTMLElement
       promises = []
       promises.push @issue.findSimilarIssues()
       promises.push @issue.getIssueUrlForSystem()
+      promises.push UserUtilities.checkAtomUpToDate()
       promises.push UserUtilities.checkPackageUpToDate(packageName) if packageName?
 
       Promise.all(promises).then (allData) =>
-        [issues, newIssueUrl, packageCheck] = allData
+        [issues, newIssueUrl, atomCheck, packageCheck] = allData
 
         if issues?.open or issues?.closed
           issue = issues.open or issues.closed
@@ -148,6 +149,14 @@ class NotificationElement extends HTMLElement
             #{packageName} is out of date: #{packageCheck.installedVersion} installed;
             #{packageCheck.latestVersion} latest.
             Upgrading to the latest version may fix this issue.
+          """
+        else if atomCheck? and not atomCheck.upToDate
+          issueButton.remove()
+
+          fatalNotification.innerHTML += """
+            Atom is out of date: #{atomCheck.installedVersion} installed;
+            #{atomCheck.latestVersion} latest.
+            Upgrading to the <a href='https://github.com/atom/atom/releases/tag/v#{atomCheck.latestVersion}'>latest version</a> may fix this issue.
           """
         else
           issueButton.setAttribute('href', newIssueUrl) if newIssueUrl?

@@ -426,6 +426,34 @@ describe "Notifications", ->
             button = fatalError.querySelector('.btn')
             expect(button.textContent).toContain 'Create issue'
 
+      describe "when Atom is out of date", ->
+        beforeEach ->
+          installedVersion = '0.179.0'
+          spyOn(atom, 'getVersion').andCallFake -> installedVersion
+          spyOn(atom, 'inDevMode').andReturn false
+
+          generateFakeAjaxResponses
+            atomResponse:
+              name: '0.180.0'
+
+          generateException()
+
+          fatalError = notificationContainer.querySelector('atom-notification.fatal')
+          waitsForPromise ->
+            fatalError.getRenderPromise().then -> issueBody = fatalError.issue.issueBody
+
+        it "doesn't show the Create Issue button", ->
+          button = fatalError.querySelector('.btn-issue')
+          expect(button).not.toExist()
+
+        it "tells the user that Atom is out of date", ->
+          fatalNotification = fatalError.querySelector('.fatal-notification')
+          expect(fatalNotification.textContent).toContain 'Atom is out of date'
+
+        it "provides a link to the latest released version", ->
+          fatalNotification = fatalError.querySelector('.fatal-notification')
+          expect(fatalNotification.innerHTML).toContain '<a href="https://github.com/atom/atom/releases/tag/v0.180.0">latest version</a>'
+
       describe "when the error has been reported", ->
         beforeEach ->
           spyOn(atom, 'inDevMode').andReturn false
@@ -532,10 +560,15 @@ generateFakeAjaxResponses = (options) ->
     if url.indexOf('git.io') > -1
       response = options?.shortenerResponse ? ['--', '201', {getResponseHeader: -> 'http://git.io/cats'}]
       settings.success.apply(settings, response)
-    else if url.indexOf('atom.io') > -1
+    else if url.indexOf('atom.io/api/packages') > -1
       response = options?.packageResponse ? {
         repository: url: 'https://github.com/atom/notifications'
         releases: latest: '0.0.0'
+      }
+      settings.success(response)
+    else if url.indexOf('atom.io/api/updates') > -1
+      response = options?.atomResponse ? {
+        name: atom.getVersion()
       }
       settings.success(response)
     else
