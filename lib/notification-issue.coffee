@@ -79,13 +79,17 @@ class NotificationIssue
         else
           packageMessage = 'Atom Core'
 
+        atomVersion = atom.getVersion()
+        if atom.getLoadSettings().apiPreviewMode
+          atomVersion += " :warning: **in 1.0 API Preview Mode** :warning:"
+
         @issueBody = """
           [Enter steps to reproduce below:]
 
           1. ...
           2. ...
 
-          **Atom Version**: #{atom.getVersion()}
+          **Atom Version**: #{atomVersion}
           **System**: #{systemName}
           **Thrown From**: #{packageMessage}
 
