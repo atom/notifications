@@ -160,7 +160,7 @@ class NotificationElement extends HTMLElement
             Removing the locally installed version may fix this issue.
           """
 
-          packagePath = atom.packages.getLoadedPackage(packageName).path
+          packagePath = atom.packages.getLoadedPackage(packageName)?.path
           if fs.isSymbolicLinkSync(packagePath)
             fatalNotification.innerHTML += """
             <br><br>
