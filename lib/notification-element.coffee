@@ -1,4 +1,4 @@
-fs = require 'fs'
+fs = require 'fs-plus'
 path = require 'path'
 marked = require 'marked'
 
@@ -157,7 +157,14 @@ class NotificationElement extends HTMLElement
             <br><br>
             Locally installed core Atom package #{packageName} is out of date: #{packageCheck.installedVersion} installed locally;
             #{packageCheck.versionShippedWithAtom} included with the version of Atom you're running.
-            Removing the locally installed version with <code>apm unlink</code> may fix this issue.
+            Removing the locally installed version may fix this issue.
+          """
+
+          packagePath = atom.packages.getLoadedPackage(packageName).path
+          if fs.isSymbolicLinkSync(packagePath)
+            fatalNotification.innerHTML += """
+            <br><br>
+            Use: <code>apm unlink #{packagePath}</code>
           """
         else if atomCheck? and not atomCheck.upToDate
           issueButton.remove()
