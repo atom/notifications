@@ -110,7 +110,7 @@ module.exports =
     pack?.metadata.version
 
   getPackageVersionShippedWithAtom: (packageName) ->
-    require(path.join(atom.packages.resourcePath, 'package.json')).packageDependencies[packageName]
+    require(path.join(atom.getLoadSettings().resourcePath, 'package.json')).packageDependencies[packageName]
 
   getLatestPackageData: (packageName) ->
     packagesUrl = 'https://atom.io/api/packages'
