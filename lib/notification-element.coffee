@@ -150,6 +150,15 @@ class NotificationElement extends HTMLElement
             #{packageCheck.latestVersion} latest.
             Upgrading to the latest version may fix this issue.
           """
+        else if packageCheck? and not packageCheck.upToDate and packageCheck.isCore
+          issueButton.remove()
+
+          fatalNotification.innerHTML += """
+            <br><br>
+            Locally installed core Atom package #{packageName} is out of date: #{packageCheck.installedVersion} installed locally;
+            #{packageCheck.versionShippedWithAtom} included with the version of Atom you're running.
+            Removing the locally installed version with <code>apm unlink</code> may fix this issue.
+          """
         else if atomCheck? and not atomCheck.upToDate
           issueButton.remove()
 
