@@ -146,7 +146,7 @@ class NotificationElement extends HTMLElement
             atom.commands.dispatch(atom.views.getView(atom.workspace), command)
 
           fatalNotification.innerHTML += """
-            #{packageName} is out of date: #{packageCheck.installedVersion} installed;
+            <code>#{packageName}</code> is out of date: #{packageCheck.installedVersion} installed;
             #{packageCheck.latestVersion} latest.
             Upgrading to the latest version may fix this issue.
           """
@@ -155,7 +155,7 @@ class NotificationElement extends HTMLElement
 
           fatalNotification.innerHTML += """
             <br><br>
-            Locally installed core Atom package #{packageName} is out of date: #{packageCheck.installedVersion} installed locally;
+            Locally installed core Atom package <code>#{packageName}</code> is out of date: #{packageCheck.installedVersion} installed locally;
             #{packageCheck.versionShippedWithAtom} included with the version of Atom you're running.
             Removing the locally installed version may fix this issue.
           """
