@@ -418,13 +418,43 @@ describe "Notifications", ->
             generateFakeAjaxResponses
               packageResponse:
                 repository: url: 'https://github.com/atom/notifications'
-                releases: latest: '0.10.0'
-            generateException()
+                releases: latest: '0.11.0'
 
-          it "ignores the out of date package because they cant upgrade it without upgrading atom", ->
-            fatalError = notificationContainer.querySelector('atom-notification.fatal')
-            button = fatalError.querySelector('.btn')
-            expect(button.textContent).toContain 'Create issue'
+          describe "when the locally installed version is lower than Atom's version", ->
+            beforeEach ->
+              versionShippedWithAtom = '0.10.0'
+              UserUtilities = require '../lib/user-utilities'
+              spyOn(UserUtilities, 'getPackageVersionShippedWithAtom').andCallFake -> versionShippedWithAtom
+
+              generateException()
+              fatalError = notificationContainer.querySelector('atom-notification.fatal')
+              waitsForPromise ->
+                fatalError.getRenderPromise().then -> issueBody = fatalError.issue.issueBody
+
+            it "doesn't show the Create Issue button", ->
+              button = fatalError.querySelector('.btn-issue')
+              expect(button).not.toExist()
+
+            it "tells the user that the package is a locally installed core package and out of date", ->
+              fatalNotification = fatalError.querySelector('.fatal-notification')
+              expect(fatalNotification.textContent).toContain 'Locally installed core Atom package'
+              expect(fatalNotification.textContent).toContain 'is out of date'
+
+          describe "when the locally installed version matches Atom's version", ->
+            beforeEach ->
+              versionShippedWithAtom = '0.9.0'
+              UserUtilities = require '../lib/user-utilities'
+              spyOn(UserUtilities, 'getPackageVersionShippedWithAtom').andCallFake -> versionShippedWithAtom
+
+              generateException()
+              fatalError = notificationContainer.querySelector('atom-notification.fatal')
+              waitsForPromise ->
+                fatalError.getRenderPromise().then -> issueBody = fatalError.issue.issueBody
+
+            it "ignores the out of date package because they cant upgrade it without upgrading atom", ->
+              fatalError = notificationContainer.querySelector('atom-notification.fatal')
+              button = fatalError.querySelector('.btn')
+              expect(button.textContent).toContain 'Create issue'
 
       describe "when Atom is out of date", ->
         beforeEach ->
