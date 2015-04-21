@@ -1,8 +1,6 @@
 # Originally from lee-dohm/bug-report
 # https://github.com/lee-dohm/bug-report/blob/master/lib/command-logger.coffee
 
-moment = null
-
 # Command names that are ignored and not included in the log. This uses an Object to provide fast
 # string matching.
 ignoredCommands =
@@ -26,9 +24,6 @@ class CommandLogger
 
   @start: ->
     @instance().start()
-
-  # Public: Format of time information.
-  dateFmt: '-m:ss.S'
 
   # Public: Maximum size of the log.
   logSize: 16
