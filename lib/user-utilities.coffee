@@ -50,7 +50,7 @@ module.exports =
 
       plistBuddy.onWillThrowError ({handle}) ->
         handle()
-        resolve('Unknown OSX version')
+        resolve({})
 
   winVersionText: ->
     new Promise (resolve, reject) ->
