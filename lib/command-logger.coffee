@@ -162,8 +162,11 @@ class CommandLogger
   #
   # Returns the {String} format of the command time.
   formatTime: (time) ->
-    moment ?= require 'moment'
-    moment(time).format(@dateFmt)
+    minutes = Math.floor(time / 60000)
+    seconds = Math.floor(((time % 60000) / 1000) * 10) / 10
+    seconds = "0#{seconds}" if seconds < 10
+    seconds = "#{seconds}.0" if Math.floor(seconds) isnt seconds
+    "-#{minutes}:#{seconds}"
 
   # Private: Initializes the log structure for speed.
   initLog: ->
