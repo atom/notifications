@@ -1,7 +1,6 @@
 $ = require 'jquery'
 os = require 'os'
 fs = require 'fs'
-plist = require 'plist'
 semver = require 'semver'
 {BufferedProcess} = require 'atom'
 
@@ -34,10 +33,23 @@ module.exports =
 
   macVersionInfo: ->
     new Promise (resolve, reject) ->
-      try
-        fs.readFile '/System/Library/CoreServices/SystemVersion.plist', 'utf8', (error, text) ->
-          resolve(plist.parse(text))
-      catch e
+      stdout = ''
+      plistBuddy = new BufferedProcess
+        command: '/usr/libexec/PlistBuddy'
+        args: [
+          '-c'
+          'Print ProductVersion'
+          '-c'
+          'Print ProductName'
+          '/System/Library/CoreServices/SystemVersion.plist'
+        ]
+        stdout: (output) -> stdout += output
+        exit: ->
+          [ProductVersion, ProductName] = stdout.trim().split('\n')
+          resolve({ProductVersion, ProductName})
+
+      plistBuddy.onWillThrowError ({handle}) ->
+        handle()
         resolve('Unknown OSX version')
 
   winVersionText: ->
