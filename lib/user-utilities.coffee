@@ -81,7 +81,10 @@ module.exports =
         stdout: (oneLine) -> data.push(oneLine)
         exit: =>
           stdout = data.join('\n')
-          packages = JSON.parse(stdout)
+          try
+            packages = JSON.parse(stdout)
+          catch error
+            packages = {}
           resolve
             dev: @filterActivePackages(packages.dev)
             user: @filterActivePackages(packages.user)
