@@ -12,8 +12,6 @@
     "fs-plus": "^2.6.0",
     "jquery": "^2",
     "marked": "^0.3",
-    "moment": "^2.8.4",
-    "plist": "^1.1.0",
     "semver": "^4.2.0",
     "stacktrace-parser": "0.1.1",
     "temp": "^0.8.1"

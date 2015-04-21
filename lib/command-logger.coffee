@@ -1,8 +1,6 @@
 # Originally from lee-dohm/bug-report
 # https://github.com/lee-dohm/bug-report/blob/master/lib/command-logger.coffee
 
-moment = null
-
 # Command names that are ignored and not included in the log. This uses an Object to provide fast
 # string matching.
 ignoredCommands =
@@ -26,9 +24,6 @@ class CommandLogger
 
   @start: ->
     @instance().start()
-
-  # Public: Format of time information.
-  dateFmt: '-m:ss.S'
 
   # Public: Maximum size of the log.
   logSize: 16
@@ -162,8 +157,11 @@ class CommandLogger
   #
   # Returns the {String} format of the command time.
   formatTime: (time) ->
-    moment ?= require 'moment'
-    moment(time).format(@dateFmt)
+    minutes = Math.floor(time / 60000)
+    seconds = Math.floor(((time % 60000) / 1000) * 10) / 10
+    seconds = "0#{seconds}" if seconds < 10
+    seconds = "#{seconds}.0" if Math.floor(seconds) isnt seconds
+    "-#{minutes}:#{seconds}"
 
   # Private: Initializes the log structure for speed.
   initLog: ->
