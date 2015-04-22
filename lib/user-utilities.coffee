@@ -115,7 +115,7 @@ module.exports =
 
   checkAtomUpToDate: ->
     @getLatestAtomData().then (latestAtomData) =>
-      installedVersion = atom.getVersion()
+      installedVersion = atom.getVersion()?.replace(/-.*$/, '')
       latestVersion = latestAtomData.name
       upToDate = installedVersion? and semver.gte(installedVersion, latestVersion)
       { upToDate, latestVersion, installedVersion }
