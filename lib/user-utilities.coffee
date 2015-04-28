@@ -87,7 +87,7 @@ module.exports =
   getInstalledPackages: ->
     new Promise (resolve, reject) =>
       data = []
-      new BufferedProcess
+      apmProcess = new BufferedProcess
         command: atom.packages.getApmPath()
         args: ['ls', '--json', '--no-color']
         stdout: (oneLine) -> data.push(oneLine)
@@ -100,6 +100,12 @@ module.exports =
           resolve
             dev: @filterActivePackages(packages.dev)
             user: @filterActivePackages(packages.user)
+
+      apmProcess.onWillThrowError ({handle}) ->
+        handle()
+        resolve
+          dev: []
+          user: []
 
   filterActivePackages: (packages) ->
     "#{pack.name}, v#{pack.version}" for pack in (packages ? []) when atom.packages.getActivePackage(pack.name)?
