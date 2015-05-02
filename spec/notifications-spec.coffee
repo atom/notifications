@@ -443,6 +443,24 @@ describe "Notifications", ->
         beforeEach ->
           spyOn(atom, 'inDevMode').andReturn false
 
+        describe "when the message is bigger than 100 characters", ->
+          beforeEach ->
+            generateFakeAjaxResponses()
+            try
+              a + 1
+            catch e
+              e.code = 'Error'
+              message = "Uncaught Error: Cannot find module 'dialog'Error: Cannot find module 'dialog' at Function.Module._resolveFilename (module.js:351:15) at Function.Module._load (module.js:293:25) at Module.require (module.js:380:17) at EventEmitter.<anonymous> (/Applications/Atom.app/Contents/Resources/atom/browser/lib/rpc-server.js:128:79) at EventEmitter.emit (events.js:119:17) at EventEmitter.<anonymous> (/Applications/Atom.app/Contents/Resources/atom/browser/api/lib/web-contents.js:99:23) at EventEmitter.emit (events.js:119:17)"
+              window.onerror.call(window, message, 'abc', 2, 3, e)
+              waitsForPromise ->
+                fatalError.getRenderPromise().then -> issueBody = fatalError.issue.issueBody
+
+          it "truncates the message to 100 characters", ->
+            notificationContainer = workspaceElement.querySelector('atom-notifications')
+            error = notificationContainer.querySelector('atom-notification.fatal')
+            expect(error).toExist()
+            expect(error.innerHTML).toContain "Uncaught Error: Cannot find module 'dialog'Error: Cannot find module 'dialog' at Function.Module...."
+
         describe "when the system is darwin", ->
           beforeEach ->
             generateFakeAjaxResponses()

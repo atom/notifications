@@ -4,6 +4,7 @@ path = require 'path'
 StackTraceParser = require 'stacktrace-parser'
 
 CommandLogger = require './command-logger'
+TitleUtilities = require './title-utilities'
 UserUtilities = require './user-utilities'
 
 module.exports =
@@ -52,7 +53,7 @@ class NotificationIssue
       "#{repoUrl}/issues/new?title=#{@encodeURI(@getIssueTitle())}&body=#{@encodeURI(issueBody)}"
 
   getIssueTitle: ->
-    @notification.getMessage()
+    TitleUtilities.format(@notification.getMessage())
 
   getIssueBody: ->
     new Promise (resolve, reject) =>
