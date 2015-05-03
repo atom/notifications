@@ -4,8 +4,9 @@ path = require 'path'
 StackTraceParser = require 'stacktrace-parser'
 
 CommandLogger = require './command-logger'
-TitleUtilities = require './title-utilities'
 UserUtilities = require './user-utilities'
+
+TRUNCATE_TITLE_TO = 100 # truncate issue title to 100 characters
 
 module.exports =
 class NotificationIssue
@@ -53,7 +54,10 @@ class NotificationIssue
       "#{repoUrl}/issues/new?title=#{@encodeURI(@getIssueTitle())}&body=#{@encodeURI(issueBody)}"
 
   getIssueTitle: ->
-    TitleUtilities.format(@notification.getMessage())
+    title = @notification.getMessage()
+    if title.length > TRUNCATE_TITLE_TO
+      title = title.substring(0, TRUNCATE_TITLE_TO-3) + '...'
+    title
 
   getIssueBody: ->
     new Promise (resolve, reject) =>
