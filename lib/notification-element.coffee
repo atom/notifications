@@ -4,7 +4,6 @@ marked = require 'marked'
 
 NotificationIssue = require './notification-issue'
 TemplateHelper = require './template-helper'
-TitleUtilities = require './title-utilities'
 UserUtilities = require './user-utilities'
 
 NotificationTemplate = """
@@ -65,8 +64,7 @@ class NotificationElement extends HTMLElement
     @innerHTML = NotificationTemplate
 
     notificationContainer = @querySelector('.message')
-    message = TitleUtilities.format(@model.getMessage())
-    notificationContainer.innerHTML = marked(message)
+    notificationContainer.innerHTML = marked(@model.getMessage())
 
     if detail = @model.getDetail()
       addSplitLinesToContainer(@querySelector('.detail-content'), detail)
