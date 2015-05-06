@@ -69,7 +69,7 @@ class CommandLogger
   #   * `type` Name {String} of the command
   #   * `target` {String} describing where the command was triggered
   logCommand: (command) ->
-    {type: name, target: source, time} = command
+    {type: name, target, time} = command
     return if command.detail?.jQueryTrigger
     return if name of ignoredCommands
 
@@ -80,10 +80,12 @@ class CommandLogger
     else
       @logIndex = (@logIndex + 1) % @logSize
       event = @latestEvent()
-      event.name   = name
-      event.source = source
-      event.count  = 1
-      event.time   = time ? Date.now()
+      event.name = name
+      event.targetNodeName = target.nodeName
+      event.targetClassName = target.className
+      event.targetId = target.id
+      event.count = 1
+      event.time = time ? Date.now()
 
   # Private: Calculates the time of the last event to be reported.
   #
@@ -134,22 +136,12 @@ class CommandLogger
   #
   # Returns the {String} format of the command event.
   formatEvent: (event, lastTime) ->
-    {count, time, name, source} = event
-    "#{@formatCount(count)} #{@formatTime(lastTime - time)} #{name} #{@formatSource(source)}"
-
-  # Private: Format the command source for reporting.
-  #
-  # * `source` {Object} describing from where the event originated
-  #
-  # Returns the {String} format of the command source.
-  formatSource: (source) ->
-    {nodeName, id, classList} = source
-    nodeText = nodeName.toLowerCase()
-    idText = if id then "##{id}" else ''
+    {count, time, name, targetNodeName, targetClassName, targetId} = event
+    nodeText = targetNodeName.toLowerCase()
+    idText = if targetId then "##{targetId}" else ''
     classText = ''
-    classText += ".#{klass}" for klass in classList if classList
-
-    "(#{nodeText}#{idText}#{classText})"
+    classText += ".#{klass}" for klass in targetClassName.split(" ") if targetClassName?
+    "#{@formatCount(count)} #{@formatTime(lastTime - time)} #{name} (#{nodeText}#{idText}#{classText})"
 
   # Private: Format the command time for reporting.
   #
@@ -169,5 +161,7 @@ class CommandLogger
     @eventLog = for i in [0...@logSize]
       name: null
       count: 0
-      source: null
+      targetNodeName: null
+      targetClassName: null
+      targetId: null
       time: null
