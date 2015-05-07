@@ -3,16 +3,15 @@
 CommandLogger = require '../lib/command-logger'
 
 describe 'CommandLogger', ->
-  [workspaceElement, logger] = []
+  [element, logger] = []
 
   dispatch = (command) ->
-    atom.commands.dispatch(workspaceElement, command)
-
-  removeScrollbarClass = (str) ->
-    str.replace /\.scrollbars-visible-(when-scrolling|always)/g, ''
+    atom.commands.dispatch(element, command)
 
   beforeEach ->
-    workspaceElement = atom.views.getView(atom.workspace)
+    element = document.createElement("section")
+    element.id = "some-id"
+    element.className = "some-class another-class"
     logger = new CommandLogger
     logger.start()
 
@@ -21,10 +20,11 @@ describe 'CommandLogger', ->
       dispatch('foo:bar')
       expect(logger.latestEvent().name).toBe 'foo:bar'
 
-    it 'catches the source of the command', ->
+    it 'catches the target of the command', ->
       dispatch('foo:bar')
-
-      expect(logger.latestEvent().source).toBeDefined()
+      expect(logger.latestEvent().targetNodeName).toBe "SECTION"
+      expect(logger.latestEvent().targetClassName).toBe "some-class another-class"
+      expect(logger.latestEvent().targetId).toBe "some-id"
 
     it 'logs repeat commands as one command', ->
       dispatch('foo:bar')
@@ -60,12 +60,23 @@ describe 'CommandLogger', ->
         ```
       """
 
-    it 'formats commands with the time, name and source', ->
-      atom.commands.dispatch(workspaceElement, 'foo:bar')
+    it 'formats commands with the time, name and target', ->
+      dispatch('foo:bar')
 
-      expect(removeScrollbarClass(logger.getText())).toBe """
+      expect(logger.getText()).toBe """
         ```
-             -0:00.0 foo:bar (atom-workspace.workspace)
+             -0:00.0 foo:bar (section#some-id.some-class.another-class)
+        ```
+      """
+
+    it 'omits the target ID if it has none', ->
+      element.id = ""
+
+      dispatch('foo:bar')
+
+      expect(logger.getText()).toBe """
+        ```
+             -0:00.0 foo:bar (section.some-class.another-class)
         ```
       """
 
@@ -74,11 +85,11 @@ describe 'CommandLogger', ->
       dispatch('foo:second')
       dispatch('foo:third')
 
-      expect(removeScrollbarClass(logger.getText())).toBe """
+      expect(logger.getText()).toBe """
         ```
-             -0:00.0 foo:first (atom-workspace.workspace)
-             -0:00.0 foo:second (atom-workspace.workspace)
-             -0:00.0 foo:third (atom-workspace.workspace)
+             -0:00.0 foo:first (section#some-id.some-class.another-class)
+             -0:00.0 foo:second (section#some-id.some-class.another-class)
+             -0:00.0 foo:third (section#some-id.some-class.another-class)
         ```
       """
 
@@ -86,9 +97,9 @@ describe 'CommandLogger', ->
       dispatch('foo:bar')
       dispatch('foo:bar')
 
-      expect(removeScrollbarClass(logger.getText())).toBe """
+      expect(logger.getText()).toBe """
         ```
-          2x -0:00.0 foo:bar (atom-workspace.workspace)
+          2x -0:00.0 foo:bar (section#some-id.some-class.another-class)
         ```
       """
 
@@ -98,9 +109,9 @@ describe 'CommandLogger', ->
         time: Date.now()
         title: 'bummer'
 
-      expect(removeScrollbarClass(logger.getText(event))).toBe """
+      expect(logger.getText(event)).toBe """
         ```
-             -0:00.0 foo:bar (atom-workspace.workspace)
+             -0:00.0 foo:bar (section#some-id.some-class.another-class)
              -0:00.0 bummer
         ```
       """
