@@ -108,8 +108,6 @@ describe "Notifications", ->
           notificationElement.focus()
           notificationElement.querySelector('.close.icon').click()
 
-          expect(atom.views.getView(atom.workspace.getActiveTextEditor())).toHaveFocus()
-
           advanceClock(NotificationElement::visibilityDuration)
           expect(notificationElement).toHaveClass 'remove'
 
@@ -129,6 +127,36 @@ describe "Notifications", ->
 
         advanceClock(NotificationElement::animationDuration * 3)
         expect(notificationContainer.childNodes.length).toBe 0
+
+      it "focuses the active pane only if the dismissed notification has focus", ->
+        jasmine.attachToDOM(workspaceElement)
+
+        waitsForPromise ->
+          atom.workspace.open()
+
+        runs ->
+          notification1 = atom.notifications.addSuccess('First message', dismissable: true)
+          notification2 = atom.notifications.addError('Second message', dismissable: true)
+          notificationElement1 = notificationContainer.querySelector('atom-notification.success')
+          notificationElement2 = notificationContainer.querySelector('atom-notification.error')
+
+          expect(notificationContainer.childNodes.length).toBe 2
+
+          notificationElement2.focus()
+
+          notification1.dismiss()
+
+          advanceClock(NotificationElement::visibilityDuration)
+          advanceClock(NotificationElement::animationDuration)
+          expect(notificationContainer.childNodes.length).toBe 1
+          expect(notificationElement2).toHaveFocus()
+
+          notificationElement2.querySelector('.close.icon').click()
+
+          advanceClock(NotificationElement::visibilityDuration)
+          advanceClock(NotificationElement::animationDuration)
+          expect(notificationContainer.childNodes.length).toBe 0
+          expect(atom.views.getView(atom.workspace.getActiveTextEditor())).toHaveFocus()
 
     describe "when an autoclose notification is added", ->
       it "closes and removes the message after a given amount of time", ->
