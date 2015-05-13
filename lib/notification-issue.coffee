@@ -71,6 +71,11 @@ class NotificationIssue
         packageVersion = atom.packages.getLoadedPackage(packageName)?.metadata?.version if packageName?
         userConfig = UserUtilities.getConfigForPackage(packageName)
         copyText = ''
+        systemUser = process.env.USER
+        rootUserStatus = ''
+
+        if systemUser is 'root'
+          rootUserStatus = '**User**: root'
 
         if packageName? and repoUrl?
           packageMessage = "[#{packageName}](#{repoUrl}) package, v#{packageVersion}"
@@ -92,6 +97,7 @@ class NotificationIssue
           **Atom Version**: #{atomVersion}
           **System**: #{systemName}
           **Thrown From**: #{packageMessage}
+          #{rootUserStatus}
 
           ### Stack Trace
 
