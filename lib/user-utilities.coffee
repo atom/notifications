@@ -1,6 +1,7 @@
 $ = require 'jquery'
 os = require 'os'
 fs = require 'fs'
+path = require 'path'
 semver = require 'semver'
 {BufferedProcess} = require 'atom'
 
