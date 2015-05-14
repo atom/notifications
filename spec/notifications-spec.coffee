@@ -1,5 +1,6 @@
 $ = require 'jquery'
 fs = require 'fs-plus'
+path = require 'path'
 temp = require('temp').track()
 {Notification} = require 'atom'
 NotificationElement = require '../lib/notification-element'
