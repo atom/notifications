@@ -1,4 +1,6 @@
 {Notification, CompositeDisposable} = require 'atom'
+fs = require 'fs-plus'
+StackTraceParser = null
 
 Notifications =
   isInitialized: false
@@ -34,6 +36,11 @@ Notifications =
 
       else if !atom.inDevMode() or atom.config.get('notifications.showErrorsInDevMode')
         preventDefault()
+
+        # Ignore errors with no paths in them since they are impossible to trace
+        if originalError.stack and not isCoreOrPackageStackTrace(originalError.stack)
+          return
+
         options =
           detail: "#{url}:#{line}"
           stack: originalError.stack
@@ -93,6 +100,12 @@ Notifications =
 
     notification.setDisplayed(true)
     @lastNotification = notification
+
+isCoreOrPackageStackTrace = (stack) ->
+  StackTraceParser ?= require 'stacktrace-parser'
+  for {file} in StackTraceParser.parse(stack)
+    return true if fs.isAbsolute(file)
+  false
 
 if atom.inDevMode()
   atom.commands.add 'atom-workspace', 'notifications:toggle-dev-panel', -> Notifications.togglePanel()

@@ -157,6 +157,20 @@ describe "Notifications", ->
           expect(notificationContainer.childNodes.length).toBe 0
           expect(fatalError).toBe null
 
+      describe "when the exception has no core or package paths in the stack trace", ->
+        it "does not display a notification", ->
+          atom.notifications.clear()
+          spyOn(atom, 'inDevMode').andReturn false
+          handler = jasmine.createSpy('onWillThrowErrorHandler')
+          atom.onWillThrowError(handler)
+          fs.readFile(__dirname)
+
+          waitsFor ->
+            handler.callCount is 1
+
+          runs ->
+            expect(atom.notifications.getNotifications().length).toBe 0
+
       describe "when there are multiple packages in the stack trace", ->
         beforeEach ->
           stack = """
