@@ -21,17 +21,32 @@ NotificationTemplate = """
 """
 
 FatalMetaNotificationTemplate = """
-  <div class="fatal-notification"></div>
+  <div class="description fatal-notification"></div>
   <div class="btn-toolbar">
     <a href="#" class="btn-issue btn btn-error"></a>
     <a href="#" class="btn-copy-report icon icon-clippy" title="Copy error report to clipboard"></a>
   </div>
 """
 
+MetaNotificationTemplate = """
+  <div class="description"></div>
+"""
+
+ButtonListTemplate = """
+  <div class="btn-toolbar"></div>
+"""
+
+ButtonTemplate = """
+  <a href="#" class="btn"></a>
+"""
+
 class NotificationElement extends HTMLElement
   animationDuration: 700
   visibilityDuration: 5000
   fatalTemplate: TemplateHelper.create(FatalMetaNotificationTemplate)
+  metaTemplate: TemplateHelper.create(MetaNotificationTemplate)
+  buttonListTemplate: TemplateHelper.create(ButtonListTemplate)
+  buttonTemplate: TemplateHelper.create(ButtonTemplate)
 
   constructor: ->
 
@@ -63,13 +78,15 @@ class NotificationElement extends HTMLElement
 
     @innerHTML = NotificationTemplate
 
+    options = @model.getOptions()
+
     notificationContainer = @querySelector('.message')
     notificationContainer.innerHTML = marked(@model.getMessage())
 
     if detail = @model.getDetail()
       addSplitLinesToContainer(@querySelector('.detail-content'), detail)
 
-      if stack = @model.getOptions().stack
+      if stack = options.stack
         stackToggle = @querySelector('.stack-toggle')
         stackContainer = @querySelector('.stack-container')
 
@@ -77,6 +94,32 @@ class NotificationElement extends HTMLElement
 
         stackToggle.addEventListener 'click', (e) => @handleStackTraceToggleClick(e, stackContainer)
         @handleStackTraceToggleClick({currentTarget: stackToggle}, stackContainer)
+
+    if metaContent = options.description
+      @classList.add('has-description')
+      metaContainer = @querySelector('.meta')
+      metaContainer.appendChild(TemplateHelper.render(@metaTemplate))
+      description = @querySelector('.description')
+      description.innerHTML = marked(metaContent)
+
+    if options.buttons and options.buttons.length > 0
+      @classList.add('has-buttons')
+      metaContainer = @querySelector('.meta')
+      metaContainer.appendChild(TemplateHelper.render(@buttonListTemplate))
+      toolbar = @querySelector('.btn-toolbar')
+      buttonClass = @model.getType()
+      buttonClass = 'error' if buttonClass is 'fatal'
+      buttonClass = "btn-#{buttonClass}"
+      options.buttons.forEach (button) =>
+        toolbar.appendChild(TemplateHelper.render(@buttonTemplate))
+        buttonEl = toolbar.childNodes[toolbar.childNodes.length - 1]
+        buttonEl.textContent = button.text
+        buttonEl.classList.add(buttonClass)
+        if button.className?
+          buttonEl.classList.add.apply(buttonEl.classList, button.className.split(' '))
+        if button.onDidClick?
+          buttonEl.addEventListener 'click', (e) ->
+            button.onDidClick.call(this, e)
 
     if @model.isDismissable()
       closeButton = @querySelector('.close')
