@@ -147,17 +147,17 @@ describe "Notifications", ->
         advanceClock(NotificationElement::animationDuration)
         expect(notificationContainer.childNodes.length).toBe 0
 
-    describe "when the `meta` option is used", ->
-      it "displays the meta text in the .meta-notification element", ->
-        atom.notifications.addSuccess('A message', meta: 'This is [a link](http://atom.io)')
+    describe "when the `description` option is used", ->
+      it "displays the description text in the .description element", ->
+        atom.notifications.addSuccess('A message', description: 'This is [a link](http://atom.io)')
         notification = notificationContainer.querySelector('atom-notification.success')
-        expect(notification).toHaveClass('has-meta')
+        expect(notification).toHaveClass('has-description')
         expect(notification.querySelector('.meta')).toBeVisible()
-        expect(notification.querySelector('.meta-notification').textContent.trim()).toBe 'This is a link'
-        expect(notification.querySelector('.meta-notification a').href).toBe 'http://atom.io/'
+        expect(notification.querySelector('.description').textContent.trim()).toBe 'This is a link'
+        expect(notification.querySelector('.description a').href).toBe 'http://atom.io/'
 
     describe "when the `buttons` options is used", ->
-      it "displays the buttons in the .meta-notification element", ->
+      it "displays the buttons in the .description element", ->
         clicked = []
         atom.notifications.addSuccess 'A message',
           buttons: [{

@@ -21,7 +21,7 @@ NotificationTemplate = """
 """
 
 FatalMetaNotificationTemplate = """
-  <div class="meta-notification fatal-notification"></div>
+  <div class="description fatal-notification"></div>
   <div class="btn-toolbar">
     <a href="#" class="btn-issue btn btn-error"></a>
     <a href="#" class="btn-copy-report icon icon-clippy" title="Copy error report to clipboard"></a>
@@ -29,7 +29,7 @@ FatalMetaNotificationTemplate = """
 """
 
 MetaNotificationTemplate = """
-  <div class="meta-notification"></div>
+  <div class="description"></div>
 """
 
 ButtonListTemplate = """
@@ -95,12 +95,12 @@ class NotificationElement extends HTMLElement
         stackToggle.addEventListener 'click', (e) => @handleStackTraceToggleClick(e, stackContainer)
         @handleStackTraceToggleClick({currentTarget: stackToggle}, stackContainer)
 
-    if metaContent = options.meta
-      @classList.add('has-meta')
+    if metaContent = options.description
+      @classList.add('has-description')
       metaContainer = @querySelector('.meta')
       metaContainer.appendChild(TemplateHelper.render(@metaTemplate))
-      metaNotification = @querySelector('.meta-notification')
-      metaNotification.innerHTML = marked(metaContent)
+      description = @querySelector('.description')
+      description.innerHTML = marked(metaContent)
 
     if options.buttons and options.buttons.length > 0
       @classList.add('has-buttons')
