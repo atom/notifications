@@ -52,6 +52,8 @@ describe "Notifications", ->
       advanceClock(NotificationElement::animationDuration)
 
       notificationContainer = workspaceElement.querySelector('atom-notifications')
+      jasmine.attachToDOM(workspaceElement)
+
       spyOn($, 'ajax')
 
     it "adds an atom-notification element to the container with a class corresponding to the type", ->
@@ -62,6 +64,7 @@ describe "Notifications", ->
       expect(notificationContainer.childNodes.length).toBe 1
       expect(notification).toHaveClass 'success'
       expect(notification.querySelector('.message').textContent.trim()).toBe 'A message'
+      expect(notification.querySelector('.meta')).not.toBeVisible()
 
       atom.notifications.addInfo('A message')
       expect(notificationContainer.childNodes.length).toBe 2
@@ -143,6 +146,15 @@ describe "Notifications", ->
 
         advanceClock(NotificationElement::animationDuration)
         expect(notificationContainer.childNodes.length).toBe 0
+
+    describe "when the `meta` option is used", ->
+      it "displays the meta text in the .meta-notification element", ->
+        atom.notifications.addSuccess('A message', meta: 'This is [a link](http://atom.io)')
+        notification = notificationContainer.querySelector('atom-notification.success')
+        expect(notification).toHaveClass('has-meta')
+        expect(notification.querySelector('.meta')).toBeVisible()
+        expect(notification.querySelector('.meta-notification').textContent.trim()).toBe 'This is a link'
+        expect(notification.querySelector('.meta-notification a').href).toBe 'http://atom.io/'
 
     describe "when an exception is thrown", ->
       [notificationContainer, fatalError, issueBody] = []

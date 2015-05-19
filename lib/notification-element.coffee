@@ -21,17 +21,27 @@ NotificationTemplate = """
 """
 
 FatalMetaNotificationTemplate = """
-  <div class="fatal-notification"></div>
+  <div class="meta-notification fatal-notification"></div>
   <div class="btn-toolbar">
     <a href="#" class="btn-issue btn btn-error"></a>
     <a href="#" class="btn-copy-report icon icon-clippy" title="Copy error report to clipboard"></a>
   </div>
 """
 
+MetaNotificationTemplate = """
+  <div class="meta-notification"></div>
+"""
+
+ButtonListTemplate = """
+  <div class="btn-toolbar"></div>
+"""
+
 class NotificationElement extends HTMLElement
   animationDuration: 700
   visibilityDuration: 5000
   fatalTemplate: TemplateHelper.create(FatalMetaNotificationTemplate)
+  metaTemplate: TemplateHelper.create(MetaNotificationTemplate)
+  buttonListTemplate: TemplateHelper.create(ButtonListTemplate)
 
   constructor: ->
 
@@ -63,13 +73,15 @@ class NotificationElement extends HTMLElement
 
     @innerHTML = NotificationTemplate
 
+    options = @model.getOptions()
+
     notificationContainer = @querySelector('.message')
     notificationContainer.innerHTML = marked(@model.getMessage())
 
     if detail = @model.getDetail()
       addSplitLinesToContainer(@querySelector('.detail-content'), detail)
 
-      if stack = @model.getOptions().stack
+      if stack = options.stack
         stackToggle = @querySelector('.stack-toggle')
         stackContainer = @querySelector('.stack-container')
 
@@ -77,6 +89,13 @@ class NotificationElement extends HTMLElement
 
         stackToggle.addEventListener 'click', (e) => @handleStackTraceToggleClick(e, stackContainer)
         @handleStackTraceToggleClick({currentTarget: stackToggle}, stackContainer)
+
+    if metaContent = options.meta
+      metaContainer = @querySelector('.meta')
+      metaContainer.appendChild(TemplateHelper.render(@metaTemplate))
+      metaNotification = @querySelector('.meta-notification')
+      metaNotification.innerHTML = marked(metaContent)
+      @classList.add('has-meta')
 
     if @model.isDismissable()
       closeButton = @querySelector('.close')
