@@ -25,6 +25,7 @@ module.exports =
       switch @getPlatform()
         when 'darwin' then resolve(@macVersionText())
         when 'win32' then resolve(@winVersionText())
+        when 'linux' then resolve(@linuxVersionText())
         else resolve("#{os.platform()} #{os.release()}")
 
   macVersionText: ->
@@ -50,6 +51,28 @@ module.exports =
           resolve({ProductVersion, ProductName})
 
       plistBuddy.onWillThrowError ({handle}) ->
+        handle()
+        resolve({})
+
+  linuxVersionText: ->
+    new Promise (resolve, reject) ->
+      @linuxVersionInfo.then (info) ->
+        return "#{os.platform()} #{os.release()}" unless info.DistroName and info.DistroVersion
+        "#{info.DistroName} #{info.DistroVersion}"
+
+  linuxVersionInfo: ->
+    new Promise (resolve, reject) ->
+      stdout = ''
+
+      lsbRelease = new BufferedProcess
+        command: 'lsb_release'
+        args: ['-ds']
+        stdout: (output) -> stdout += output
+        exit: (exitCode) ->
+          [DistroName, DistroVersion] = stdout.trim().split(' ')
+          resolve({DistroName, DistroVersion})
+
+      lsbRelease.onWillThrowError ({handle}) ->
         handle()
         resolve({})
 
