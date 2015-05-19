@@ -57,8 +57,10 @@ module.exports =
   linuxVersionText: ->
     new Promise (resolve, reject) ->
       @linuxVersionInfo().then (info) ->
-        return "#{os.platform()} #{os.release()}" unless info.DistroName and info.DistroVersion
-        "#{info.DistroName} #{info.DistroVersion}"
+        if info.DistroName and info.DistroVersion
+          "#{info.DistroName} #{info.DistroVersion}"
+        else
+          "#{os.platform()} #{os.release()}"
 
   linuxVersionInfo: ->
     new Promise (resolve, reject) ->
