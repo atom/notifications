@@ -57,6 +57,7 @@ atom-notification {
   position: relative;
   width: @width;
   padding-left: @icon-size;
+  margin-bottom: @notification-gap;
   max-height: @max-height;
   word-wrap: break-word;
   pointer-events: auto;
@@ -66,10 +67,22 @@ atom-notification {
     top: 0;
     left: 0;
     width: @icon-size;
-    height: calc(100% ~"-" @notification-gap );
+    height: 100%;
     padding-top: @component-padding;
     text-align: center;
     border-radius: @component-border-radius 0 0 @component-border-radius;
+  }
+
+
+  // fill space between notifiactions to prevent click throughs
+  &:after {
+    content: "";
+    display: block;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -@notification-gap;
+    height: @notification-gap;
   }
 
   .meta,
@@ -105,7 +118,6 @@ atom-notification {
   }
 
   .content {
-    margin-bottom: @notification-gap;
     border-radius: 0 @component-border-radius @component-border-radius 0;
   }
 
