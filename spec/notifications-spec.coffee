@@ -156,6 +156,37 @@ describe "Notifications", ->
         expect(notification.querySelector('.meta-notification').textContent.trim()).toBe 'This is a link'
         expect(notification.querySelector('.meta-notification a').href).toBe 'http://atom.io/'
 
+    describe "when the `buttons` options is used", ->
+      it "displays the buttons in the .meta-notification element", ->
+        clicked = []
+        atom.notifications.addSuccess 'A message',
+          buttons: [{
+            text: 'Button One'
+            className: 'btn-one'
+            onDidClick: -> clicked.push 'one'
+          },{
+            text: 'Button Two'
+            className: 'btn-two'
+            onDidClick: -> clicked.push 'two'
+          }]
+
+        notification = notificationContainer.querySelector('atom-notification.success')
+        expect(notification).toHaveClass('has-buttons')
+        expect(notification.querySelector('.meta')).toBeVisible()
+
+        btnOne = notification.querySelector('.btn-one')
+        btnTwo = notification.querySelector('.btn-two')
+
+        expect(btnOne).toHaveClass 'btn-success'
+        expect(btnOne.textContent).toBe 'Button One'
+        expect(btnTwo).toHaveClass 'btn-success'
+        expect(btnTwo.textContent).toBe 'Button Two'
+
+        btnTwo.click()
+        btnOne.click()
+
+        expect(clicked).toEqual ['two', 'one']
+
     describe "when an exception is thrown", ->
       [notificationContainer, fatalError, issueBody] = []
       describe "when the editor is in dev mode", ->

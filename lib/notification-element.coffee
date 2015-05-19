@@ -36,12 +36,17 @@ ButtonListTemplate = """
   <div class="btn-toolbar"></div>
 """
 
+ButtonTemplate = """
+  <a href="#" class="btn"></a>
+"""
+
 class NotificationElement extends HTMLElement
   animationDuration: 700
   visibilityDuration: 5000
   fatalTemplate: TemplateHelper.create(FatalMetaNotificationTemplate)
   metaTemplate: TemplateHelper.create(MetaNotificationTemplate)
   buttonListTemplate: TemplateHelper.create(ButtonListTemplate)
+  buttonTemplate: TemplateHelper.create(ButtonTemplate)
 
   constructor: ->
 
@@ -91,11 +96,30 @@ class NotificationElement extends HTMLElement
         @handleStackTraceToggleClick({currentTarget: stackToggle}, stackContainer)
 
     if metaContent = options.meta
+      @classList.add('has-meta')
       metaContainer = @querySelector('.meta')
       metaContainer.appendChild(TemplateHelper.render(@metaTemplate))
       metaNotification = @querySelector('.meta-notification')
       metaNotification.innerHTML = marked(metaContent)
-      @classList.add('has-meta')
+
+    if options.buttons and options.buttons.length > 0
+      @classList.add('has-buttons')
+      metaContainer = @querySelector('.meta')
+      metaContainer.appendChild(TemplateHelper.render(@buttonListTemplate))
+      toolbar = @querySelector('.btn-toolbar')
+      buttonClass = @model.getType()
+      buttonClass = 'error' if buttonClass is 'fatal'
+      buttonClass = "btn-#{buttonClass}"
+      options.buttons.forEach (button) =>
+        toolbar.appendChild(TemplateHelper.render(@buttonTemplate))
+        buttonEl = toolbar.childNodes[toolbar.childNodes.length - 1]
+        buttonEl.textContent = button.text
+        buttonEl.classList.add(buttonClass)
+        if button.className?
+          buttonEl.classList.add.apply(buttonEl.classList, button.className.split(' '))
+        if button.onDidClick?
+          buttonEl.addEventListener 'click', (e) ->
+            button.onDidClick.call(this, e)
 
     if @model.isDismissable()
       closeButton = @querySelector('.close')
