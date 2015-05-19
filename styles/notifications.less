@@ -177,7 +177,6 @@ atom-notification {
     }
 
     .stack-toggle {
-      display: block;
       margin-top: @component-padding;
 
       .icon:before {
@@ -190,8 +189,12 @@ atom-notification {
     }
   }
 
-  .fatal-notification {
+  .meta-notification {
     font-size: .8em;
+
+    p:last-child {
+      margin-bottom: 0;
+    }
   }
 
   .btn-toolbar {
