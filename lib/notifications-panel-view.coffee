@@ -44,10 +44,10 @@ class NotificationsPanelView
 
   getElement: -> @element
 
-  createFatalError: =>
+  createFatalError: ->
     atom.commands.dispatch(atom.views.getView(atom.workspace), 'notifications:trigger-error')
 
-  createError: =>
+  createError: ->
     message = 'Failed to load your user config'
     options =
       dismissable: true
@@ -58,11 +58,11 @@ class NotificationsPanelView
       """
     atom.notifications.addError(message, options)
 
-  createWarning: =>
+  createWarning: ->
     atom.notifications.addWarning('Oops warning')
 
-  createInfo: =>
+  createInfo: ->
     atom.notifications.addInfo('Some info for you', icon: 'comment')
 
-  createSuccess: =>
+  createSuccess: ->
     atom.notifications.addSuccess('Yeah, success!')

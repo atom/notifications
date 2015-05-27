@@ -130,9 +130,9 @@ class NotificationElement extends HTMLElement
       closeAllButton.addEventListener 'click', => @handleRemoveAllNotificationsClick()
 
     if @model.getType() is 'fatal'
-        @renderFatalError()
-      else
-        Promise.resolve()
+      @renderFatalError()
+    else
+      Promise.resolve()
 
   renderFatalError: ->
     repoUrl = @issue.getRepoUrl()
@@ -172,7 +172,7 @@ class NotificationElement extends HTMLElement
       promises.push UserUtilities.checkAtomUpToDate()
       promises.push UserUtilities.checkPackageUpToDate(packageName) if packageName?
 
-      Promise.all(promises).then (allData) =>
+      Promise.all(promises).then (allData) ->
         [issues, newIssueUrl, atomCheck, packageCheck] = allData
 
         if issues?.open or issues?.closed
@@ -261,7 +261,7 @@ class NotificationElement extends HTMLElement
 
   getButtonClass: ->
     type = "btn-#{@model.getType()}"
-    if type == 'btn-fatal' then 'btn-error' else type
+    if type is 'btn-fatal' then 'btn-error' else type
 
 addSplitLinesToContainer = (container, content) ->
   for line in content.split('\n')

@@ -34,7 +34,7 @@ Notifications =
         """
         atom.notifications.addError(message, dismissable: true)
 
-      else if !atom.inDevMode() or atom.config.get('notifications.showErrorsInDevMode')
+      else if not atom.inDevMode() or atom.config.get('notifications.showErrorsInDevMode')
         preventDefault()
 
         # Ignore errors with no paths in them since they are impossible to trace
