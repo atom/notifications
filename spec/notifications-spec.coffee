@@ -164,7 +164,7 @@ describe "Notifications", ->
             text: 'Button One'
             className: 'btn-one'
             onDidClick: -> clicked.push 'one'
-          },{
+          }, {
             text: 'Button Two'
             className: 'btn-two'
             onDidClick: -> clicked.push 'two'

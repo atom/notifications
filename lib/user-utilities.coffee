@@ -84,7 +84,7 @@ module.exports =
       systemInfo = new BufferedProcess
         command: 'systeminfo'
         stdout: (oneLine) -> data.push(oneLine)
-        exit: =>
+        exit: ->
           info = data.join('\n')
           info = if (res = /OS.Name.\s+(.*)$/im.exec(info)) then res[1] else 'Unknown Windows Version'
           resolve(info)
@@ -146,11 +146,11 @@ module.exports =
         error: (error) -> reject(error)
 
   checkAtomUpToDate: ->
-    @getLatestAtomData().then (latestAtomData) =>
+    @getLatestAtomData().then (latestAtomData) ->
       installedVersion = atom.getVersion()?.replace(/-.*$/, '')
       latestVersion = latestAtomData.name
       upToDate = installedVersion? and semver.gte(installedVersion, latestVersion)
-      { upToDate, latestVersion, installedVersion }
+      {upToDate, latestVersion, installedVersion}
 
   getPackageVersion: (packageName) ->
     pack = atom.packages.getLoadedPackage(packageName)
@@ -183,4 +183,4 @@ module.exports =
         versionShippedWithAtom = @getPackageVersionShippedWithAtom(packageName)
         upToDate = installedVersion? and semver.gte(installedVersion, versionShippedWithAtom)
 
-      { isCore, upToDate, latestVersion, installedVersion, versionShippedWithAtom }
+      {isCore, upToDate, latestVersion, installedVersion, versionShippedWithAtom}
