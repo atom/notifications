@@ -1,6 +1,7 @@
 $ = require 'jquery'
 os = require 'os'
 fs = require 'fs'
+path = require 'path'
 semver = require 'semver'
 {BufferedProcess} = require 'atom'
 
@@ -24,6 +25,7 @@ module.exports =
       switch @getPlatform()
         when 'darwin' then resolve(@macVersionText())
         when 'win32' then resolve(@winVersionText())
+        when 'linux' then resolve(@linuxVersionText())
         else resolve("#{os.platform()} #{os.release()}")
 
   macVersionText: ->
@@ -52,13 +54,36 @@ module.exports =
         handle()
         resolve({})
 
+  linuxVersionText: ->
+    @linuxVersionInfo().then (info) ->
+      if info.DistroName and info.DistroVersion
+        "#{info.DistroName} #{info.DistroVersion}"
+      else
+        "#{os.platform()} #{os.release()}"
+
+  linuxVersionInfo: ->
+    new Promise (resolve, reject) ->
+      stdout = ''
+
+      lsbRelease = new BufferedProcess
+        command: 'lsb_release'
+        args: ['-ds']
+        stdout: (output) -> stdout += output
+        exit: (exitCode) ->
+          [DistroName, DistroVersion] = stdout.trim().split(' ')
+          resolve({DistroName, DistroVersion})
+
+      lsbRelease.onWillThrowError ({handle}) ->
+        handle()
+        resolve({})
+
   winVersionText: ->
     new Promise (resolve, reject) ->
       data = []
       systemInfo = new BufferedProcess
         command: 'systeminfo'
         stdout: (oneLine) -> data.push(oneLine)
-        exit: =>
+        exit: ->
           info = data.join('\n')
           info = if (res = /OS.Name.\s+(.*)$/im.exec(info)) then res[1] else 'Unknown Windows Version'
           resolve(info)
@@ -120,11 +145,11 @@ module.exports =
         error: (error) -> reject(error)
 
   checkAtomUpToDate: ->
-    @getLatestAtomData().then (latestAtomData) =>
+    @getLatestAtomData().then (latestAtomData) ->
       installedVersion = atom.getVersion()?.replace(/-.*$/, '')
       latestVersion = latestAtomData.name
       upToDate = installedVersion? and semver.gte(installedVersion, latestVersion)
-      { upToDate, latestVersion, installedVersion }
+      {upToDate, latestVersion, installedVersion}
 
   getPackageVersion: (packageName) ->
     pack = atom.packages.getLoadedPackage(packageName)
@@ -157,4 +182,4 @@ module.exports =
         versionShippedWithAtom = @getPackageVersionShippedWithAtom(packageName)
         upToDate = installedVersion? and semver.gte(installedVersion, versionShippedWithAtom)
 
-      { isCore, upToDate, latestVersion, installedVersion, versionShippedWithAtom }
+      {isCore, upToDate, latestVersion, installedVersion, versionShippedWithAtom}

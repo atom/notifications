@@ -4,12 +4,12 @@
 # Command names that are ignored and not included in the log. This uses an Object to provide fast
 # string matching.
 ignoredCommands =
-  'show.bs.tooltip':        yes
-  'shown.bs.tooltip':       yes
-  'hide.bs.tooltip':        yes
-  'hidden.bs.tooltip':      yes
+  'show.bs.tooltip': yes
+  'shown.bs.tooltip': yes
+  'hide.bs.tooltip': yes
+  'hidden.bs.tooltip': yes
   'editor:display-updated': yes
-  'mousewheel':             yes
+  'mousewheel': yes
 
 # Ten minutes in milliseconds.
 tenMinutes = 10 * 60 * 1000

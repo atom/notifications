@@ -1,5 +1,6 @@
 $ = require 'jquery'
 fs = require 'fs-plus'
+path = require 'path'
 temp = require('temp').track()
 {Notification} = require 'atom'
 NotificationElement = require '../lib/notification-element'
@@ -51,6 +52,8 @@ describe "Notifications", ->
       advanceClock(NotificationElement::animationDuration)
 
       notificationContainer = workspaceElement.querySelector('atom-notifications')
+      jasmine.attachToDOM(workspaceElement)
+
       spyOn($, 'ajax')
 
     it "adds an atom-notification element to the container with a class corresponding to the type", ->
@@ -61,6 +64,7 @@ describe "Notifications", ->
       expect(notificationContainer.childNodes.length).toBe 1
       expect(notification).toHaveClass 'success'
       expect(notification.querySelector('.message').textContent.trim()).toBe 'A message'
+      expect(notification.querySelector('.meta')).not.toBeVisible()
 
       atom.notifications.addInfo('A message')
       expect(notificationContainer.childNodes.length).toBe 2
@@ -171,6 +175,46 @@ describe "Notifications", ->
         advanceClock(NotificationElement::animationDuration)
         expect(notificationContainer.childNodes.length).toBe 0
 
+    describe "when the `description` option is used", ->
+      it "displays the description text in the .description element", ->
+        atom.notifications.addSuccess('A message', description: 'This is [a link](http://atom.io)')
+        notification = notificationContainer.querySelector('atom-notification.success')
+        expect(notification).toHaveClass('has-description')
+        expect(notification.querySelector('.meta')).toBeVisible()
+        expect(notification.querySelector('.description').textContent.trim()).toBe 'This is a link'
+        expect(notification.querySelector('.description a').href).toBe 'http://atom.io/'
+
+    describe "when the `buttons` options is used", ->
+      it "displays the buttons in the .description element", ->
+        clicked = []
+        atom.notifications.addSuccess 'A message',
+          buttons: [{
+            text: 'Button One'
+            className: 'btn-one'
+            onDidClick: -> clicked.push 'one'
+          }, {
+            text: 'Button Two'
+            className: 'btn-two'
+            onDidClick: -> clicked.push 'two'
+          }]
+
+        notification = notificationContainer.querySelector('atom-notification.success')
+        expect(notification).toHaveClass('has-buttons')
+        expect(notification.querySelector('.meta')).toBeVisible()
+
+        btnOne = notification.querySelector('.btn-one')
+        btnTwo = notification.querySelector('.btn-two')
+
+        expect(btnOne).toHaveClass 'btn-success'
+        expect(btnOne.textContent).toBe 'Button One'
+        expect(btnTwo).toHaveClass 'btn-success'
+        expect(btnTwo.textContent).toBe 'Button Two'
+
+        btnTwo.click()
+        btnOne.click()
+
+        expect(clicked).toEqual ['two', 'one']
+
     describe "when an exception is thrown", ->
       [notificationContainer, fatalError, issueBody] = []
       describe "when the editor is in dev mode", ->
@@ -183,6 +227,20 @@ describe "Notifications", ->
         it "does not display a notification", ->
           expect(notificationContainer.childNodes.length).toBe 0
           expect(fatalError).toBe null
+
+      describe "when the exception has no core or package paths in the stack trace", ->
+        it "does not display a notification", ->
+          atom.notifications.clear()
+          spyOn(atom, 'inDevMode').andReturn false
+          handler = jasmine.createSpy('onWillThrowErrorHandler')
+          atom.onWillThrowError(handler)
+          fs.readFile(__dirname)
+
+          waitsFor ->
+            handler.callCount is 1
+
+          runs ->
+            expect(atom.notifications.getNotifications().length).toBe 0
 
       describe "when there are multiple packages in the stack trace", ->
         beforeEach ->
