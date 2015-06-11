@@ -4,6 +4,7 @@ path = require 'path'
 temp = require('temp').track()
 {Notification} = require 'atom'
 NotificationElement = require '../lib/notification-element'
+NotificationIssue = require '../lib/notification-issue'
 
 describe "Notifications", ->
   [workspaceElement, activationPromise] = []
@@ -484,8 +485,10 @@ describe "Notifications", ->
           beforeEach ->
             generateFakeAjaxResponses
               packageResponse:
-                repository: url: 'https://github.com/someguy/notifications'
+                repository: url: 'https://github.com/someguy/somepackage'
                 releases: latest: '0.10.0'
+            spyOn(NotificationIssue.prototype, 'getPackageName').andCallFake -> "somepackage"
+            spyOn(NotificationIssue.prototype, 'getRepoUrl').andCallFake -> "https://github.com/someguy/somepackage"
             generateException()
             fatalError = notificationContainer.querySelector('atom-notification.fatal')
             waitsForPromise ->
@@ -505,8 +508,11 @@ describe "Notifications", ->
               packageResponse:
                 repository: url: 'https://github.com/atom/sort-lines'
                 releases: latest: '0.10.0'
+            spyOn(NotificationIssue.prototype, 'getPackageName').andCallFake -> "sort-lines"
+            spyOn(NotificationIssue.prototype, 'getRepoUrl').andCallFake -> "https://github.com/atom/sort-lines"
             generateException()
             fatalError = notificationContainer.querySelector('atom-notification.fatal')
+
             waitsForPromise ->
               fatalError.getRenderPromise().then -> issueBody = fatalError.issue.issueBody
 
