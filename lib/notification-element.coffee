@@ -255,7 +255,7 @@ class NotificationElement extends HTMLElement
 
   removeNotificationAfterTimeout: ->
     atom.workspace.getActivePane().activate() if this is document.activeElement
-    
+
     setTimeout =>
       @remove()
     , @animationDuration # keep in sync with CSS animation
