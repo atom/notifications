@@ -172,14 +172,13 @@ module.exports =
       installedVersion = @getPackageVersion(packageName)
       upToDate = installedVersion? and semver.gte(installedVersion, latestPackageData.releases.latest)
       latestVersion = latestPackageData.releases.latest
-      isCore = latestPackageData.repository.url.startsWith('https://github.com/atom/')
+      versionShippedWithAtom = @getPackageVersionShippedWithAtom(packageName)
 
-      if isCore
+      if isCore = versionShippedWithAtom?
         # A core package is out of date if the version which is being used
         # is lower than the version which normally ships with the version
         # of Atom which is running. This will happen when there's a locally
         # installed version of the package with a lower version than Atom's.
-        versionShippedWithAtom = @getPackageVersionShippedWithAtom(packageName)
         upToDate = installedVersion? and semver.gte(installedVersion, versionShippedWithAtom)
 
       {isCore, upToDate, latestVersion, installedVersion, versionShippedWithAtom}
