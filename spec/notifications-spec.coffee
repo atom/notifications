@@ -499,6 +499,25 @@ describe "Notifications", ->
             expect(fatalNotification.textContent).toContain 'Upgrading to the latest'
             expect(button.getAttribute('href')).toBe '#'
 
+        describe "when the package is an atom-owned non-core package", ->
+          beforeEach ->
+            generateFakeAjaxResponses
+              packageResponse:
+                repository: url: 'https://github.com/atom/sort-lines'
+                releases: latest: '0.10.0'
+            generateException()
+            fatalError = notificationContainer.querySelector('atom-notification.fatal')
+            waitsForPromise ->
+              fatalError.getRenderPromise().then -> issueBody = fatalError.issue.issueBody
+
+          it "asks the user to update their packages", ->
+            fatalNotification = fatalError.querySelector('.fatal-notification')
+            button = fatalError.querySelector('.btn')
+
+            expect(button.textContent).toContain 'Check for package updates'
+            expect(fatalNotification.textContent).toContain 'Upgrading to the latest'
+            expect(button.getAttribute('href')).toBe '#'
+
         describe "when the package is a core package", ->
           beforeEach ->
             generateFakeAjaxResponses
