@@ -6,7 +6,7 @@ StackTraceParser = require 'stacktrace-parser'
 CommandLogger = require './command-logger'
 UserUtilities = require './user-utilities'
 
-TRUNCATE_TITLE_TO = 100 # truncate issue title to 100 characters
+TITLE_CHAR_LIMIT = 100 # Truncate issue title to 100 characters
 
 module.exports =
 class NotificationIssue
@@ -55,8 +55,8 @@ class NotificationIssue
 
   getIssueTitle: ->
     title = @notification.getMessage()
-    if title.length > TRUNCATE_TITLE_TO
-      title = title.substring(0, TRUNCATE_TITLE_TO-3) + '...'
+    if title.length > TITLE_CHAR_LIMIT
+      title = title.substring(0, TITLE_CHAR_LIMIT - 3) + '...'
     title
 
   getIssueBody: ->
