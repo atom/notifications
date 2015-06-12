@@ -6,6 +6,8 @@ StackTraceParser = require 'stacktrace-parser'
 CommandLogger = require './command-logger'
 UserUtilities = require './user-utilities'
 
+TITLE_CHAR_LIMIT = 100 # Truncate issue title to 100 characters (including ellipsis)
+
 module.exports =
 class NotificationIssue
   constructor: (@notification) ->
@@ -52,7 +54,10 @@ class NotificationIssue
       "#{repoUrl}/issues/new?title=#{@encodeURI(@getIssueTitle())}&body=#{@encodeURI(issueBody)}"
 
   getIssueTitle: ->
-    @notification.getMessage()
+    title = @notification.getMessage()
+    if title.length > TITLE_CHAR_LIMIT
+      title = title.substring(0, TITLE_CHAR_LIMIT - 3) + '...'
+    title
 
   getIssueBody: ->
     new Promise (resolve, reject) =>
