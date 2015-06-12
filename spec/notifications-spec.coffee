@@ -443,27 +443,31 @@ describe "Notifications", ->
         beforeEach ->
           spyOn(atom, 'inDevMode').andReturn false
 
-        describe "when the message is bigger than 100 characters", ->
-          MESSAGE = "Uncaught Error: Cannot find module 'dialog'Error: Cannot find module 'dialog' at Function.Module._resolveFilename (module.js:351:15) at Function.Module._load (module.js:293:25) at Module.require (module.js:380:17) at EventEmitter.<anonymous> (/Applications/Atom.app/Contents/Resources/atom/browser/lib/rpc-server.js:128:79) at EventEmitter.emit (events.js:119:17) at EventEmitter.<anonymous> (/Applications/Atom.app/Contents/Resources/atom/browser/api/lib/web-contents.js:99:23) at EventEmitter.emit (events.js:119:17)"
-          TRUNCATED = "Uncaught Error: Cannot find module 'dialog'Error: Cannot find module 'dialog' at Function.Module...."
+        describe "when the message is longer than 100 characters", ->
+          message = "Uncaught Error: Cannot find module 'dialog'Error: Cannot find module 'dialog' at Function.Module._resolveFilename (module.js:351:15) at Function.Module._load (module.js:293:25) at Module.require (module.js:380:17) at EventEmitter.<anonymous> (/Applications/Atom.app/Contents/Resources/atom/browser/lib/rpc-server.js:128:79) at EventEmitter.emit (events.js:119:17) at EventEmitter.<anonymous> (/Applications/Atom.app/Contents/Resources/atom/browser/api/lib/web-contents.js:99:23) at EventEmitter.emit (events.js:119:17)"
+          truncatedMessage = "Uncaught Error: Cannot find module 'dialog'Error: Cannot find module 'dialog' at Function.Module...."
+
           beforeEach ->
             generateFakeAjaxResponses()
             try
               a + 1
             catch e
               e.code = 'Error'
-              e.message = MESSAGE
+              e.message = message
               window.onerror.call(window, e.message, 'abc', 2, 3, e)
 
           it "truncates the issue title to 100 characters", ->
             fatalError = notificationContainer.querySelector('atom-notification.fatal')
+
             waitsForPromise ->
               fatalError.getRenderPromise()
+
             runs ->
               button = fatalError.querySelector('.btn')
-              encodedMessage = encodeURI(TRUNCATED)
+              encodedMessage = encodeURI(truncatedMessage)
               expect(button.textContent).toContain 'Create issue'
               expect(button.getAttribute('href')).toContain "github.com/atom/notifications/issues/new?title=#{encodedMessage}&body="
+
         describe "when the system is darwin", ->
           beforeEach ->
             generateFakeAjaxResponses()
