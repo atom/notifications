@@ -6,7 +6,7 @@ StackTraceParser = require 'stacktrace-parser'
 CommandLogger = require './command-logger'
 UserUtilities = require './user-utilities'
 
-TITLE_CHAR_LIMIT = 100 # Truncate issue title to 100 characters
+TITLE_CHAR_LIMIT = 100 # Truncate issue title to 100 characters (including ellipsis)
 
 module.exports =
 class NotificationIssue
