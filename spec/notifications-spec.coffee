@@ -83,6 +83,27 @@ describe "Notifications", ->
       expect(notificationContainer.childNodes.length).toBe 5
       expect(notificationContainer.querySelector('atom-notification.fatal')).toBeDefined()
 
+    it "displays notification with a detail when a detail is specified", ->
+      atom.notifications.addInfo('A message', detail: 'Some detail')
+      notification = notificationContainer.childNodes[0]
+      expect(notification.querySelector('.detail').textContent).toContain 'Some detail'
+
+      atom.notifications.addInfo('A message', detail: null)
+      notification = notificationContainer.childNodes[1]
+      expect(notification.querySelector('.detail')).not.toBeVisible()
+
+      atom.notifications.addInfo('A message', detail: 1)
+      notification = notificationContainer.childNodes[2]
+      expect(notification.querySelector('.detail').textContent).toContain '1'
+
+      atom.notifications.addInfo('A message', detail: {something: 'ok'})
+      notification = notificationContainer.childNodes[3]
+      expect(notification.querySelector('.detail').textContent).toContain 'Object'
+
+      atom.notifications.addInfo('A message', detail: ['cats', 'ok'])
+      notification = notificationContainer.childNodes[4]
+      expect(notification.querySelector('.detail').textContent).toContain 'cats,ok'
+
     describe "when a dismissable notification is added", ->
       it "is removed when Notification::dismiss() is called", ->
         notification = atom.notifications.addSuccess('A message', dismissable: true)

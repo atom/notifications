@@ -265,6 +265,7 @@ class NotificationElement extends HTMLElement
     if type is 'btn-fatal' then 'btn-error' else type
 
 addSplitLinesToContainer = (container, content) ->
+  content = content.toString() if typeof content isnt 'string'
   for line in content.split('\n')
     div = document.createElement('div')
     div.classList.add 'line'
