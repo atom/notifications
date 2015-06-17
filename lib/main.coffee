@@ -87,6 +87,7 @@ Notifications =
       Notifications.notificationsPanel = atom.workspace.addBottomPanel(item: Notifications.notificationsPanelView.getElement())
 
   addNotificationView: (notification) ->
+    return unless notification?
     @initializeIfNotInitialized()
     return if notification.wasDisplayed()
 
