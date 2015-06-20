@@ -707,12 +707,9 @@ describe "Notifications", ->
 
         describe "when the binary has no path", ->
           beforeEach ->
-            try
-              a + 1
-            catch e
-              e.code = 'ENOENT'
-              message = 'Error: spawn some_binary ENOENT'
-              window.onerror.call(window, message, 'abc', 2, 3, e)
+            error = new Error('Error: spawn some_binary ENOENT')
+            error.code = 'ENOENT'
+            window.onerror.call(window, error.message, 'abc', 2, 3, error)
 
           it "displays a dismissable error without the stack trace", ->
             notificationContainer = workspaceElement.querySelector('atom-notifications')
