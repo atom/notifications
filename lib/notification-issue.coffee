@@ -156,8 +156,7 @@ class NotificationIssue
           repo = JSON.parse(fs.readFileSync(path.join(packagePath, 'package.json')))?.repository
           repoUrl = repo?.url ? repo
 
-    repoUrl = repoUrl?.replace(/\.git$/, '')
-    repoUrl
+    repoUrl?.replace(/\.git$/, '').replace(/^git\+/, '')
 
   getPackageNameFromFilePath: (filePath) ->
     return unless filePath
