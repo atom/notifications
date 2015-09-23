@@ -494,7 +494,9 @@ describe "Notifications", ->
             fatalError.getRenderPromise().then -> issueBody = fatalError.issue.issueBody
 
           button = fatalError.querySelector('.btn')
+          fatalNotification = fatalError.querySelector('.fatal-notification')
           expect(button.textContent).toContain 'Create issue'
+          expect(fatalNotification.textContent).toContain 'You can help by creating an issue'
           expect(button.getAttribute('href')).toContain 'git.io'
 
       describe "when the package is out of date", ->
