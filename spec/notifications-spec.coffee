@@ -311,7 +311,6 @@ describe "Notifications", ->
 
             button = fatalError.querySelector('.btn')
             expect(button.textContent).toContain 'Create issue on the notifications package'
-            expect(button.getAttribute('href')).toContain 'atom/notifications/issues/new'
 
             expect(issueBody).toMatch /Atom Version\*\*: [0-9].[0-9]+.[0-9]+/ig
             expect(issueBody).not.toMatch /Unknown/ig
@@ -419,7 +418,6 @@ describe "Notifications", ->
 
           button = fatalError.querySelector('.btn')
           expect(button.textContent).toContain 'Create issue on atom/atom'
-          expect(button.getAttribute('href')).toContain 'atom/atom/issues/new'
 
           expect(issueBody).toContain 'ReferenceError: a is not defined'
           expect(issueBody).toContain '**Thrown From**: Atom Core'
@@ -458,7 +456,6 @@ describe "Notifications", ->
           fatalNotification = fatalError.querySelector('.fatal-notification')
           expect(button.textContent).toContain 'Create issue'
           expect(fatalNotification.textContent).toContain 'You can help by creating an issue'
-          expect(button.getAttribute('href')).toContain 'github.com/atom/notifications/issues/new'
 
       describe "when the error has not been reported", ->
         beforeEach ->
@@ -487,38 +484,19 @@ describe "Notifications", ->
               button = fatalError.querySelector('.btn')
               encodedMessage = encodeURI(truncatedMessage)
               expect(button.textContent).toContain 'Create issue'
-              expect(button.getAttribute('href')).toContain "github.com/atom/notifications/issues/new?title=#{encodedMessage}&body="
 
-        describe "when the system is darwin", ->
-          beforeEach ->
-            generateFakeAjaxResponses()
-            generateException()
-            fatalError = notificationContainer.querySelector('atom-notification.fatal')
-            waitsForPromise ->
-              fatalError.getRenderPromise().then -> issueBody = fatalError.issue.issueBody
+        it "asks the user to create an issue", ->
+          generateFakeAjaxResponses()
+          generateException()
+          fatalError = notificationContainer.querySelector('atom-notification.fatal')
+          waitsForPromise ->
+            fatalError.getRenderPromise().then -> issueBody = fatalError.issue.issueBody
 
-          it "asks the user to create an issue", ->
-            button = fatalError.querySelector('.btn')
-            fatalNotification = fatalError.querySelector('.fatal-notification')
-            expect(button.textContent).toContain 'Create issue'
-            expect(fatalNotification.textContent).toContain 'You can help by creating an issue'
-            expect(button.getAttribute('href')).toContain 'github.com/atom/notifications/issues/new'
-
-        describe "when the system is win32", ->
-          beforeEach ->
-            UserUtilities = require '../lib/user-utilities'
-            spyOn(UserUtilities, 'getPlatform').andReturn 'win32'
-
-            generateFakeAjaxResponses()
-            generateException()
-            fatalError = notificationContainer.querySelector('atom-notification.fatal')
-            waitsForPromise ->
-              fatalError.getRenderPromise().then -> issueBody = fatalError.issue.issueBody
-
-          it "uses a shortened url via git.io", ->
-            button = fatalError.querySelector('.btn')
-            expect(button.textContent).toContain 'Create issue'
-            expect(button.getAttribute('href')).toContain 'git.io'
+          button = fatalError.querySelector('.btn')
+          fatalNotification = fatalError.querySelector('.fatal-notification')
+          expect(button.textContent).toContain 'Create issue'
+          expect(fatalNotification.textContent).toContain 'You can help by creating an issue'
+          expect(button.getAttribute('href')).toContain 'git.io'
 
       describe "when the package is out of date", ->
         beforeEach ->
