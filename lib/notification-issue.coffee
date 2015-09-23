@@ -35,26 +35,19 @@ class NotificationIssue
           resolve(null)
         error: -> resolve(null)
 
-  getIssueUrlForSystem: ->
-    new Promise (resolve, reject) =>
-      @getIssueUrl().then (issueUrl) ->
-        if UserUtilities.getPlatform() is 'win32'
-          # win32 can only handle a 2048 length link, so we use the shortener.
-          $.ajax 'http://git.io',
-            type: 'POST'
-            data: url: issueUrl
-            success: (data, status, xhr) ->
-              resolve(xhr.getResponseHeader('Location'))
-            error: -> resolve(issueUrl)
-        else
-          resolve(issueUrl)
-      return
-
   getIssueUrl: ->
-    @getIssueBody().then (issueBody) =>
-      repoUrl = @getRepoUrl()
-      repoUrl = 'https://github.com/atom/atom' unless repoUrl?
-      "#{repoUrl}/issues/new?title=#{@encodeURI(@getIssueTitle())}&body=#{@encodeURI(issueBody)}"
+    new Promise (resolve, reject) =>
+      @getIssueBody().then (issueBody) =>
+        repoUrl = @getRepoUrl()
+        repoUrl = 'https://github.com/atom/atom' unless repoUrl?
+        issueUrl = "#{repoUrl}/issues/new?title=#{@encodeURI(@getIssueTitle())}&body=#{@encodeURI(issueBody)}"
+        $.ajax 'http://git.io', # Shorten the URL length so we don't hit '414 Request-URI Too Large' errors
+          type: 'POST'
+          data: url: issueUrl
+          success: (data, status, xhr) ->
+            resolve(xhr.getResponseHeader('Location'))
+          error: -> resolve(issueUrl)
+      return
 
   getIssueTitle: ->
     title = @notification.getMessage()

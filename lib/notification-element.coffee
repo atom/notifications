@@ -168,7 +168,7 @@ class NotificationElement extends HTMLElement
 
       promises = []
       promises.push @issue.findSimilarIssues()
-      promises.push @issue.getIssueUrlForSystem()
+      promises.push @issue.getIssueUrl()
       promises.push UserUtilities.checkAtomUpToDate()
       promises.push UserUtilities.checkPackageUpToDate(packageName) if packageName?
 
