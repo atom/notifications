@@ -311,7 +311,10 @@ describe "Notifications", ->
 
             button = fatalError.querySelector('.btn')
             expect(button.textContent).toContain 'Create issue on the notifications package'
-            expect(button.getAttribute('href')).toContain 'atom/notifications/issues/new'
+            unless process.platform is 'win32'
+              expect(button.getAttribute('href')).toContain 'atom/notifications/issues/new'
+            else
+              expect(button.getAttribute('href')).toContain 'git.io/cats'
 
             expect(issueBody).toMatch /Atom Version\*\*: [0-9].[0-9]+.[0-9]+/ig
             expect(issueBody).not.toMatch /Unknown/ig
@@ -376,7 +379,8 @@ describe "Notifications", ->
             a + 1
           catch e
             # Pull the file path from the stack
-            filePath = e.stack.split('\n')[1].match(/\(([^:]+)/)[1]
+            # For Windows we have to ignore the starting drive letter (eg C:\)
+            filePath = e.stack.split('\n')[1].match(/\(((\w:\\)[^:]+|([^:]+))/)[1]
             window.onerror.call(window, e.toString(), filePath, 2, 3, message: e.toString(), stack: undefined)
 
           notificationContainer = workspaceElement.querySelector('atom-notifications')
@@ -419,7 +423,10 @@ describe "Notifications", ->
 
           button = fatalError.querySelector('.btn')
           expect(button.textContent).toContain 'Create issue on atom/atom'
-          expect(button.getAttribute('href')).toContain 'atom/atom/issues/new'
+          unless process.platform is 'win32'
+            expect(button.getAttribute('href')).toContain 'atom/atom/issues/new'
+          else
+            expect(button.getAttribute('href')).toContain 'git.io/cats'
 
           expect(issueBody).toContain 'ReferenceError: a is not defined'
           expect(issueBody).toContain '**Thrown From**: Atom Core'
@@ -458,7 +465,10 @@ describe "Notifications", ->
           fatalNotification = fatalError.querySelector('.fatal-notification')
           expect(button.textContent).toContain 'Create issue'
           expect(fatalNotification.textContent).toContain 'You can help by creating an issue'
-          expect(button.getAttribute('href')).toContain 'github.com/atom/notifications/issues/new'
+          unless process.platform is 'win32'
+            expect(button.getAttribute('href')).toContain 'github.com/atom/notifications/issues/new'
+          else
+            expect(button.getAttribute('href')).toContain 'git.io/cats'
 
       describe "when the error has not been reported", ->
         beforeEach ->
@@ -487,10 +497,16 @@ describe "Notifications", ->
               button = fatalError.querySelector('.btn')
               encodedMessage = encodeURI(truncatedMessage)
               expect(button.textContent).toContain 'Create issue'
-              expect(button.getAttribute('href')).toContain "github.com/atom/notifications/issues/new?title=#{encodedMessage}&body="
+              unless process.platform is 'win32'
+                expect(button.getAttribute('href')).toContain "github.com/atom/notifications/issues/new?title=#{encodedMessage}&body="
+              else
+                expect(button.getAttribute('href')).toContain 'git.io/cats'
 
         describe "when the system is darwin", ->
           beforeEach ->
+            UserUtilities = require '../lib/user-utilities'
+            spyOn(UserUtilities, 'getPlatform').andReturn 'darwin'
+
             generateFakeAjaxResponses()
             generateException()
             fatalError = notificationContainer.querySelector('atom-notification.fatal')
