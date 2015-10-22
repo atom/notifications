@@ -12,6 +12,7 @@ Notifications =
     showErrorsInDevMode:
       type: 'boolean'
       default: false
+      description: 'Show notifications for uncaught exceptions even if Atom is running in dev mode. If this config setting is disabled, uncaught exceptions will trigger the dev tools to open and be logged in the console tab.'
 
   activate: (state) ->
     CommandLogger = require './command-logger'
