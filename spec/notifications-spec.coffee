@@ -448,6 +448,53 @@ describe "Notifications", ->
             expect(fatalError.innerHTML).toContain "<a href=\"https://github.com/atom/notifications\">broken-load package</a>"
             expect(fatalError.issue.getPackageName()).toBe 'broken-load'
 
+      describe "when an exception is thrown from a package trying to load a grammar", ->
+        beforeEach ->
+          spyOn(atom, 'inDevMode').andReturn false
+          generateFakeAjaxResponses()
+
+          packagesDir = temp.mkdirSync('atom-packages-')
+          atom.packages.packageDirPaths.push(path.join(packagesDir, '.atom', 'packages'))
+          packageDir = path.join(packagesDir, '.atom', 'packages', 'language-broken-grammar')
+          fs.writeFileSync path.join(packageDir, 'package.json'), """
+            {
+              "name": "language-broken-grammar",
+              "version": "1.0.0",
+              "repository": "https://github.com/atom/notifications"
+            }
+          """
+
+          stack = """
+            Unexpected string
+              at nodeTransforms.Literal (/usr/share/atom/resources/app/node_modules/season/node_modules/cson-parser/lib/parse.js:100:15)
+              at #{path.join('packageDir', 'grammars', 'broken-grammar.cson')}:1:1
+          """
+          detail = """
+            At Syntax error on line 241, column 18: evalmachine.<anonymous>:1
+            "#\\{" "end": "\\}"
+                   ^^^^^
+            Unexpected string in #{path.join('packageDir', 'grammars', 'broken-grammar.cson')}
+
+            SyntaxError: Syntax error on line 241, column 18: evalmachine.<anonymous>:1
+            "#\\{" "end": "\\}"
+                   ^^^^^
+          """
+          message = "Failed to load a language-broken-grammar package grammar"
+          atom.notifications.addFatalError(message, {stack, detail, dismissable: true})
+          notificationContainer = workspaceElement.querySelector('atom-notifications')
+          fatalError = notificationContainer.querySelector('atom-notification.fatal')
+
+        it "displays a fatal error with the package name in the error", ->
+          waitsForPromise ->
+            fatalError.getRenderPromise()
+
+          runs ->
+            expect(notificationContainer.childNodes.length).toBe 1
+            expect(fatalError).toHaveClass 'has-close'
+            expect(fatalError.innerHTML).toContain "Failed to load a language-broken-grammar package grammar"
+            expect(fatalError.innerHTML).toContain "<a href=\"https://github.com/atom/notifications\">language-broken-grammar package</a>"
+            expect(fatalError.issue.getPackageName()).toBe 'language-broken-grammar'
+
       describe "when an exception is thrown from a package trying to activate", ->
         beforeEach ->
           spyOn(atom, 'inDevMode').andReturn false

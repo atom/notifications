@@ -191,7 +191,7 @@ class NotificationIssue
           return packName unless /^\.\./.test(relativePath)
       @getPackageNameFromFilePath(filePath)
 
-    packageName = /Failed to (load|activate) the (.*) package/.exec(message)?[2]
+    packageName = /Failed to (load|activate) (the|a) (.*) package/.exec(message)?[3]
     return packageName if packageName?
 
     if options.detail? and packageName = getPackageName(options.detail)
