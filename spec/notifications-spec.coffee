@@ -379,7 +379,7 @@ describe "Notifications", ->
             a + 1
           catch e
             # Pull the file path from the stack
-            filePath = e.stack.split('\n')[1].match(/\((.+?):\d+(:\d+)?/)[1]
+            filePath = e.stack.split('\n')[1].match(/\((.+?):\d+/)[1]
             window.onerror.call(window, e.toString(), filePath, 2, 3, message: e.toString(), stack: undefined)
 
           notificationContainer = workspaceElement.querySelector('atom-notifications')

@@ -191,7 +191,7 @@ class NotificationIssue
       @getPackageNameFromFilePath(filePath)
 
     if options.detail?
-      file = /(.*)(:\d)?/.exec(options.detail)?[1]
+      file = /(\((.+?):\d+|\((.+)\)|(.+))/.exec(options.detail)[1]
 
       # Stack traces may be a file URI
       if /file:\/\/(\w*)\/(.*)/.test(file)
