@@ -352,7 +352,7 @@ describe "Notifications", ->
               "repository": "https://github.com/atom/notifications"
             }
           """
-          atom.packages.loadPackage('linked-package')
+          atom.packages.enablePackage('linked-package')
 
           stack = """
             ReferenceError: path is not defined
