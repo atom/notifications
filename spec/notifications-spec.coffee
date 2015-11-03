@@ -370,6 +370,74 @@ describe "Notifications", ->
             expect(fatalError.innerHTML).toContain "<a href=\"https://github.com/atom/notifications\">unloaded package</a>"
             expect(fatalError.issue.getPackageName()).toBe 'unloaded'
 
+      describe "when an exception is thrown from a package trying to load", ->
+        beforeEach ->
+          spyOn(atom, 'inDevMode').andReturn false
+          generateFakeAjaxResponses()
+
+          packagesDir = temp.mkdirSync('atom-packages-')
+          atom.packages.packageDirPaths.push(path.join(packagesDir, '.atom', 'packages'))
+          packageDir = path.join(packagesDir, '.atom', 'packages', 'broken-load')
+          fs.writeFileSync path.join(packageDir, 'package.json'), """
+            {
+              "name": "broken-load",
+              "version": "1.0.0",
+              "repository": "https://github.com/atom/notifications"
+            }
+          """
+
+          stack = "TypeError: Cannot read property 'prototype' of undefined\n  at __extends (<anonymous>:1:1)\n  at Object.defineProperty.value [as .coffee] (/Applications/Atom.app/Contents/Resources/app.asar/src/compile-cache.js:169:21)"
+          detail = "TypeError: Cannot read property 'prototype' of undefined"
+          message = "Failed to load the broken-load package"
+          atom.notifications.addFatalError(message, {stack, detail, dismissable: true})
+          notificationContainer = workspaceElement.querySelector('atom-notifications')
+          fatalError = notificationContainer.querySelector('atom-notification.fatal')
+
+        it "displays a fatal error with the package name in the error", ->
+          waitsForPromise ->
+            fatalError.getRenderPromise()
+
+          runs ->
+            expect(notificationContainer.childNodes.length).toBe 1
+            expect(fatalError).toHaveClass 'has-close'
+            expect(fatalError.innerHTML).toContain "TypeError: Cannot read property 'prototype' of undefined"
+            expect(fatalError.innerHTML).toContain "<a href=\"https://github.com/atom/notifications\">broken-load package</a>"
+            expect(fatalError.issue.getPackageName()).toBe 'broken-load'
+
+      describe "when an exception is thrown from a package trying to activate", ->
+        beforeEach ->
+          spyOn(atom, 'inDevMode').andReturn false
+          generateFakeAjaxResponses()
+
+          packagesDir = temp.mkdirSync('atom-packages-')
+          atom.packages.packageDirPaths.push(path.join(packagesDir, '.atom', 'packages'))
+          packageDir = path.join(packagesDir, '.atom', 'packages', 'broken-activation')
+          fs.writeFileSync path.join(packageDir, 'package.json'), """
+            {
+              "name": "broken-activation",
+              "version": "1.0.0",
+              "repository": "https://github.com/atom/notifications"
+            }
+          """
+
+          stack = "TypeError: Cannot read property 'command' of undefined\n  at Object.module.exports.activate (<anonymous>:7:23)\n  at Package.module.exports.Package.activateNow (/Applications/Atom.app/Contents/Resources/app.asar/src/package.js:232:19)"
+          detail = "TypeError: Cannot read property 'command' of undefined"
+          message = "Failed to activate the broken-activation package"
+          atom.notifications.addFatalError(message, {stack, detail, dismissable: true})
+          notificationContainer = workspaceElement.querySelector('atom-notifications')
+          fatalError = notificationContainer.querySelector('atom-notification.fatal')
+
+        it "displays a fatal error with the package name in the error", ->
+          waitsForPromise ->
+            fatalError.getRenderPromise()
+
+          runs ->
+            expect(notificationContainer.childNodes.length).toBe 1
+            expect(fatalError).toHaveClass 'has-close'
+            expect(fatalError.innerHTML).toContain "TypeError: Cannot read property 'command' of undefined"
+            expect(fatalError.innerHTML).toContain "<a href=\"https://github.com/atom/notifications\">broken-activation package</a>"
+            expect(fatalError.issue.getPackageName()).toBe 'broken-activation'
+
       describe "when an exception is thrown from a package without a trace, but with a URL", ->
         beforeEach ->
           issueBody = null
