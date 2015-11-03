@@ -368,7 +368,7 @@ describe "Notifications", ->
           notificationContainer = workspaceElement.querySelector('atom-notifications')
           fatalError = notificationContainer.querySelector('atom-notification.fatal')
 
-        fit "displays a fatal error with the package name in the error", ->
+        it "displays a fatal error with the package name in the error", ->
           waitsForPromise ->
             fatalError.getRenderPromise()
 
