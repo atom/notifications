@@ -335,6 +335,50 @@ describe "Notifications", ->
             expect(issueBody).toContain '"notifications":'
             expect(issueBody).not.toContain '"editor":'
 
+      describe "when an exception is thrown from a linked package", ->
+        beforeEach ->
+          spyOn(atom, 'inDevMode').andReturn false
+          generateFakeAjaxResponses()
+
+          packagesDir = path.join(temp.mkdirSync('atom-packages-'), '.atom', 'packages')
+          atom.packages.packageDirPaths.push(packagesDir)
+          packageDir = path.join(packagesDir, '..', '..', 'github', 'linked-package')
+          fs.makeTreeSync path.dirname(path.join(packagesDir, 'linked-package'))
+          fs.symlinkSync(packageDir, path.join(packagesDir, 'linked-package'), 'junction')
+          fs.writeFileSync path.join(packageDir, 'package.json'), """
+            {
+              "name": "linked-package",
+              "version": "1.0.0",
+              "repository": "https://github.com/atom/notifications"
+            }
+          """
+          atom.packages.loadPackage('linked-package')
+
+          stack = """
+            ReferenceError: path is not defined
+              at Object.module.exports.LinkedPackage.wow (#{path.join(packageDir, 'linked-package.coffee')}:29:15)
+              at atom-workspace.subscriptions.add.atom.commands.add.linked-package:wow (#{path.join(packageDir, 'linked-package.coffee')}:18:102)
+              at CommandRegistry.module.exports.CommandRegistry.handleCommandEvent (/Applications/Atom.app/Contents/Resources/app/src/command-registry.js:238:29)
+              at /Applications/Atom.app/Contents/Resources/app/src/command-registry.js:3:61
+              at CommandPaletteView.module.exports.CommandPaletteView.confirmed (/Applications/Atom.app/Contents/Resources/app/node_modules/command-palette/lib/command-palette-view.js:159:32)
+          """
+          detail = "At #{path.join(packageDir, 'linked-package.coffee')}:41"
+          message = "Uncaught ReferenceError: path is not defined"
+          atom.notifications.addFatalError(message, {stack, detail, dismissable: true})
+          notificationContainer = workspaceElement.querySelector('atom-notifications')
+          fatalError = notificationContainer.querySelector('atom-notification.fatal')
+
+        fit "displays a fatal error with the package name in the error", ->
+          waitsForPromise ->
+            fatalError.getRenderPromise()
+
+          runs ->
+            expect(notificationContainer.childNodes.length).toBe 1
+            expect(fatalError).toHaveClass 'has-close'
+            expect(fatalError.innerHTML).toContain "Uncaught ReferenceError: path is not defined"
+            expect(fatalError.innerHTML).toContain "<a href=\"https://github.com/atom/notifications\">linked-package package</a>"
+            expect(fatalError.issue.getPackageName()).toBe 'linked-package'
+
       describe "when an exception is thrown from an unloaded package", ->
         beforeEach ->
           spyOn(atom, 'inDevMode').andReturn false

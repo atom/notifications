@@ -180,7 +180,7 @@ class NotificationIssue
 
     packagePaths = @getPackagePathsByPackageName()
     for packageName, packagePath of packagePaths
-      if packagePath.indexOf('.atom/dev/packages') > -1 or packagePath.indexOf('.atom/packages') > -1
+      if packagePath.indexOf(path.join('.atom', 'dev', 'packages')) > -1 or packagePath.indexOf(path.join('.atom', 'packages')) > -1
         packagePaths[packageName] = fs.realpathSync(packagePath)
 
     getPackageName = (filePath) =>
