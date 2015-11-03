@@ -190,8 +190,15 @@ class NotificationIssue
           return packName unless /^\.\./.test(relativePath)
       @getPackageNameFromFilePath(filePath)
 
-    if options.detail? and packageName = getPackageName(options.detail)
-      return packageName
+    if options.detail?
+      file = /(.*)(:\d)?/.exec(options.detail)?[1]
+
+      # Stack traces may be a file URI
+      if /file:\/\/(\w*)\/(.*)/.test(file)
+        file = /file:\/\/(\w*)\/(.*)/.exec(file)[2]
+
+      packageName = getPackageName(file)
+      return packageName if packageName?
 
     if options.stack?
       stack = StackTraceParser.parse(options.stack)
@@ -200,6 +207,11 @@ class NotificationIssue
 
         # Empty when it was run from the dev console
         return unless file
+
+        # Stack traces may be a file URI
+        if /file:\/\/(\w*)\/(.*)/.test(file)
+          file = /file:\/\/(\w*)\/(.*)/.exec(file)[2]
+
         packageName = getPackageName(file)
         return packageName if packageName?
 
