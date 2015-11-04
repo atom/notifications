@@ -174,9 +174,8 @@ class NotificationIssue
     return packageName if packageName
 
   getPackageName: ->
-    message = @notification.getMessage()
     options = @notification.getOptions()
-    return unless message? or options.stack? or options.detail?
+    return unless options.stack? or options.detail? or options.packageName?
 
     packagePaths = @getPackagePathsByPackageName()
     for packageName, packagePath of packagePaths
@@ -191,8 +190,7 @@ class NotificationIssue
           return packName unless /^\.\./.test(relativePath)
       @getPackageNameFromFilePath(filePath)
 
-    packageName = /Failed to (load|activate) (the|a) (.*) package/.exec(message)?[3]
-    return packageName if packageName?
+    return options.packageName if options.packageName?
 
     if options.detail? and packageName = getPackageName(options.detail)
       return packageName

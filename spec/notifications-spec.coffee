@@ -433,7 +433,7 @@ describe "Notifications", ->
           stack = "TypeError: Cannot read property 'prototype' of undefined\n  at __extends (<anonymous>:1:1)\n  at Object.defineProperty.value [as .coffee] (/Applications/Atom.app/Contents/Resources/app.asar/src/compile-cache.js:169:21)"
           detail = "TypeError: Cannot read property 'prototype' of undefined"
           message = "Failed to load the broken-load package"
-          atom.notifications.addFatalError(message, {stack, detail, dismissable: true})
+          atom.notifications.addFatalError(message, {stack, detail, packageName: 'broken-load', dismissable: true})
           notificationContainer = workspaceElement.querySelector('atom-notifications')
           fatalError = notificationContainer.querySelector('atom-notification.fatal')
 
@@ -480,7 +480,7 @@ describe "Notifications", ->
                    ^^^^^
           """
           message = "Failed to load a language-broken-grammar package grammar"
-          atom.notifications.addFatalError(message, {stack, detail, dismissable: true})
+          atom.notifications.addFatalError(message, {stack, detail, packageName: 'language-broken-grammar', dismissable: true})
           notificationContainer = workspaceElement.querySelector('atom-notifications')
           fatalError = notificationContainer.querySelector('atom-notification.fatal')
 
@@ -514,7 +514,7 @@ describe "Notifications", ->
           stack = "TypeError: Cannot read property 'command' of undefined\n  at Object.module.exports.activate (<anonymous>:7:23)\n  at Package.module.exports.Package.activateNow (/Applications/Atom.app/Contents/Resources/app.asar/src/package.js:232:19)"
           detail = "TypeError: Cannot read property 'command' of undefined"
           message = "Failed to activate the broken-activation package"
-          atom.notifications.addFatalError(message, {stack, detail, dismissable: true})
+          atom.notifications.addFatalError(message, {stack, detail, packageName: 'broken-activation', dismissable: true})
           notificationContainer = workspaceElement.querySelector('atom-notifications')
           fatalError = notificationContainer.querySelector('atom-notification.fatal')
 
