@@ -175,7 +175,9 @@ class NotificationIssue
 
   getPackageName: ->
     options = @notification.getOptions()
-    return unless options.stack? or options.detail? or options.packageName?
+
+    return options.packageName if options.packageName?
+    return unless options.stack? or options.detail?
 
     packagePaths = @getPackagePathsByPackageName()
     for packageName, packagePath of packagePaths
@@ -189,8 +191,6 @@ class NotificationIssue
           relativePath = path.relative(packagePath, filePath)
           return packName unless /^\.\./.test(relativePath)
       @getPackageNameFromFilePath(filePath)
-
-    return options.packageName if options.packageName?
 
     if options.detail? and packageName = getPackageName(options.detail)
       return packageName
