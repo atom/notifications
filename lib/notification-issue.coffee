@@ -183,6 +183,12 @@ class NotificationIssue
         packagePaths[packageName] = fs.realpathSync(packagePath)
 
     getPackageName = (filePath) =>
+      filePath = /(\((.+?):\d+|\((.+)\)|(.+))/.exec(filePath)[1]
+
+      # Stack traces may be a file URI
+      if /file:\/\/(\w*)\/(.*)/.test(filePath)
+        filePath = /file:\/\/(\w*)\/(.*)/.exec(filePath)[2]
+
       if path.isAbsolute(filePath)
         for packName, packagePath of packagePaths
           continue if filePath is 'node.js'
@@ -191,13 +197,7 @@ class NotificationIssue
       @getPackageNameFromFilePath(filePath)
 
     if options.detail?
-      file = /(\((.+?):\d+|\((.+)\)|(.+))/.exec(options.detail)[1]
-
-      # Stack traces may be a file URI
-      if /file:\/\/(\w*)\/(.*)/.test(file)
-        file = /file:\/\/(\w*)\/(.*)/.exec(file)[2]
-
-      packageName = getPackageName(file)
+      packageName = getPackageName(options.detail)
       return packageName if packageName?
 
     if options.stack?
@@ -207,11 +207,6 @@ class NotificationIssue
 
         # Empty when it was run from the dev console
         return unless file
-
-        # Stack traces may be a file URI
-        if /file:\/\/(\w*)\/(.*)/.test(file)
-          file = /file:\/\/(\w*)\/(.*)/.exec(file)[2]
-
         packageName = getPackageName(file)
         return packageName if packageName?
 
