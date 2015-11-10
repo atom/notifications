@@ -356,7 +356,7 @@ describe "Notifications", ->
 
           stack = """
             ReferenceError: path is not defined
-              at Object.module.exports.LinkedPackage.wow (#{path.join(packageDir, 'linked-package.coffee')}:29:15)
+              at Object.module.exports.LinkedPackage.wow (#{path.join(fs.realpathSync(packageDir), 'linked-package.coffee')}:29:15)
               at atom-workspace.subscriptions.add.atom.commands.add.linked-package:wow (#{path.join(packageDir, 'linked-package.coffee')}:18:102)
               at CommandRegistry.module.exports.CommandRegistry.handleCommandEvent (/Applications/Atom.app/Contents/Resources/app/src/command-registry.js:238:29)
               at /Applications/Atom.app/Contents/Resources/app/src/command-registry.js:3:61
