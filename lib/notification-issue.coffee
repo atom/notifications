@@ -196,9 +196,8 @@ class NotificationIssue
           return packName unless /^\.\./.test(relativePath)
       @getPackageNameFromFilePath(filePath)
 
-    if options.detail?
-      packageName = getPackageName(options.detail)
-      return packageName if packageName?
+    if options.detail? and packageName = getPackageName(options.detail)
+      return packageName
 
     if options.stack?
       stack = StackTraceParser.parse(options.stack)
