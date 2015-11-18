@@ -335,6 +335,50 @@ describe "Notifications", ->
             expect(issueBody).toContain '"notifications":'
             expect(issueBody).not.toContain '"editor":'
 
+      describe "when an exception is thrown from a linked package", ->
+        beforeEach ->
+          spyOn(atom, 'inDevMode').andReturn false
+          generateFakeAjaxResponses()
+
+          packagesDir = path.join(temp.mkdirSync('atom-packages-'), '.atom', 'packages')
+          atom.packages.packageDirPaths.push(packagesDir)
+          packageDir = path.join(packagesDir, '..', '..', 'github', 'linked-package')
+          fs.makeTreeSync path.dirname(path.join(packagesDir, 'linked-package'))
+          fs.symlinkSync(packageDir, path.join(packagesDir, 'linked-package'), 'junction')
+          fs.writeFileSync path.join(packageDir, 'package.json'), """
+            {
+              "name": "linked-package",
+              "version": "1.0.0",
+              "repository": "https://github.com/atom/notifications"
+            }
+          """
+          atom.packages.enablePackage('linked-package')
+
+          stack = """
+            ReferenceError: path is not defined
+              at Object.module.exports.LinkedPackage.wow (#{path.join(fs.realpathSync(packageDir), 'linked-package.coffee')}:29:15)
+              at atom-workspace.subscriptions.add.atom.commands.add.linked-package:wow (#{path.join(packageDir, 'linked-package.coffee')}:18:102)
+              at CommandRegistry.module.exports.CommandRegistry.handleCommandEvent (/Applications/Atom.app/Contents/Resources/app/src/command-registry.js:238:29)
+              at /Applications/Atom.app/Contents/Resources/app/src/command-registry.js:3:61
+              at CommandPaletteView.module.exports.CommandPaletteView.confirmed (/Applications/Atom.app/Contents/Resources/app/node_modules/command-palette/lib/command-palette-view.js:159:32)
+          """
+          detail = "At #{path.join(packageDir, 'linked-package.coffee')}:41"
+          message = "Uncaught ReferenceError: path is not defined"
+          atom.notifications.addFatalError(message, {stack, detail, dismissable: true})
+          notificationContainer = workspaceElement.querySelector('atom-notifications')
+          fatalError = notificationContainer.querySelector('atom-notification.fatal')
+
+        it "displays a fatal error with the package name in the error", ->
+          waitsForPromise ->
+            fatalError.getRenderPromise()
+
+          runs ->
+            expect(notificationContainer.childNodes.length).toBe 1
+            expect(fatalError).toHaveClass 'has-close'
+            expect(fatalError.innerHTML).toContain "Uncaught ReferenceError: path is not defined"
+            expect(fatalError.innerHTML).toContain "<a href=\"https://github.com/atom/notifications\">linked-package package</a>"
+            expect(fatalError.issue.getPackageName()).toBe 'linked-package'
+
       describe "when an exception is thrown from an unloaded package", ->
         beforeEach ->
           spyOn(atom, 'inDevMode').andReturn false
@@ -369,6 +413,121 @@ describe "Notifications", ->
             expect(fatalError.innerHTML).toContain 'ReferenceError: unloaded error'
             expect(fatalError.innerHTML).toContain "<a href=\"https://github.com/atom/notifications\">unloaded package</a>"
             expect(fatalError.issue.getPackageName()).toBe 'unloaded'
+
+      describe "when an exception is thrown from a package trying to load", ->
+        beforeEach ->
+          spyOn(atom, 'inDevMode').andReturn false
+          generateFakeAjaxResponses()
+
+          packagesDir = temp.mkdirSync('atom-packages-')
+          atom.packages.packageDirPaths.push(path.join(packagesDir, '.atom', 'packages'))
+          packageDir = path.join(packagesDir, '.atom', 'packages', 'broken-load')
+          fs.writeFileSync path.join(packageDir, 'package.json'), """
+            {
+              "name": "broken-load",
+              "version": "1.0.0",
+              "repository": "https://github.com/atom/notifications"
+            }
+          """
+
+          stack = "TypeError: Cannot read property 'prototype' of undefined\n  at __extends (<anonymous>:1:1)\n  at Object.defineProperty.value [as .coffee] (/Applications/Atom.app/Contents/Resources/app.asar/src/compile-cache.js:169:21)"
+          detail = "TypeError: Cannot read property 'prototype' of undefined"
+          message = "Failed to load the broken-load package"
+          atom.notifications.addFatalError(message, {stack, detail, packageName: 'broken-load', dismissable: true})
+          notificationContainer = workspaceElement.querySelector('atom-notifications')
+          fatalError = notificationContainer.querySelector('atom-notification.fatal')
+
+        it "displays a fatal error with the package name in the error", ->
+          waitsForPromise ->
+            fatalError.getRenderPromise()
+
+          runs ->
+            expect(notificationContainer.childNodes.length).toBe 1
+            expect(fatalError).toHaveClass 'has-close'
+            expect(fatalError.innerHTML).toContain "TypeError: Cannot read property 'prototype' of undefined"
+            expect(fatalError.innerHTML).toContain "<a href=\"https://github.com/atom/notifications\">broken-load package</a>"
+            expect(fatalError.issue.getPackageName()).toBe 'broken-load'
+
+      describe "when an exception is thrown from a package trying to load a grammar", ->
+        beforeEach ->
+          spyOn(atom, 'inDevMode').andReturn false
+          generateFakeAjaxResponses()
+
+          packagesDir = temp.mkdirSync('atom-packages-')
+          atom.packages.packageDirPaths.push(path.join(packagesDir, '.atom', 'packages'))
+          packageDir = path.join(packagesDir, '.atom', 'packages', 'language-broken-grammar')
+          fs.writeFileSync path.join(packageDir, 'package.json'), """
+            {
+              "name": "language-broken-grammar",
+              "version": "1.0.0",
+              "repository": "https://github.com/atom/notifications"
+            }
+          """
+
+          stack = """
+            Unexpected string
+              at nodeTransforms.Literal (/usr/share/atom/resources/app/node_modules/season/node_modules/cson-parser/lib/parse.js:100:15)
+              at #{path.join('packageDir', 'grammars', 'broken-grammar.cson')}:1:1
+          """
+          detail = """
+            At Syntax error on line 241, column 18: evalmachine.<anonymous>:1
+            "#\\{" "end": "\\}"
+                   ^^^^^
+            Unexpected string in #{path.join('packageDir', 'grammars', 'broken-grammar.cson')}
+
+            SyntaxError: Syntax error on line 241, column 18: evalmachine.<anonymous>:1
+            "#\\{" "end": "\\}"
+                   ^^^^^
+          """
+          message = "Failed to load a language-broken-grammar package grammar"
+          atom.notifications.addFatalError(message, {stack, detail, packageName: 'language-broken-grammar', dismissable: true})
+          notificationContainer = workspaceElement.querySelector('atom-notifications')
+          fatalError = notificationContainer.querySelector('atom-notification.fatal')
+
+        it "displays a fatal error with the package name in the error", ->
+          waitsForPromise ->
+            fatalError.getRenderPromise()
+
+          runs ->
+            expect(notificationContainer.childNodes.length).toBe 1
+            expect(fatalError).toHaveClass 'has-close'
+            expect(fatalError.innerHTML).toContain "Failed to load a language-broken-grammar package grammar"
+            expect(fatalError.innerHTML).toContain "<a href=\"https://github.com/atom/notifications\">language-broken-grammar package</a>"
+            expect(fatalError.issue.getPackageName()).toBe 'language-broken-grammar'
+
+      describe "when an exception is thrown from a package trying to activate", ->
+        beforeEach ->
+          spyOn(atom, 'inDevMode').andReturn false
+          generateFakeAjaxResponses()
+
+          packagesDir = temp.mkdirSync('atom-packages-')
+          atom.packages.packageDirPaths.push(path.join(packagesDir, '.atom', 'packages'))
+          packageDir = path.join(packagesDir, '.atom', 'packages', 'broken-activation')
+          fs.writeFileSync path.join(packageDir, 'package.json'), """
+            {
+              "name": "broken-activation",
+              "version": "1.0.0",
+              "repository": "https://github.com/atom/notifications"
+            }
+          """
+
+          stack = "TypeError: Cannot read property 'command' of undefined\n  at Object.module.exports.activate (<anonymous>:7:23)\n  at Package.module.exports.Package.activateNow (/Applications/Atom.app/Contents/Resources/app.asar/src/package.js:232:19)"
+          detail = "TypeError: Cannot read property 'command' of undefined"
+          message = "Failed to activate the broken-activation package"
+          atom.notifications.addFatalError(message, {stack, detail, packageName: 'broken-activation', dismissable: true})
+          notificationContainer = workspaceElement.querySelector('atom-notifications')
+          fatalError = notificationContainer.querySelector('atom-notification.fatal')
+
+        it "displays a fatal error with the package name in the error", ->
+          waitsForPromise ->
+            fatalError.getRenderPromise()
+
+          runs ->
+            expect(notificationContainer.childNodes.length).toBe 1
+            expect(fatalError).toHaveClass 'has-close'
+            expect(fatalError.innerHTML).toContain "TypeError: Cannot read property 'command' of undefined"
+            expect(fatalError.innerHTML).toContain "<a href=\"https://github.com/atom/notifications\">broken-activation package</a>"
+            expect(fatalError.issue.getPackageName()).toBe 'broken-activation'
 
       describe "when an exception is thrown from a package without a trace, but with a URL", ->
         beforeEach ->
