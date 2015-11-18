@@ -176,6 +176,7 @@ class NotificationIssue
   getPackageName: ->
     options = @notification.getOptions()
     return unless options.stack? or options.detail?
+    return options.packageName if options.packageName
 
     packagePaths = @getPackagePathsByPackageName()
     for packageName, packagePath of packagePaths
