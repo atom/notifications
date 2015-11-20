@@ -8,6 +8,8 @@ UserUtilities = require './user-utilities'
 
 TITLE_CHAR_LIMIT = 100 # Truncate issue title to 100 characters (including ellipsis)
 
+FileURLRegExp = new RegExp('file://\w*/(.*)')
+
 module.exports =
 class NotificationIssue
   constructor: (@notification) ->
@@ -183,11 +185,11 @@ class NotificationIssue
         packagePaths[packageName] = fs.realpathSync(packagePath)
 
     getPackageName = (filePath) =>
-      filePath = /(\((.+?):\d+|\((.+)\)|(.+))/.exec(filePath)[1]
+      filePath = /\((.+?):\d+|\((.+)\)|(.+)/.exec(filePath)[0]
 
       # Stack traces may be a file URI
-      if /file:\/\/(\w*)\/(.*)/.test(filePath)
-        filePath = /file:\/\/(\w*)\/(.*)/.exec(filePath)[2]
+      if match = FileURLRegExp.exec(filePath)
+        filePath = match[1]
 
       if path.isAbsolute(filePath)
         for packName, packagePath of packagePaths
