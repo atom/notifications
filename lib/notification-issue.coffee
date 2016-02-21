@@ -42,7 +42,7 @@ class NotificationIssue
       @getIssueUrl().then (issueUrl) ->
         if UserUtilities.getPlatform() is 'win32'
           # win32 can only handle a 2048 length link, so we use the shortener.
-          $.ajax 'http://git.io',
+          $.ajax 'https://git.io',
             type: 'POST'
             data: url: issueUrl
             success: (data, status, xhr) ->
