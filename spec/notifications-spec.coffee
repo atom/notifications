@@ -916,7 +916,7 @@ generateException = ->
 generateFakeAjaxResponses = (options) ->
   $.ajax.andCallFake (url, settings) ->
     if url.indexOf('git.io') > -1
-      response = options?.shortenerResponse ? ['--', '201', {getResponseHeader: -> 'http://git.io/cats'}]
+      response = options?.shortenerResponse ? ['--', '201', {getResponseHeader: -> 'https://git.io/cats'}]
       settings.success.apply(settings, response)
     else if url.indexOf('atom.io/api/packages') > -1
       response = options?.packageResponse ? {
