@@ -238,7 +238,7 @@ describe "Notifications", ->
         expect(clicked).toEqual ['two', 'one']
 
     describe "when an exception is thrown", ->
-      [notificationContainer, fatalError, issueBody] = []
+      [notificationContainer, fatalError, issueTitle, issueBody] = []
       describe "when the editor is in dev mode", ->
         beforeEach ->
           spyOn(atom, 'inDevMode').andReturn true
@@ -291,6 +291,7 @@ describe "Notifications", ->
 
       describe "when an exception is thrown from a package", ->
         beforeEach ->
+          issueTitle = null
           issueBody = null
           spyOn(atom, 'inDevMode').andReturn false
           generateFakeAjaxResponses()
@@ -300,7 +301,9 @@ describe "Notifications", ->
 
         it "displays a fatal error with the package name in the error", ->
           waitsForPromise ->
-            fatalError.getRenderPromise().then -> issueBody = fatalError.issue.issueBody
+            fatalError.getRenderPromise().then ->
+              issueTitle = fatalError.issue.getIssueTitle()
+              issueBody = fatalError.issue.issueBody
 
           runs ->
             expect(notificationContainer.childNodes.length).toBe 1
@@ -316,6 +319,8 @@ describe "Notifications", ->
             else
               expect(button.getAttribute('href')).toContain 'git.io/cats'
 
+            expect(issueTitle).toContain '$ATOM_HOME'
+            expect(issueTitle).not.toContain process.env.ATOM_HOME
             expect(issueBody).toMatch /Atom Version\*\*: [0-9].[0-9]+.[0-9]+/ig
             expect(issueBody).not.toMatch /Unknown/ig
             expect(issueBody).toContain 'ReferenceError: a is not defined'
@@ -825,7 +830,7 @@ describe "Notifications", ->
               issuesResponse:
                 items: [
                   {
-                    title: 'ReferenceError: a is not defined'
+                    title: 'ReferenceError: a is not defined in $ATOM_HOME/somewhere'
                     html_url: 'http://url.com/ok'
                     state: 'open'
                   }
@@ -849,7 +854,7 @@ describe "Notifications", ->
               issuesResponse:
                 items: [
                   {
-                    title: 'ReferenceError: a is not defined'
+                    title: 'ReferenceError: a is not defined in $ATOM_HOME/somewhere'
                     html_url: 'http://url.com/closed'
                     state: 'closed'
                   }
@@ -908,7 +913,8 @@ generateException = ->
   try
     a + 1
   catch e
-    window.onerror.call(window, e.toString(), '/dev/null', 2, 3, e)
+    errMsg = e.toString() + ' in ' + process.env.ATOM_HOME + '/somewhere'
+    window.onerror.call(window, errMsg, '/dev/null', 2, 3, e)
 
 # shortenerResponse
 # packageResponse

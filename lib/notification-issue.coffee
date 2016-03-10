@@ -60,6 +60,7 @@ class NotificationIssue
 
   getIssueTitle: ->
     title = @notification.getMessage()
+    title = title.replace(process.env.ATOM_HOME, '$ATOM_HOME')
     if title.length > TITLE_CHAR_LIMIT
       title = title.substring(0, TITLE_CHAR_LIMIT - 3) + '...'
     title
