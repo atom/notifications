@@ -314,10 +314,7 @@ describe "Notifications", ->
 
             button = fatalError.querySelector('.btn')
             expect(button.textContent).toContain 'Create issue on the notifications package'
-            unless process.platform is 'win32'
-              expect(button.getAttribute('href')).toContain 'atom/notifications/issues/new'
-            else
-              expect(button.getAttribute('href')).toContain 'git.io/cats'
+            expect(button.getAttribute('href')).toContain 'bit.ly/cats'
 
             expect(issueTitle).toContain '$ATOM_HOME'
             expect(issueTitle).not.toContain process.env.ATOM_HOME
@@ -586,10 +583,7 @@ describe "Notifications", ->
 
           button = fatalError.querySelector('.btn')
           expect(button.textContent).toContain 'Create issue on atom/atom'
-          unless process.platform is 'win32'
-            expect(button.getAttribute('href')).toContain 'atom/atom/issues/new'
-          else
-            expect(button.getAttribute('href')).toContain 'git.io/cats'
+          expect(button.getAttribute('href')).toContain 'bit.ly/cats'
 
           expect(issueBody).toContain 'ReferenceError: a is not defined'
           expect(issueBody).toContain '**Thrown From**: Atom Core'
@@ -628,10 +622,7 @@ describe "Notifications", ->
           fatalNotification = fatalError.querySelector('.fatal-notification')
           expect(button.textContent).toContain 'Create issue'
           expect(fatalNotification.textContent).toContain 'You can help by creating an issue'
-          unless process.platform is 'win32'
-            expect(button.getAttribute('href')).toContain 'github.com/atom/notifications/issues/new'
-          else
-            expect(button.getAttribute('href')).toContain 'git.io/cats'
+          expect(button.getAttribute('href')).toContain 'bit.ly/cats'
 
       describe "when the error has not been reported", ->
         beforeEach ->
@@ -660,44 +651,7 @@ describe "Notifications", ->
               button = fatalError.querySelector('.btn')
               encodedMessage = encodeURI(truncatedMessage)
               expect(button.textContent).toContain 'Create issue'
-              unless process.platform is 'win32'
-                expect(button.getAttribute('href')).toContain "github.com/atom/notifications/issues/new?title=#{encodedMessage}&body="
-              else
-                expect(button.getAttribute('href')).toContain 'git.io/cats'
-
-        describe "when the system is darwin", ->
-          beforeEach ->
-            UserUtilities = require '../lib/user-utilities'
-            spyOn(UserUtilities, 'getPlatform').andReturn 'darwin'
-
-            generateFakeAjaxResponses()
-            generateException()
-            fatalError = notificationContainer.querySelector('atom-notification.fatal')
-            waitsForPromise ->
-              fatalError.getRenderPromise().then -> issueBody = fatalError.issue.issueBody
-
-          it "asks the user to create an issue", ->
-            button = fatalError.querySelector('.btn')
-            fatalNotification = fatalError.querySelector('.fatal-notification')
-            expect(button.textContent).toContain 'Create issue'
-            expect(fatalNotification.textContent).toContain 'You can help by creating an issue'
-            expect(button.getAttribute('href')).toContain 'github.com/atom/notifications/issues/new'
-
-        describe "when the system is win32", ->
-          beforeEach ->
-            UserUtilities = require '../lib/user-utilities'
-            spyOn(UserUtilities, 'getPlatform').andReturn 'win32'
-
-            generateFakeAjaxResponses()
-            generateException()
-            fatalError = notificationContainer.querySelector('atom-notification.fatal')
-            waitsForPromise ->
-              fatalError.getRenderPromise().then -> issueBody = fatalError.issue.issueBody
-
-          it "uses a shortened url via git.io", ->
-            button = fatalError.querySelector('.btn')
-            expect(button.textContent).toContain 'Create issue'
-            expect(button.getAttribute('href')).toContain 'git.io'
+              expect(button.getAttribute('href')).toContain 'bit.ly/cats'
 
       describe "when the package is out of date", ->
         beforeEach ->
@@ -921,9 +875,11 @@ generateException = ->
 # issuesResponse
 generateFakeAjaxResponses = (options) ->
   $.ajax.andCallFake (url, settings) ->
-    if url.indexOf('git.io') > -1
-      response = options?.shortenerResponse ? ['--', '201', {getResponseHeader: -> 'https://git.io/cats'}]
-      settings.success.apply(settings, response)
+    if url.indexOf('bitly.com') > -1
+      response = options?.shortenerResponse ? {
+        data: url: 'http://bit.ly/cats'
+      }
+      settings.success(response)
     else if url.indexOf('atom.io/api/packages') > -1
       response = options?.packageResponse ? {
         repository: url: 'https://github.com/atom/notifications'
