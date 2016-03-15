@@ -40,16 +40,10 @@ class NotificationIssue
   getIssueUrlForSystem: ->
     new Promise (resolve, reject) =>
       @getIssueUrl().then (issueUrl) ->
-        if UserUtilities.getPlatform() is 'win32'
-          # win32 can only handle a 2048 length link, so we use the shortener.
-          $.ajax 'https://git.io',
-            type: 'POST'
-            data: url: issueUrl
-            success: (data, status, xhr) ->
-              resolve(xhr.getResponseHeader('Location'))
-            error: -> resolve(issueUrl)
-        else
-          resolve(issueUrl)
+        issueUrl = encodeURIComponent(issueUrl)
+        $.ajax "https://api-ssl.bitly.com/v3/shorten?access_token=04ffc90d972077e493f9958177db31410cb23973&format=json&longUrl=#{issueUrl}",
+          success: (data) -> resolve(data.data.url)
+          error: -> resolve(issueUrl)
       return
 
   getIssueUrl: ->
