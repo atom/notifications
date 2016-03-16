@@ -314,7 +314,7 @@ describe "Notifications", ->
 
             button = fatalError.querySelector('.btn')
             expect(button.textContent).toContain 'Create issue on the notifications package'
-            expect(button.getAttribute('href')).toContain 'bit.ly/cats'
+            expect(button.getAttribute('href')).toContain 'is.gd/cats'
 
             expect(issueTitle).toContain '$ATOM_HOME'
             expect(issueTitle).not.toContain process.env.ATOM_HOME
@@ -583,7 +583,7 @@ describe "Notifications", ->
 
           button = fatalError.querySelector('.btn')
           expect(button.textContent).toContain 'Create issue on atom/atom'
-          expect(button.getAttribute('href')).toContain 'bit.ly/cats'
+          expect(button.getAttribute('href')).toContain 'is.gd/cats'
 
           expect(issueBody).toContain 'ReferenceError: a is not defined'
           expect(issueBody).toContain '**Thrown From**: Atom Core'
@@ -622,7 +622,7 @@ describe "Notifications", ->
           fatalNotification = fatalError.querySelector('.fatal-notification')
           expect(button.textContent).toContain 'Create issue'
           expect(fatalNotification.textContent).toContain 'You can help by creating an issue'
-          expect(button.getAttribute('href')).toContain 'bit.ly/cats'
+          expect(button.getAttribute('href')).toContain 'is.gd/cats'
 
       describe "when the error has not been reported", ->
         beforeEach ->
@@ -651,7 +651,7 @@ describe "Notifications", ->
               button = fatalError.querySelector('.btn')
               encodedMessage = encodeURI(truncatedMessage)
               expect(button.textContent).toContain 'Create issue'
-              expect(button.getAttribute('href')).toContain 'bit.ly/cats'
+              expect(button.getAttribute('href')).toContain 'is.gd/cats'
 
       describe "when the package is out of date", ->
         beforeEach ->
@@ -875,10 +875,8 @@ generateException = ->
 # issuesResponse
 generateFakeAjaxResponses = (options) ->
   $.ajax.andCallFake (url, settings) ->
-    if url.indexOf('bitly.com') > -1
-      response = options?.shortenerResponse ? {
-        data: url: 'http://bit.ly/cats'
-      }
+    if url.indexOf('is.gd') > -1
+      response = options?.shortenerResponse ? 'http://is.gd/cats'
       settings.success(response)
     else if url.indexOf('atom.io/api/packages') > -1
       response = options?.packageResponse ? {
