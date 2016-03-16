@@ -40,9 +40,12 @@ class NotificationIssue
   getIssueUrlForSystem: ->
     new Promise (resolve, reject) =>
       @getIssueUrl().then (issueUrl) ->
-        issueUrl = encodeURIComponent(issueUrl)
-        $.ajax "https://api-ssl.bitly.com/v3/shorten?access_token=04ffc90d972077e493f9958177db31410cb23973&format=json&longUrl=#{issueUrl}",
-          success: (data) -> resolve(data.data.url)
+        $.ajax "https://is.gd/create.php?format=simple",
+          type: 'POST'
+          data: url: issueUrl
+          success: (data) ->
+            console.log(data)
+            resolve(data)
           error: -> resolve(issueUrl)
       return
 
