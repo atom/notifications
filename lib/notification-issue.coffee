@@ -43,9 +43,7 @@ class NotificationIssue
         $.ajax "https://is.gd/create.php?format=simple",
           type: 'POST'
           data: url: issueUrl
-          success: (data) ->
-            console.log(data)
-            resolve(data)
+          success: (data) -> resolve(data)
           error: -> resolve(issueUrl)
       return
 
