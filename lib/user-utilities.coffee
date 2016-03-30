@@ -3,12 +3,15 @@ os = require 'os'
 fs = require 'fs'
 path = require 'path'
 semver = require 'semver'
+_ = require 'lodash'
 {BufferedProcess} = require 'atom'
 
 ###
 A collection of methods for retrieving information about the user's system for
 bug report purposes.
 ###
+
+DEV_PACKAGE_PATH = path.join('dev', 'packages')
 
 module.exports =
 
@@ -108,32 +111,31 @@ module.exports =
   Section: Installed Packages
   ###
 
+  isDevModePackagePath: (packagePath) ->
+    packagePath.match(DEV_PACKAGE_PATH)?
+
   # Returns a promise. Resolves with object of arrays {dev: ['some-package, v0.2.3', ...], user: [...]}
   getInstalledPackages: ->
     new Promise (resolve, reject) =>
-      data = []
-      apmProcess = new BufferedProcess
-        command: atom.packages.getApmPath()
-        args: ['ls', '--json', '--no-color']
-        stdout: (oneLine) -> data.push(oneLine)
-        exit: =>
-          stdout = data.join('\n')
-          try
-            packages = JSON.parse(stdout)
-          catch error
-            packages = {}
-          resolve
-            dev: @filterActivePackages(packages.dev)
-            user: @filterActivePackages(packages.user)
+      devPackagePaths = _.filter(atom.packages.getAvailablePackagePaths(), @isDevModePackagePath)
+      devPackageNames = _.map(devPackagePaths, (packagePath) -> path.basename(packagePath))
+      availablePackages = atom.packages.getAvailablePackageMetadata()
+      activePackageNames = _.map(atom.packages.getActivePackages(), (activePackage) -> activePackage.name)
+      resolve
+        dev: @getPackageNames(availablePackages, devPackageNames, activePackageNames, true)
+        user: @getPackageNames(availablePackages, devPackageNames, activePackageNames, false)
 
-      apmProcess.onWillThrowError ({handle}) ->
-        handle()
-        resolve
-          dev: []
-          user: []
+  getActiveLabel: (packageName, activePackageNames) ->
+    if packageName in activePackageNames
+      'active'
+    else
+      'inactive'
 
-  filterActivePackages: (packages) ->
-    "#{pack.name}, v#{pack.version}" for pack in (packages ? []) when atom.packages.getActivePackage(pack.name)?
+  getPackageNames: (availablePackages, devPackageNames, activePackageNames, devMode) ->
+    if devMode
+      "#{pack.name}, v#{pack.version} (#{@getActiveLabel(pack.name, activePackageNames)})" for pack in (availablePackages ? []) when pack.name in devPackageNames
+    else
+      "#{pack.name}, v#{pack.version} (#{@getActiveLabel(pack.name, activePackageNames)})" for pack in (availablePackages ? []) when pack.name not in devPackageNames
 
   getLatestAtomData: ->
     atomUrl = 'https://atom.io/api/updates'
