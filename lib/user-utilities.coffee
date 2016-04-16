@@ -3,7 +3,6 @@ os = require 'os'
 fs = require 'fs'
 path = require 'path'
 semver = require 'semver'
-_ = require 'lodash'
 {BufferedProcess} = require 'atom'
 
 ###
@@ -117,10 +116,10 @@ module.exports =
   # Returns a promise. Resolves with object of arrays {dev: ['some-package, v0.2.3', ...], user: [...]}
   getInstalledPackages: ->
     new Promise (resolve, reject) =>
-      devPackagePaths = _.filter(atom.packages.getAvailablePackagePaths(), @isDevModePackagePath)
-      devPackageNames = _.map(devPackagePaths, (packagePath) -> path.basename(packagePath))
+      devPackagePaths = atom.packages.getAvailablePackagePaths().filter(@isDevModePackagePath)
+      devPackageNames = devPackagePaths.map((packagePath) -> path.basename(packagePath))
       availablePackages = atom.packages.getAvailablePackageMetadata()
-      activePackageNames = _.map(atom.packages.getActivePackages(), (activePackage) -> activePackage.name)
+      activePackageNames = atom.packages.getActivePackages().map((activePackage) -> activePackage.name)
       resolve
         dev: @getPackageNames(availablePackages, devPackageNames, activePackageNames, true)
         user: @getPackageNames(availablePackages, devPackageNames, activePackageNames, false)
