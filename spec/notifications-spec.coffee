@@ -365,7 +365,7 @@ describe "Notifications", ->
           notificationContainer = workspaceElement.querySelector('atom-notifications')
           fatalError = notificationContainer.querySelector('atom-notification.fatal')
 
-        it "replaces the directory with an environment variable", ->
+        it "replaces the directory with a ~", ->
           waitsForPromise ->
             fatalError.getRenderPromise().then ->
               issueTitle = fatalError.issue.getIssueTitle()
