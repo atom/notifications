@@ -55,11 +55,11 @@ class NotificationIssue
 
   getIssueTitle: ->
     title = @notification.getMessage()
+    title = title.replace(process.env.ATOM_HOME, '$ATOM_HOME')
     if process.platform is 'win32'
-      title = title.replace(process.env.ATOM_HOME, '%ATOM_HOME%')
-      title = title.replace(process.env.USERPROFILE, '%USERPROFILE%')
+      title = title.replace(process.env.USERPROFILE, '~')
+      title = title.replace(path.sep, path.posix.sep) # Standardize issue titles
     else
-      title = title.replace(process.env.ATOM_HOME, '$ATOM_HOME')
       title = title.replace(process.env.HOME, '~')
 
     if title.length > TITLE_CHAR_LIMIT

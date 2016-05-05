@@ -316,10 +316,7 @@ describe "Notifications", ->
             expect(button.textContent).toContain 'Create issue on the notifications package'
             expect(button.getAttribute('href')).toContain 'is.gd/cats'
 
-            if process.platform is 'win32'
-              expect(issueTitle).toContain '%ATOM_HOME%'
-            else
-              expect(issueTitle).toContain '$ATOM_HOME'
+            expect(issueTitle).toContain '$ATOM_HOME'
             expect(issueTitle).not.toContain process.env.ATOM_HOME
             expect(issueBody).toMatch /Atom Version\*\*: [0-9].[0-9]+.[0-9]+/ig
             expect(issueBody).not.toMatch /Unknown/ig
@@ -339,6 +336,15 @@ describe "Notifications", ->
             expect(issueBody).toContain '"core":'
             expect(issueBody).toContain '"notifications":'
             expect(issueBody).not.toContain '"editor":'
+
+        it "standardizes platform separators on #win32", ->
+          waitsForPromise ->
+            fatalError.getRenderPromise().then ->
+              issueTitle = fatalError.issue.getIssueTitle()
+
+          runs ->
+            expect(issueTitle).toContain path.posix.sep
+            expect(issueTitle).not.toContain path.win32.sep
 
       describe "when an exception contains the user's home directory", ->
         beforeEach ->
@@ -365,11 +371,10 @@ describe "Notifications", ->
               issueTitle = fatalError.issue.getIssueTitle()
 
           runs ->
+            expect(issueTitle).toContain '~'
             if process.platform is 'win32'
-              expect(issueTitle).toContain '%USERPROFILE%'
               expect(issueTitle).not.toContain process.env.USERPROFILE
             else
-              expect(issueTitle).toContain '~'
               expect(issueTitle).not.toContain process.env.HOME
 
       describe "when an exception is thrown from a linked package", ->
