@@ -337,6 +337,46 @@ describe "Notifications", ->
             expect(issueBody).toContain '"notifications":'
             expect(issueBody).not.toContain '"editor":'
 
+        it "standardizes platform separators on #win32", ->
+          waitsForPromise ->
+            fatalError.getRenderPromise().then ->
+              issueTitle = fatalError.issue.getIssueTitle()
+
+          runs ->
+            expect(issueTitle).toContain path.posix.sep
+            expect(issueTitle).not.toContain path.win32.sep
+
+      describe "when an exception contains the user's home directory", ->
+        beforeEach ->
+          issueTitle = null
+          spyOn(atom, 'inDevMode').andReturn false
+          generateFakeAjaxResponses()
+
+          # Create a custom error message that contains the user profile but not ATOM_HOME
+          try
+            a + 1
+          catch e
+            if process.platform is 'win32'
+              errMsg = e.toString() + ' in ' + process.env.USERPROFILE + path.sep + 'somewhere'
+            else
+              errMsg = e.toString() + ' in ' + process.env.HOME + path.sep + 'somewhere'
+            window.onerror.call(window, errMsg, '/dev/null', 2, 3, e)
+
+          notificationContainer = workspaceElement.querySelector('atom-notifications')
+          fatalError = notificationContainer.querySelector('atom-notification.fatal')
+
+        it "replaces the directory with a ~", ->
+          waitsForPromise ->
+            fatalError.getRenderPromise().then ->
+              issueTitle = fatalError.issue.getIssueTitle()
+
+          runs ->
+            expect(issueTitle).toContain '~'
+            if process.platform is 'win32'
+              expect(issueTitle).not.toContain process.env.USERPROFILE
+            else
+              expect(issueTitle).not.toContain process.env.HOME
+
       describe "when an exception is thrown from a linked package", ->
         beforeEach ->
           spyOn(atom, 'inDevMode').andReturn false
