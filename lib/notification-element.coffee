@@ -41,7 +41,7 @@ ButtonTemplate = """
 """
 
 class NotificationElement extends HTMLElement
-  animationDuration: 700
+  animationDuration: 360
   visibilityDuration: 5000
   fatalTemplate: TemplateHelper.create(FatalMetaNotificationTemplate)
   metaTemplate: TemplateHelper.create(MetaNotificationTemplate)
