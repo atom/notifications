@@ -69,7 +69,6 @@ class NotificationIssue
   getIssueBody: ->
     new Promise (resolve, reject) =>
       return resolve(@issueBody) if @issueBody
-
       systemPromise = UserUtilities.getOSVersion()
       installedPackagesPromise = UserUtilities.getInstalledPackages()
 
@@ -195,11 +194,13 @@ class NotificationIssue
       if match = FileURLRegExp.exec(filePath)
         filePath = match[1]
 
+      filePath = path.normalize(filePath)
+
       if path.isAbsolute(filePath)
         for packName, packagePath of packagePaths
           continue if filePath is 'node.js'
-          relativePath = path.relative(packagePath, filePath)
-          return packName unless /^\.\./.test(relativePath)
+          isSubfolder = filePath.indexOf(path.normalize(packagePath + path.sep)) is 0
+          return packName if isSubfolder
       @getPackageNameFromFilePath(filePath)
 
     if options.detail? and packageName = getPackageName(options.detail)
