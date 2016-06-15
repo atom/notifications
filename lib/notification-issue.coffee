@@ -99,9 +99,6 @@ class NotificationIssue
         atomVersion = atom.getVersion()
         electronVersion = process.versions.electron
 
-        if atom.getLoadSettings().apiPreviewMode
-          atomVersion += " :warning: **in 1.0 API Preview Mode** :warning:"
-
         @issueBody = """
           [Enter steps to reproduce below:]
 
