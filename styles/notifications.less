@@ -170,7 +170,6 @@ atom-notification {
     overflow-y: auto;
 
     .line {
-      white-space: pre;
       font-family: @font-family-monospace;
     }
 
@@ -182,8 +181,18 @@ atom-notification {
       }
     }
 
+    .detail-content {
+      .line {
+        white-space: pre-wrap;
+      }
+    }
+
     .stack-container {
       margin-top: @component-padding;
+
+      .line {
+        white-space: pre;
+      }
     }
   }
 
