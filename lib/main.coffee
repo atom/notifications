@@ -1,6 +1,7 @@
 {Notification, CompositeDisposable} = require 'atom'
 fs = require 'fs-plus'
 StackTraceParser = null
+NotificationElement = require './notification-element'
 
 Notifications =
   isInitialized: false
@@ -59,10 +60,8 @@ Notifications =
   initializeIfNotInitialized: ->
     return if @isInitialized
 
-    NotificationElement = require './notification-element'
-
     @subscriptions.add atom.views.addViewProvider Notification, (model) ->
-      new NotificationElement().initialize(model)
+      new NotificationElement(model)
 
     @notificationsElement = document.createElement('atom-notifications')
     atom.views.getView(atom.workspace).appendChild(@notificationsElement)
@@ -89,9 +88,9 @@ Notifications =
       # do not show duplicates unless some amount of time has passed
       timeSpan = notification.getTimestamp() - @lastNotification.getTimestamp()
       unless timeSpan < @duplicateTimeDelay and notification.isEqual(@lastNotification)
-        @notificationsElement.appendChild(atom.views.getView(notification))
+        @notificationsElement.appendChild(atom.views.getView(notification).element)
     else
-      @notificationsElement.appendChild(atom.views.getView(notification))
+      @notificationsElement.appendChild(atom.views.getView(notification).element)
 
     notification.setDisplayed(true)
     @lastNotification = notification

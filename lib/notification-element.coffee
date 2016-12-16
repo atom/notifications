@@ -41,7 +41,8 @@ ButtonTemplate = """
   <a href="#" class="btn"></a>
 """
 
-class NotificationElement extends HTMLElement
+module.exports =
+class NotificationElement
   animationDuration: 360
   visibilityDuration: 5000
   fatalTemplate: TemplateHelper.create(FatalMetaNotificationTemplate)
@@ -49,9 +50,8 @@ class NotificationElement extends HTMLElement
   buttonListTemplate: TemplateHelper.create(ButtonListTemplate)
   buttonTemplate: TemplateHelper.create(ButtonTemplate)
 
-  constructor: ->
-
-  initialize: (@model) ->
+  constructor: (@model) ->
+    @element = document.createElement('atom-notification')
     @issue = new NotificationIssue(@model) if @model.getType() is 'fatal'
     @renderPromise = @render().catch (e) ->
       console.error e.message
@@ -61,35 +61,37 @@ class NotificationElement extends HTMLElement
       @model.onDidDismiss => @removeNotification()
     else
       @autohide()
-    this
+
+    @element.issue = @issue
+    @element.getRenderPromise = @getRenderPromise.bind(this)
 
   getModel: -> @model
 
   getRenderPromise: -> @renderPromise
 
   render: ->
-    @classList.add "#{@model.getType()}"
-    @classList.add "icon", "icon-#{@model.getIcon()}", "native-key-bindings"
+    @element.classList.add "#{@model.getType()}"
+    @element.classList.add "icon", "icon-#{@model.getIcon()}", "native-key-bindings"
 
-    @classList.add('has-detail') if detail = @model.getDetail()
-    @classList.add('has-close') if @model.isDismissable()
-    @classList.add('has-stack') if @model.getOptions().stack?
+    @element.classList.add('has-detail') if detail = @model.getDetail()
+    @element.classList.add('has-close') if @model.isDismissable()
+    @element.classList.add('has-stack') if @model.getOptions().stack?
 
-    @setAttribute('tabindex', '-1')
+    @element.setAttribute('tabindex', '-1')
 
-    @innerHTML = NotificationTemplate
+    @element.innerHTML = NotificationTemplate
 
     options = @model.getOptions()
 
-    notificationContainer = @querySelector('.message')
+    notificationContainer = @element.querySelector('.message')
     notificationContainer.innerHTML = marked(@model.getMessage())
 
     if detail = @model.getDetail()
-      addSplitLinesToContainer(@querySelector('.detail-content'), detail)
+      addSplitLinesToContainer(@element.querySelector('.detail-content'), detail)
 
       if stack = options.stack
-        stackToggle = @querySelector('.stack-toggle')
-        stackContainer = @querySelector('.stack-container')
+        stackToggle = @element.querySelector('.stack-toggle')
+        stackContainer = @element.querySelector('.stack-container')
 
         addSplitLinesToContainer(stackContainer, stack)
 
@@ -97,17 +99,17 @@ class NotificationElement extends HTMLElement
         @handleStackTraceToggleClick({currentTarget: stackToggle}, stackContainer)
 
     if metaContent = options.description
-      @classList.add('has-description')
-      metaContainer = @querySelector('.meta')
+      @element.classList.add('has-description')
+      metaContainer = @element.querySelector('.meta')
       metaContainer.appendChild(TemplateHelper.render(@metaTemplate))
-      description = @querySelector('.description')
+      description = @element.querySelector('.description')
       description.innerHTML = marked(metaContent)
 
     if options.buttons and options.buttons.length > 0
-      @classList.add('has-buttons')
-      metaContainer = @querySelector('.meta')
+      @element.classList.add('has-buttons')
+      metaContainer = @element.querySelector('.meta')
       metaContainer.appendChild(TemplateHelper.render(@buttonListTemplate))
-      toolbar = @querySelector('.btn-toolbar')
+      toolbar = @element.querySelector('.btn-toolbar')
       buttonClass = @model.getType()
       buttonClass = 'error' if buttonClass is 'fatal'
       buttonClass = "btn-#{buttonClass}"
@@ -119,14 +121,14 @@ class NotificationElement extends HTMLElement
         if button.className?
           buttonEl.classList.add.apply(buttonEl.classList, button.className.split(' '))
         if button.onDidClick?
-          buttonEl.addEventListener 'click', (e) ->
+          buttonEl.addEventListener 'click', (e) =>
             button.onDidClick.call(this, e)
 
     if @model.isDismissable()
-      closeButton = @querySelector('.close')
+      closeButton = @element.querySelector('.close')
       closeButton.addEventListener 'click', => @handleRemoveNotificationClick()
 
-      closeAllButton = @querySelector('.close-all')
+      closeAllButton = @element.querySelector('.close-all')
       closeAllButton.classList.add @getButtonClass()
       closeAllButton.addEventListener 'click', => @handleRemoveAllNotificationsClick()
 
@@ -139,9 +141,9 @@ class NotificationElement extends HTMLElement
     repoUrl = @issue.getRepoUrl()
     packageName = @issue.getPackageName()
 
-    fatalContainer = @querySelector('.meta')
+    fatalContainer = @element.querySelector('.meta')
     fatalContainer.appendChild(TemplateHelper.render(@fatalTemplate))
-    fatalNotification = @querySelector('.fatal-notification')
+    fatalNotification = @element.querySelector('.fatal-notification')
 
     issueButton = fatalContainer.querySelector('.btn-issue')
 
@@ -231,7 +233,7 @@ class NotificationElement extends HTMLElement
       Promise.resolve()
 
   removeNotification: ->
-    @classList.add('remove')
+    @element.classList.add('remove')
     @removeNotificationAfterTimeout()
 
   handleRemoveNotificationClick: ->
@@ -255,15 +257,15 @@ class NotificationElement extends HTMLElement
 
   autohide: ->
     setTimeout =>
-      @classList.add('remove')
+      @element.classList.add('remove')
       @removeNotificationAfterTimeout()
     , @visibilityDuration
 
   removeNotificationAfterTimeout: ->
-    atom.workspace.getActivePane().activate() if this is document.activeElement
+    atom.workspace.getActivePane().activate() if @element is document.activeElement
 
     setTimeout =>
-      @remove()
+      @element.remove()
     , @animationDuration # keep in sync with CSS animation
 
   getButtonClass: ->
@@ -278,5 +280,3 @@ addSplitLinesToContainer = (container, content) ->
     div.textContent = line
     container.appendChild(div)
   return
-
-module.exports = NotificationElement = document.registerElement 'atom-notification', prototype: NotificationElement.prototype
