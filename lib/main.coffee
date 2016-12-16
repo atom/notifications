@@ -59,13 +59,12 @@ Notifications =
   initializeIfNotInitialized: ->
     return if @isInitialized
 
-    NotificationsElement = require './notifications-element'
     NotificationElement = require './notification-element'
 
     @subscriptions.add atom.views.addViewProvider Notification, (model) ->
       new NotificationElement().initialize(model)
 
-    @notificationsElement = new NotificationsElement
+    @notificationsElement = document.createElement('atom-notifications')
     atom.views.getView(atom.workspace).appendChild(@notificationsElement)
 
     @isInitialized = true
