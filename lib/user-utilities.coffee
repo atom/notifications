@@ -1,7 +1,7 @@
-$ = require 'jquery'
 os = require 'os'
 fs = require 'fs'
 path = require 'path'
+request = require 'request'
 semver = require 'semver'
 {BufferedProcess} = require 'atom'
 
@@ -139,11 +139,15 @@ module.exports =
   getLatestAtomData: ->
     atomUrl = 'https://atom.io/api/updates'
     new Promise (resolve, reject) ->
-      $.ajax atomUrl,
-        accept: 'application/vnd.github.v3+json'
-        contentType: "application/json"
-        success: (data) -> resolve(data)
-        error: (error) -> reject(error)
+      request.get {
+        uri: atomUrl,
+        headers: [
+          accept: 'application/vnd.github.v3+json'
+          contentType: "application/json"
+        ]
+      }, (err, resp, body) ->
+        reject(err) if err?
+        resolve(body)
 
   checkAtomUpToDate: ->
     @getLatestAtomData().then (latestAtomData) ->
@@ -162,11 +166,15 @@ module.exports =
   getLatestPackageData: (packageName) ->
     packagesUrl = 'https://atom.io/api/packages'
     new Promise (resolve, reject) ->
-      $.ajax "#{packagesUrl}/#{packageName}",
-        accept: 'application/vnd.github.v3+json'
-        contentType: "application/json"
-        success: (data) -> resolve(data)
-        error: (error) -> reject(error)
+      request.get {
+        uri: packagesUrl
+        headers: [
+          accept: 'application/vnd.github.v3+json'
+          contentType: "application/json"
+        ]
+      }, (err, resp, body) ->
+        reject(err) if err?
+        resolve(body)
 
   checkPackageUpToDate: (packageName) ->
     @getLatestPackageData(packageName).then (latestPackageData) =>
