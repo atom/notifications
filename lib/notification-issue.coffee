@@ -1,5 +1,5 @@
-$ = require 'jquery'
 fs = require 'fs'
+request = require 'request'
 path = require 'path'
 StackTraceParser = require 'stacktrace-parser'
 
@@ -22,36 +22,42 @@ class NotificationIssue
     query = "#{@getIssueTitle()} repo:#{repo}"
 
     new Promise (resolve, reject) =>
-      $.ajax "#{url}?q=#{encodeURI(query)}&sort=created",
-        accept: 'application/vnd.github.v3+json'
-        contentType: "application/json"
-        success: (data) =>
-          if data.items?
-            issues = {}
-            for issue in data.items
-              if issue.title.indexOf(@getIssueTitle()) > -1 and not issues[issue.state]?
-                issues[issue.state] = issue
-                break
+      request.get {
+        uri: "#{url}?q=#{encodeURI(query)}&sort=created",
+        headers: {
+          accept: 'application/vnd.github.v3+json'
+          contentType: "application/json"
+        }
+      }, (err, resp, body) =>
+        resolve(null) if err?
 
-            return resolve(issues) if issues.open? or issues.closed?
-          resolve(null)
-        error: -> resolve(null)
+        if body.items?
+          issues = {}
+          for issue in body.items
+            if issue.title.indexOf(@getIssueTitle()) > -1 and not issues[issue.state]?
+              issues[issue.state] = issue
+              break
+
+          return resolve(issues) if issues.open? or issues.closed?
+        resolve(null)
 
   getIssueUrlForSystem: ->
     new Promise (resolve, reject) =>
       @getIssueUrl().then (issueUrl) ->
-        $.ajax "https://is.gd/create.php?format=simple",
-          type: 'POST'
-          data: url: issueUrl
-          success: (data) -> resolve(data)
-          error: -> resolve(issueUrl)
+        request.post {
+          uri: 'https://is.gd/create.php?format=simple'
+          form: {url: issueUrl},
+        },
+        (err, resp, body) ->
+          resolve(issueUrl) if err
+          resolve(body)
       return
 
   getIssueUrl: ->
     @getIssueBody().then (issueBody) =>
       repoUrl = @getRepoUrl()
       repoUrl = 'https://github.com/atom/atom' unless repoUrl?
-      "#{repoUrl}/issues/new?title=#{@encodeURI(@getIssueTitle())}&body=#{@encodeURI(issueBody)}"
+      "#{repoUrl}/issues/new?title=#{encodeURIComponent(@getIssueTitle())}&body=#{encodeURIComponent(issueBody)}"
 
   getIssueTitle: ->
     title = @notification.getMessage()
@@ -143,10 +149,6 @@ class NotificationIssue
           #{copyText}
         """
         resolve(@issueBody)
-
-  encodeURI: (str) ->
-    str = encodeURI(str)
-    str.replace(/#/g, '%23').replace(/;/g, '%3B')
 
   getRepoUrl: ->
     packageName = @getPackageName()
