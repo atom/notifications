@@ -1,9 +1,13 @@
-$ = require 'jquery'
 os = require 'os'
 fs = require 'fs'
 path = require 'path'
 semver = require 'semver'
 {BufferedProcess} = require 'atom'
+
+githubHeaders = new Headers({
+  accept: 'application/vnd.github.v3+json',
+  contentType: "application/json"
+})
 
 ###
 A collection of methods for retrieving information about the user's system for
@@ -137,13 +141,8 @@ module.exports =
       "#{pack.name}, v#{pack.version} (#{@getActiveLabel(pack.name, activePackageNames)})" for pack in (availablePackages ? []) when pack.name not in devPackageNames
 
   getLatestAtomData: ->
-    atomUrl = 'https://atom.io/api/updates'
-    new Promise (resolve, reject) ->
-      $.ajax atomUrl,
-        accept: 'application/vnd.github.v3+json'
-        contentType: "application/json"
-        success: (data) -> resolve(data)
-        error: (error) -> reject(error)
+    fetch 'https://atom.io/api/updates', {headers: githubHeaders}
+      .then (r) -> if r.ok then r.json() else Promise.reject r.statusCode
 
   checkAtomUpToDate: ->
     @getLatestAtomData().then (latestAtomData) ->
@@ -160,13 +159,8 @@ module.exports =
     require(path.join(atom.getLoadSettings().resourcePath, 'package.json')).packageDependencies[packageName]
 
   getLatestPackageData: (packageName) ->
-    packagesUrl = 'https://atom.io/api/packages'
-    new Promise (resolve, reject) ->
-      $.ajax "#{packagesUrl}/#{packageName}",
-        accept: 'application/vnd.github.v3+json'
-        contentType: "application/json"
-        success: (data) -> resolve(data)
-        error: (error) -> reject(error)
+    fetch "https://atom.io/api/packages/#{packageName}", {headers: githubHeaders}
+      .then (r) -> if r.ok then r.json() else Promise.reject r.statusCode
 
   checkPackageUpToDate: (packageName) ->
     @getLatestPackageData(packageName).then (latestPackageData) =>

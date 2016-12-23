@@ -1,4 +1,3 @@
-$ = require 'jquery'
 fs = require 'fs-plus'
 path = require 'path'
 temp = require('temp').track()
@@ -55,7 +54,8 @@ describe "Notifications", ->
       notificationContainer = workspaceElement.querySelector('atom-notifications')
       jasmine.attachToDOM(workspaceElement)
 
-      spyOn($, 'ajax')
+      spyOn(window, 'fetch')
+      generateFakeFetchResponses()
 
     it "adds an atom-notification element to the container with a class corresponding to the type", ->
       expect(notificationContainer.childNodes.length).toBe 0
@@ -294,7 +294,7 @@ describe "Notifications", ->
           issueTitle = null
           issueBody = null
           spyOn(atom, 'inDevMode').andReturn false
-          generateFakeAjaxResponses()
+          generateFakeFetchResponses()
           generateException()
           notificationContainer = workspaceElement.querySelector('atom-notifications')
           fatalError = notificationContainer.querySelector('atom-notification.fatal')
@@ -350,16 +350,14 @@ describe "Notifications", ->
         beforeEach ->
           issueTitle = null
           spyOn(atom, 'inDevMode').andReturn false
-          generateFakeAjaxResponses()
+          generateFakeFetchResponses()
 
           # Create a custom error message that contains the user profile but not ATOM_HOME
           try
             a + 1
           catch e
-            if process.platform is 'win32'
-              errMsg = e.toString() + ' in ' + process.env.USERPROFILE + path.sep + 'somewhere'
-            else
-              errMsg = e.toString() + ' in ' + process.env.HOME + path.sep + 'somewhere'
+            home = if process.platform is 'win32' then process.env.USERPROFILE else process.env.HOME
+            errMsg = "#{e.toString()} in #{home}#{path.sep}somewhere"
             window.onerror.call(window, errMsg, '/dev/null', 2, 3, e)
 
           notificationContainer = workspaceElement.querySelector('atom-notifications')
@@ -380,7 +378,7 @@ describe "Notifications", ->
       describe "when an exception is thrown from a linked package", ->
         beforeEach ->
           spyOn(atom, 'inDevMode').andReturn false
-          generateFakeAjaxResponses()
+          generateFakeFetchResponses()
 
           packagesDir = path.join(temp.mkdirSync('atom-packages-'), '.atom', 'packages')
           atom.packages.packageDirPaths.push(packagesDir)
@@ -425,7 +423,7 @@ describe "Notifications", ->
         beforeEach ->
           spyOn(atom, 'inDevMode').andReturn false
 
-          generateFakeAjaxResponses()
+          generateFakeFetchResponses()
 
           packagesDir = temp.mkdirSync('atom-packages-')
           atom.packages.packageDirPaths.push(path.join(packagesDir, '.atom', 'packages'))
@@ -459,7 +457,7 @@ describe "Notifications", ->
       describe "when an exception is thrown from a package trying to load", ->
         beforeEach ->
           spyOn(atom, 'inDevMode').andReturn false
-          generateFakeAjaxResponses()
+          generateFakeFetchResponses()
 
           packagesDir = temp.mkdirSync('atom-packages-')
           atom.packages.packageDirPaths.push(path.join(packagesDir, '.atom', 'packages'))
@@ -493,7 +491,7 @@ describe "Notifications", ->
       describe "when an exception is thrown from a package trying to load a grammar", ->
         beforeEach ->
           spyOn(atom, 'inDevMode').andReturn false
-          generateFakeAjaxResponses()
+          generateFakeFetchResponses()
 
           packagesDir = temp.mkdirSync('atom-packages-')
           atom.packages.packageDirPaths.push(path.join(packagesDir, '.atom', 'packages'))
@@ -540,7 +538,7 @@ describe "Notifications", ->
       describe "when an exception is thrown from a package trying to activate", ->
         beforeEach ->
           spyOn(atom, 'inDevMode').andReturn false
-          generateFakeAjaxResponses()
+          generateFakeFetchResponses()
 
           packagesDir = temp.mkdirSync('atom-packages-')
           atom.packages.packageDirPaths.push(path.join(packagesDir, '.atom', 'packages'))
@@ -575,7 +573,7 @@ describe "Notifications", ->
         beforeEach ->
           issueBody = null
           spyOn(atom, 'inDevMode').andReturn false
-          generateFakeAjaxResponses()
+          generateFakeFetchResponses()
           try
             a + 1
           catch e
@@ -600,7 +598,7 @@ describe "Notifications", ->
           atom.commands.dispatch(workspaceElement, 'some-package:a-command')
           atom.commands.dispatch(workspaceElement, 'some-package:a-command')
           spyOn(atom, 'inDevMode').andReturn false
-          generateFakeAjaxResponses()
+          generateFakeFetchResponses()
           try
             a + 1
           catch e
@@ -651,7 +649,7 @@ describe "Notifications", ->
       describe "when the there is an error searching for the issue", ->
         beforeEach ->
           spyOn(atom, 'inDevMode').andReturn false
-          generateFakeAjaxResponses(issuesErrorResponse: '403')
+          generateFakeFetchResponses(issuesErrorResponse: '403')
           generateException()
           fatalError = notificationContainer.querySelector('atom-notification.fatal')
           waitsForPromise ->
@@ -673,7 +671,7 @@ describe "Notifications", ->
           truncatedMessage = "Uncaught Error: Cannot find module 'dialog'Error: Cannot find module 'dialog' at Function.Module...."
 
           beforeEach ->
-            generateFakeAjaxResponses()
+            generateFakeFetchResponses()
             try
               a + 1
             catch e
@@ -689,7 +687,7 @@ describe "Notifications", ->
 
             runs ->
               button = fatalError.querySelector('.btn')
-              encodedMessage = encodeURI(truncatedMessage)
+              encodedMessage = encodeURIComponent(truncatedMessage)
               expect(button.textContent).toContain 'Create issue'
               expect(button.getAttribute('href')).toContain 'is.gd/cats'
 
@@ -702,7 +700,7 @@ describe "Notifications", ->
 
         describe "when the package is a non-core package", ->
           beforeEach ->
-            generateFakeAjaxResponses
+            generateFakeFetchResponses
               packageResponse:
                 repository: url: 'https://github.com/someguy/somepackage'
                 releases: latest: '0.10.0'
@@ -723,7 +721,7 @@ describe "Notifications", ->
 
         describe "when the package is an atom-owned non-core package", ->
           beforeEach ->
-            generateFakeAjaxResponses
+            generateFakeFetchResponses
               packageResponse:
                 repository: url: 'https://github.com/atom/sort-lines'
                 releases: latest: '0.10.0'
@@ -745,7 +743,7 @@ describe "Notifications", ->
 
         describe "when the package is a core package", ->
           beforeEach ->
-            generateFakeAjaxResponses
+            generateFakeFetchResponses
               packageResponse:
                 repository: url: 'https://github.com/atom/notifications'
                 releases: latest: '0.11.0'
@@ -792,7 +790,7 @@ describe "Notifications", ->
           spyOn(atom, 'getVersion').andCallFake -> installedVersion
           spyOn(atom, 'inDevMode').andReturn false
 
-          generateFakeAjaxResponses
+          generateFakeFetchResponses
             atomResponse:
               name: '0.180.0'
 
@@ -820,7 +818,7 @@ describe "Notifications", ->
 
         describe "when the issue is open", ->
           beforeEach ->
-            generateFakeAjaxResponses
+            generateFakeFetchResponses
               issuesResponse:
                 items: [
                   {
@@ -840,11 +838,11 @@ describe "Notifications", ->
             expect(button.textContent).toContain 'View Issue'
             expect(button.getAttribute('href')).toBe 'http://url.com/ok'
             expect(fatalNotification.textContent).toContain 'already been reported'
-            expect($.ajax.calls[0].args[0]).toContain 'atom/notifications'
+            expect(fetch.calls[0].args[0]).toContain encodeURIComponent('atom/notifications')
 
         describe "when the issue is closed", ->
           beforeEach ->
-            generateFakeAjaxResponses
+            generateFakeFetchResponses
               issuesResponse:
                 items: [
                   {
@@ -907,41 +905,38 @@ generateException = ->
   try
     a + 1
   catch e
-    errMsg = e.toString() + ' in ' + process.env.ATOM_HOME + '/somewhere'
+    errMsg = "#{e.toString()} in #{process.env.ATOM_HOME}/somewhere"
     window.onerror.call(window, errMsg, '/dev/null', 2, 3, e)
 
 # shortenerResponse
 # packageResponse
 # issuesResponse
-generateFakeAjaxResponses = (options) ->
-  $.ajax.andCallFake (url, settings) ->
+generateFakeFetchResponses = (options) =>
+  fetch.andCallFake (url) =>
     if url.indexOf('is.gd') > -1
-      response = options?.shortenerResponse ? 'http://is.gd/cats'
-      settings.success(response)
-    else if url.indexOf('atom.io/api/packages') > -1
-      response = options?.packageResponse ? {
+      return textPromise options?.shortenerResponse ? 'http://is.gd/cats'
+
+    if url.indexOf('atom.io/api/packages') > -1
+      return jsonPromise(options?.packageResponse ? {
         repository: url: 'https://github.com/atom/notifications'
         releases: latest: '0.0.0'
-      }
-      settings.success(response)
-    else if url.indexOf('atom.io/api/updates') > -1
-      response = options?.atomResponse ? {
-        name: atom.getVersion()
-      }
-      settings.success(response)
-    else
-      if options?.issuesErrorResponse?
-        settings.error?({}, options.issuesErrorResponse, null)
-      else
-        response = options?.issuesResponse ? {
-          items: []
-        }
-        settings.success(response)
+      })
+
+    if url.indexOf('atom.io/api/updates') > -1
+      return(jsonPromise options?.atomResponse ? {name: atom.getVersion()})
+
+    if options?.issuesErrorResponse?
+      return Promise.reject(options?.issuesErrorResponse)
+
+    jsonPromise(options?.issuesResponse ? {items: []})
+
+jsonPromise = (object) -> Promise.resolve {ok: true, json: -> Promise.resolve object}
+textPromise = (text) -> Promise.resolve {ok: true, text: -> Promise.resolve text}
 
 window.waitsForPromise = (fn) ->
   promise = fn()
   window.waitsFor 5000, (moveOn) ->
-    promise.then(moveOn)
+    promise.then (moveOn)
     promise.catch (error) ->
       jasmine.getEnv().currentSpec.fail("Expected promise to be resolved, but it was rejected with #{jasmine.pp(error)}")
       moveOn()
