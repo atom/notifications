@@ -327,16 +327,6 @@ describe "Notifications", ->
             # FIXME: this doesnt work on the test server. `apm ls` is not working for some reason.
             # expect(issueBody).toContain 'notifications, v'
 
-        it "contains core and notifications config values", ->
-          atom.config.set('notifications.something', 10)
-          waitsForPromise ->
-            fatalError.getRenderPromise().then -> issueBody = fatalError.issue.issueBody
-
-          runs ->
-            expect(issueBody).toContain '"core":'
-            expect(issueBody).toContain '"notifications":'
-            expect(issueBody).not.toContain '"editor":'
-
         it "standardizes platform separators on #win32", ->
           waitsForPromise ->
             fatalError.getRenderPromise().then ->
@@ -625,11 +615,6 @@ describe "Notifications", ->
 
           expect(issueBody).toContain 'ReferenceError: a is not defined'
           expect(issueBody).toContain '**Thrown From**: Atom Core'
-
-        it "contains core and editor config values", ->
-          expect(issueBody).toContain '"core":'
-          expect(issueBody).toContain '"editor":'
-          expect(issueBody).not.toContain '"notifications":'
 
         it "contains the commands that the user run in the issue body", ->
           expect(issueBody).toContain 'some-package:a-command'

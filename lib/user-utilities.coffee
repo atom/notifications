@@ -99,18 +99,6 @@ module.exports =
         resolve('Unknown Windows Version')
 
   ###
-  Section: Config Values
-  ###
-
-  getConfigForPackage: (packageName) ->
-    config = core: atom.config.settings.core
-    if packageName?
-      config[packageName] = atom.config.settings[packageName]
-    else
-      config.editor = atom.config.settings.editor
-    config
-
-  ###
   Section: Installed Packages
   ###
 

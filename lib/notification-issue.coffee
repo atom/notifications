@@ -81,7 +81,6 @@ class NotificationIssue
         repoUrl = @getRepoUrl()
         packageName = @getPackageName()
         packageVersion = atom.packages.getLoadedPackage(packageName)?.metadata?.version if packageName?
-        userConfig = UserUtilities.getConfigForPackage(packageName)
         copyText = ''
         systemUser = process.env.USER
         rootUserStatus = ''
@@ -124,12 +123,6 @@ class NotificationIssue
           ### Commands
 
           #{CommandLogger.instance().getText()}
-
-          ### Config
-
-          ```json
-          #{JSON.stringify(userConfig, null, 2)}
-          ```
 
           ### Installed Packages
 
