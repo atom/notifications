@@ -105,7 +105,7 @@ module.exports =
   isDevModePackagePath: (packagePath) ->
     packagePath.match(DEV_PACKAGE_PATH)?
 
-  # Returns a promise. Resolves with object of arrays {dev: ['some-package, v0.2.3', ...], user: [...]}
+  # Returns a promise. Resolves with object of arrays {dev: ['some-package 0.2.3', ...], user: [...]}
   getInstalledPackages: ->
     new Promise (resolve, reject) =>
       devPackagePaths = atom.packages.getAvailablePackagePaths().filter(@isDevModePackagePath)
@@ -124,9 +124,9 @@ module.exports =
 
   getPackageNames: (availablePackages, devPackageNames, activePackageNames, devMode) ->
     if devMode
-      "#{pack.name}, v#{pack.version} (#{@getActiveLabel(pack.name, activePackageNames)})" for pack in (availablePackages ? []) when pack.name in devPackageNames
+      "#{pack.name} #{pack.version} (#{@getActiveLabel(pack.name, activePackageNames)})" for pack in (availablePackages ? []) when pack.name in devPackageNames
     else
-      "#{pack.name}, v#{pack.version} (#{@getActiveLabel(pack.name, activePackageNames)})" for pack in (availablePackages ? []) when pack.name not in devPackageNames
+      "#{pack.name} #{pack.version} (#{@getActiveLabel(pack.name, activePackageNames)})" for pack in (availablePackages ? []) when pack.name not in devPackageNames
 
   getLatestAtomData: ->
     fetch 'https://atom.io/api/updates', {headers: githubHeaders}

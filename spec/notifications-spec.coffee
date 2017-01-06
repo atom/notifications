@@ -321,11 +321,11 @@ describe "Notifications", ->
             expect(issueBody).toMatch /Atom Version\*\*: [0-9].[0-9]+.[0-9]+/ig
             expect(issueBody).not.toMatch /Unknown/ig
             expect(issueBody).toContain 'ReferenceError: a is not defined'
-            expect(issueBody).toContain 'Thrown From**: [notifications](https://github.com/atom/notifications) package, v'
+            expect(issueBody).toContain 'Thrown From**: [notifications](https://github.com/atom/notifications) package '
             expect(issueBody).toContain '# User'
 
             # FIXME: this doesnt work on the test server. `apm ls` is not working for some reason.
-            # expect(issueBody).toContain 'notifications, v'
+            # expect(issueBody).toContain 'notifications '
 
         it "standardizes platform separators on #win32", ->
           waitsForPromise ->

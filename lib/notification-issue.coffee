@@ -89,9 +89,9 @@ class NotificationIssue
           rootUserStatus = '**User**: root'
 
         if packageName? and repoUrl?
-          packageMessage = "[#{packageName}](#{repoUrl}) package, v#{packageVersion}"
+          packageMessage = "[#{packageName}](#{repoUrl}) package #{packageVersion}"
         else if packageName?
-          packageMessage = "'#{packageName}' package, v#{packageVersion}"
+          packageMessage = "'#{packageName}' package v#{packageVersion}"
         else
           packageMessage = 'Atom Core'
 
