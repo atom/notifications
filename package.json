@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "fs-plus": "^2.6.0",
-    "jquery": "^2",
     "marked": "^0.3.6",
     "semver": "^4.3.2",
     "stacktrace-parser": "^0.1.3",

@@ -1,4 +1,3 @@
-$ = require 'jquery'
 fs = require 'fs'
 path = require 'path'
 StackTraceParser = require 'stacktrace-parser'
@@ -10,48 +9,50 @@ TITLE_CHAR_LIMIT = 100 # Truncate issue title to 100 characters (including ellip
 
 FileURLRegExp = new RegExp('file://\w*/(.*)')
 
+githubHeaders = new Headers({
+  accept: 'application/vnd.github.v3+json'
+  contentType: "application/json"
+})
+
 module.exports =
 class NotificationIssue
   constructor: (@notification) ->
 
   findSimilarIssues: ->
-    url = "https://api.github.com/search/issues"
     repoUrl = @getRepoUrl()
     repoUrl = 'atom/atom' unless repoUrl?
     repo = repoUrl.replace /http(s)?:\/\/(\d+\.)?github.com\//gi, ''
-    query = "#{@getIssueTitle()} repo:#{repo}"
+    issueTitle = @getIssueTitle()
+    query = "#{issueTitle} repo:#{repo}"
 
-    new Promise (resolve, reject) =>
-      $.ajax "#{url}?q=#{encodeURI(query)}&sort=created",
-        accept: 'application/vnd.github.v3+json'
-        contentType: "application/json"
-        success: (data) =>
-          if data.items?
-            issues = {}
-            for issue in data.items
-              if issue.title.indexOf(@getIssueTitle()) > -1 and not issues[issue.state]?
-                issues[issue.state] = issue
-                break
+    fetch "https://api.github.com/search/issues?q=#{encodeURIComponent(query)}&sort=created", {headers: githubHeaders}
+      .then (r) => r?.json()
+      .then (data) =>
+        if data?.items?
+          issues = {}
+          for issue in data.items
+            if issue.title.indexOf(issueTitle) > -1 and not issues[issue.state]?
+              issues[issue.state] = issue
+              return issues if issues.open? and issues.closed?
 
-            return resolve(issues) if issues.open? or issues.closed?
-          resolve(null)
-        error: -> resolve(null)
+          return issues if issues.open? or issues.closed?
+        null
+      .catch (e) -> null
 
   getIssueUrlForSystem: ->
-    new Promise (resolve, reject) =>
-      @getIssueUrl().then (issueUrl) ->
-        $.ajax "https://is.gd/create.php?format=simple",
-          type: 'POST'
-          data: url: issueUrl
-          success: (data) -> resolve(data)
-          error: -> resolve(issueUrl)
-      return
+    @getIssueUrl().then (issueUrl) ->
+      fetch "https://is.gd/create.php?format=simple", {
+        method: 'POST',
+        body: "url=#{encodeURI(issueUrl)}"
+      }
+      .then (r) -> r.text()
+      .catch (e) -> null
 
   getIssueUrl: ->
     @getIssueBody().then (issueBody) =>
       repoUrl = @getRepoUrl()
       repoUrl = 'https://github.com/atom/atom' unless repoUrl?
-      "#{repoUrl}/issues/new?title=#{@encodeURI(@getIssueTitle())}&body=#{@encodeURI(issueBody)}"
+      "#{repoUrl}/issues/new?title=#{encodeURIComponent(@getIssueTitle())}&body=#{encodeURIComponent(issueBody)}"
 
   getIssueTitle: ->
     title = @notification.getMessage()
@@ -143,10 +144,6 @@ class NotificationIssue
           #{copyText}
         """
         resolve(@issueBody)
-
-  encodeURI: (str) ->
-    str = encodeURI(str)
-    str.replace(/#/g, '%23').replace(/;/g, '%3B')
 
   getRepoUrl: ->
     packageName = @getPackageName()
