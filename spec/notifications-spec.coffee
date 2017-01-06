@@ -318,7 +318,7 @@ describe "Notifications", ->
 
             expect(issueTitle).toContain '$ATOM_HOME'
             expect(issueTitle).not.toContain process.env.ATOM_HOME
-            expect(issueBody).toMatch /Atom Version\*\*: [0-9].[0-9]+.[0-9]+/ig
+            expect(issueBody).toMatch /Atom\*\*: [0-9].[0-9]+.[0-9]+/ig
             expect(issueBody).not.toMatch /Unknown/ig
             expect(issueBody).toContain 'ReferenceError: a is not defined'
             expect(issueBody).toContain 'Thrown From**: [notifications](https://github.com/atom/notifications) package '

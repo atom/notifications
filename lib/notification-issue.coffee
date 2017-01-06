@@ -40,6 +40,8 @@ class NotificationIssue
       .catch (e) -> null
 
   getIssueUrlForSystem: ->
+    # Windows will not launch URLs greater than ~2000 bytes so we need to shrink it
+    # Also is.gd has a limit of 5000 bytes...
     @getIssueUrl().then (issueUrl) ->
       fetch "https://is.gd/create.php?format=simple", {
         method: 'POST',
@@ -99,13 +101,13 @@ class NotificationIssue
         electronVersion = process.versions.electron
 
         @issueBody = """
-          [Enter steps to reproduce below:]
+          [Enter steps to reproduce:]
 
           1. ...
           2. ...
 
-          **Atom Version**: #{atomVersion}
-          **Electron Version**: #{electronVersion}
+          **Atom**: #{atomVersion}
+          **Electron**: #{electronVersion}
           **System**: #{systemName}
           **Thrown From**: #{packageMessage}
           #{rootUserStatus}
