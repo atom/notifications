@@ -1,6 +1,7 @@
 fs = require 'fs-plus'
 path = require 'path'
 marked = require 'marked'
+{shell} = require 'electron'
 
 NotificationIssue = require './notification-issue'
 TemplateHelper = require './template-helper'
@@ -168,12 +169,11 @@ class NotificationElement extends HTMLElement
 
       promises = []
       promises.push @issue.findSimilarIssues()
-      promises.push @issue.getIssueUrlForSystem()
       promises.push UserUtilities.checkAtomUpToDate()
       promises.push UserUtilities.checkPackageUpToDate(packageName) if packageName?
 
-      Promise.all(promises).then (allData) ->
-        [issues, newIssueUrl, atomCheck, packageCheck] = allData
+      Promise.all(promises).then (allData) =>
+        [issues, atomCheck, packageCheck] = allData
 
         if issues?.open or issues?.closed
           issue = issues.open or issues.closed
@@ -218,8 +218,14 @@ class NotificationElement extends HTMLElement
             Upgrading to the <a href='https://github.com/atom/atom/releases/tag/v#{atomCheck.latestVersion}'>latest version</a> may fix this issue.
           """
         else
-          issueButton.setAttribute('href', newIssueUrl) if newIssueUrl?
           fatalNotification.innerHTML += " You can help by creating an issue. Please explain what actions triggered this error."
+          issueButton.addEventListener 'click', (e) =>
+            e.preventDefault()
+            issueButton.classList.add('opening')
+            @issue.getIssueUrlForSystem().then (issueUrl) ->
+              shell.openExternal(issueUrl)
+              issueButton.classList.remove('opening')
+
         return
     else
       Promise.resolve()
