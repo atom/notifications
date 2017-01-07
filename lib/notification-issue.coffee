@@ -45,7 +45,8 @@ class NotificationIssue
     @getIssueUrl().then (issueUrl) ->
       fetch "https://is.gd/create.php?format=simple", {
         method: 'POST',
-        body: "url=#{encodeURI(issueUrl)}"
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: "url=#{encodeURIComponent(issueUrl)}"
       }
       .then (r) -> r.text()
       .catch (e) -> null
@@ -54,7 +55,10 @@ class NotificationIssue
     @getIssueBody().then (issueBody) =>
       repoUrl = @getRepoUrl()
       repoUrl = 'https://github.com/atom/atom' unless repoUrl?
-      "#{repoUrl}/issues/new?title=#{encodeURIComponent(@getIssueTitle())}&body=#{encodeURIComponent(issueBody)}"
+      "#{repoUrl}/issues/new?title=#{@encodeURI(@getIssueTitle())}&body=#{@encodeURI(issueBody)}"
+
+  encodeURI: (str) ->
+    encodeURI(str).replace(/#/g, '%23').replace(/;/g, '%3B').replace(/%20/g, '+')
 
   getIssueTitle: ->
     title = @notification.getMessage()
@@ -73,10 +77,10 @@ class NotificationIssue
     new Promise (resolve, reject) =>
       return resolve(@issueBody) if @issueBody
       systemPromise = UserUtilities.getOSVersion()
-      installedPackagesPromise = UserUtilities.getInstalledPackages()
+      nonCorePackagesPromise = UserUtilities.getNonCorePackages()
 
-      Promise.all([systemPromise, installedPackagesPromise]).then (all) =>
-        [systemName, installedPackages] = all
+      Promise.all([systemPromise, nonCorePackagesPromise]).then (all) =>
+        [systemName, nonCorePackages] = all
 
         message = @notification.getMessage()
         options = @notification.getOptions()
@@ -108,7 +112,7 @@ class NotificationIssue
 
           **Atom**: #{atomVersion}
           **Electron**: #{electronVersion}
-          **System**: #{systemName}
+          **OS**: #{systemName}
           **Thrown From**: #{packageMessage}
           #{rootUserStatus}
 
@@ -126,14 +130,10 @@ class NotificationIssue
 
           #{CommandLogger.instance().getText()}
 
-          ### Installed Packages
+          ### Non-Core Packages
 
-          ```coffee
-          # User
-          #{installedPackages.user.join('\n') or 'No installed packages'}
-
-          # Dev
-          #{installedPackages.dev.join('\n') or 'No dev packages'}
+          ```
+          #{nonCorePackages.join('\n')}
           ```
 
           #{copyText}

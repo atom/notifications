@@ -322,7 +322,7 @@ describe "Notifications", ->
             expect(issueBody).not.toMatch /Unknown/ig
             expect(issueBody).toContain 'ReferenceError: a is not defined'
             expect(issueBody).toContain 'Thrown From**: [notifications](https://github.com/atom/notifications) package '
-            expect(issueBody).toContain '# User'
+            expect(issueBody).toContain '### Non-Core Packages'
 
             # FIXME: this doesnt work on the test server. `apm ls` is not working for some reason.
             # expect(issueBody).toContain 'notifications '
