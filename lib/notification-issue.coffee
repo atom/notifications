@@ -26,8 +26,8 @@ class NotificationIssue
     query = "#{issueTitle} repo:#{repo}"
 
     fetch "https://api.github.com/search/issues?q=#{encodeURIComponent(query)}&sort=created", {headers: githubHeaders}
-      .then (r) => r?.json()
-      .then (data) =>
+      .then (r) -> r?.json()
+      .then (data) ->
         if data?.items?
           issues = {}
           for issue in data.items
@@ -45,7 +45,7 @@ class NotificationIssue
     @getIssueUrl().then (issueUrl) ->
       fetch "https://is.gd/create.php?format=simple", {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: "url=#{encodeURIComponent(issueUrl)}"
       }
       .then (r) -> r.text()

@@ -103,9 +103,9 @@ module.exports =
   ###
 
   getNonCorePackages: ->
-    new Promise (resolve, reject) =>
-      nonCorePackages = atom.packages.getAvailablePackageMetadata().filter((p) -> !atom.packages.isBundledPackage(p.name))
-      devPackageNames = atom.packages.getAvailablePackagePaths().filter((p) -> p.includes(DEV_PACKAGE_PATH)).map((p) => path.basename(p))
+    new Promise (resolve, reject) ->
+      nonCorePackages = atom.packages.getAvailablePackageMetadata().filter((p) -> not atom.packages.isBundledPackage(p.name))
+      devPackageNames = atom.packages.getAvailablePackagePaths().filter((p) -> p.includes(DEV_PACKAGE_PATH)).map((p) -> path.basename(p))
       resolve("#{pack.name} #{pack.version} #{if pack.name in devPackageNames then '(dev)' else ''}" for pack in nonCorePackages)
 
   getLatestAtomData: ->

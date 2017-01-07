@@ -895,8 +895,8 @@ generateException = ->
 # shortenerResponse
 # packageResponse
 # issuesResponse
-generateFakeFetchResponses = (options) =>
-  fetch.andCallFake (url) =>
+generateFakeFetchResponses = (options) ->
+  fetch.andCallFake (url) ->
     if url.indexOf('is.gd') > -1
       return textPromise options?.shortenerResponse ? 'http://is.gd/cats'
 
