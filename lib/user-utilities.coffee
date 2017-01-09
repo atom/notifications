@@ -36,7 +36,7 @@ module.exports =
 
   macVersionText: ->
     @macVersionInfo().then (info) ->
-      return 'Unknown OS X version' unless info.ProductName and info.ProductVersion
+      return 'Unknown macOS version' unless info.ProductName and info.ProductVersion
       "#{info.ProductName} #{info.ProductVersion}"
 
   macVersionInfo: ->
@@ -91,54 +91,22 @@ module.exports =
         stdout: (oneLine) -> data.push(oneLine)
         exit: ->
           info = data.join('\n')
-          info = if (res = /OS.Name.\s+(.*)$/im.exec(info)) then res[1] else 'Unknown Windows Version'
+          info = if (res = /OS.Name.\s+(.*)$/im.exec(info)) then res[1] else 'Unknown Windows version'
           resolve(info)
 
       systemInfo.onWillThrowError ({handle}) ->
         handle()
-        resolve('Unknown Windows Version')
-
-  ###
-  Section: Config Values
-  ###
-
-  getConfigForPackage: (packageName) ->
-    config = core: atom.config.settings.core
-    if packageName?
-      config[packageName] = atom.config.settings[packageName]
-    else
-      config.editor = atom.config.settings.editor
-    config
+        resolve('Unknown Windows version')
 
   ###
   Section: Installed Packages
   ###
 
-  isDevModePackagePath: (packagePath) ->
-    packagePath.match(DEV_PACKAGE_PATH)?
-
-  # Returns a promise. Resolves with object of arrays {dev: ['some-package, v0.2.3', ...], user: [...]}
-  getInstalledPackages: ->
-    new Promise (resolve, reject) =>
-      devPackagePaths = atom.packages.getAvailablePackagePaths().filter(@isDevModePackagePath)
-      devPackageNames = devPackagePaths.map((packagePath) -> path.basename(packagePath))
-      availablePackages = atom.packages.getAvailablePackageMetadata()
-      activePackageNames = atom.packages.getActivePackages().map((activePackage) -> activePackage.name)
-      resolve
-        dev: @getPackageNames(availablePackages, devPackageNames, activePackageNames, true)
-        user: @getPackageNames(availablePackages, devPackageNames, activePackageNames, false)
-
-  getActiveLabel: (packageName, activePackageNames) ->
-    if packageName in activePackageNames
-      'active'
-    else
-      'inactive'
-
-  getPackageNames: (availablePackages, devPackageNames, activePackageNames, devMode) ->
-    if devMode
-      "#{pack.name}, v#{pack.version} (#{@getActiveLabel(pack.name, activePackageNames)})" for pack in (availablePackages ? []) when pack.name in devPackageNames
-    else
-      "#{pack.name}, v#{pack.version} (#{@getActiveLabel(pack.name, activePackageNames)})" for pack in (availablePackages ? []) when pack.name not in devPackageNames
+  getNonCorePackages: ->
+    new Promise (resolve, reject) ->
+      nonCorePackages = atom.packages.getAvailablePackageMetadata().filter((p) -> not atom.packages.isBundledPackage(p.name))
+      devPackageNames = atom.packages.getAvailablePackagePaths().filter((p) -> p.includes(DEV_PACKAGE_PATH)).map((p) -> path.basename(p))
+      resolve("#{pack.name} #{pack.version} #{if pack.name in devPackageNames then '(dev)' else ''}" for pack in nonCorePackages)
 
   getLatestAtomData: ->
     fetch 'https://atom.io/api/updates', {headers: githubHeaders}

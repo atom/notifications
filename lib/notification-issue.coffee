@@ -26,8 +26,8 @@ class NotificationIssue
     query = "#{issueTitle} repo:#{repo}"
 
     fetch "https://api.github.com/search/issues?q=#{encodeURIComponent(query)}&sort=created", {headers: githubHeaders}
-      .then (r) => r?.json()
-      .then (data) =>
+      .then (r) -> r?.json()
+      .then (data) ->
         if data?.items?
           issues = {}
           for issue in data.items
@@ -40,10 +40,13 @@ class NotificationIssue
       .catch (e) -> null
 
   getIssueUrlForSystem: ->
+    # Windows will not launch URLs greater than ~2000 bytes so we need to shrink it
+    # Also is.gd has a limit of 5000 bytes...
     @getIssueUrl().then (issueUrl) ->
       fetch "https://is.gd/create.php?format=simple", {
         method: 'POST',
-        body: "url=#{encodeURI(issueUrl)}"
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: "url=#{encodeURIComponent(issueUrl)}"
       }
       .then (r) -> r.text()
       .catch (e) -> null
@@ -52,7 +55,10 @@ class NotificationIssue
     @getIssueBody().then (issueBody) =>
       repoUrl = @getRepoUrl()
       repoUrl = 'https://github.com/atom/atom' unless repoUrl?
-      "#{repoUrl}/issues/new?title=#{encodeURIComponent(@getIssueTitle())}&body=#{encodeURIComponent(issueBody)}"
+      "#{repoUrl}/issues/new?title=#{@encodeURI(@getIssueTitle())}&body=#{@encodeURI(issueBody)}"
+
+  encodeURI: (str) ->
+    encodeURI(str).replace(/#/g, '%23').replace(/;/g, '%3B').replace(/%20/g, '+')
 
   getIssueTitle: ->
     title = @notification.getMessage()
@@ -71,17 +77,16 @@ class NotificationIssue
     new Promise (resolve, reject) =>
       return resolve(@issueBody) if @issueBody
       systemPromise = UserUtilities.getOSVersion()
-      installedPackagesPromise = UserUtilities.getInstalledPackages()
+      nonCorePackagesPromise = UserUtilities.getNonCorePackages()
 
-      Promise.all([systemPromise, installedPackagesPromise]).then (all) =>
-        [systemName, installedPackages] = all
+      Promise.all([systemPromise, nonCorePackagesPromise]).then (all) =>
+        [systemName, nonCorePackages] = all
 
         message = @notification.getMessage()
         options = @notification.getOptions()
         repoUrl = @getRepoUrl()
         packageName = @getPackageName()
         packageVersion = atom.packages.getLoadedPackage(packageName)?.metadata?.version if packageName?
-        userConfig = UserUtilities.getConfigForPackage(packageName)
         copyText = ''
         systemUser = process.env.USER
         rootUserStatus = ''
@@ -90,9 +95,9 @@ class NotificationIssue
           rootUserStatus = '**User**: root'
 
         if packageName? and repoUrl?
-          packageMessage = "[#{packageName}](#{repoUrl}) package, v#{packageVersion}"
+          packageMessage = "[#{packageName}](#{repoUrl}) package #{packageVersion}"
         else if packageName?
-          packageMessage = "'#{packageName}' package, v#{packageVersion}"
+          packageMessage = "'#{packageName}' package v#{packageVersion}"
         else
           packageMessage = 'Atom Core'
 
@@ -100,14 +105,14 @@ class NotificationIssue
         electronVersion = process.versions.electron
 
         @issueBody = """
-          [Enter steps to reproduce below:]
+          [Enter steps to reproduce:]
 
           1. ...
           2. ...
 
-          **Atom Version**: #{atomVersion}
-          **Electron Version**: #{electronVersion}
-          **System**: #{systemName}
+          **Atom**: #{atomVersion}
+          **Electron**: #{electronVersion}
+          **OS**: #{systemName}
           **Thrown From**: #{packageMessage}
           #{rootUserStatus}
 
@@ -125,20 +130,10 @@ class NotificationIssue
 
           #{CommandLogger.instance().getText()}
 
-          ### Config
+          ### Non-Core Packages
 
-          ```json
-          #{JSON.stringify(userConfig, null, 2)}
           ```
-
-          ### Installed Packages
-
-          ```coffee
-          # User
-          #{installedPackages.user.join('\n') or 'No installed packages'}
-
-          # Dev
-          #{installedPackages.dev.join('\n') or 'No dev packages'}
+          #{nonCorePackages.join('\n')}
           ```
 
           #{copyText}

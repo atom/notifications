@@ -303,7 +303,8 @@ describe "Notifications", ->
           waitsForPromise ->
             fatalError.getRenderPromise().then ->
               issueTitle = fatalError.issue.getIssueTitle()
-              issueBody = fatalError.issue.issueBody
+              fatalError.issue.getIssueBody().then (result) ->
+                issueBody = result
 
           runs ->
             expect(notificationContainer.childNodes.length).toBe 1
@@ -314,28 +315,17 @@ describe "Notifications", ->
 
             button = fatalError.querySelector('.btn')
             expect(button.textContent).toContain 'Create issue on the notifications package'
-            expect(button.getAttribute('href')).toContain 'is.gd/cats'
 
             expect(issueTitle).toContain '$ATOM_HOME'
             expect(issueTitle).not.toContain process.env.ATOM_HOME
-            expect(issueBody).toMatch /Atom Version\*\*: [0-9].[0-9]+.[0-9]+/ig
+            expect(issueBody).toMatch /Atom\*\*: [0-9].[0-9]+.[0-9]+/ig
             expect(issueBody).not.toMatch /Unknown/ig
             expect(issueBody).toContain 'ReferenceError: a is not defined'
-            expect(issueBody).toContain 'Thrown From**: [notifications](https://github.com/atom/notifications) package, v'
-            expect(issueBody).toContain '# User'
+            expect(issueBody).toContain 'Thrown From**: [notifications](https://github.com/atom/notifications) package '
+            expect(issueBody).toContain '### Non-Core Packages'
 
             # FIXME: this doesnt work on the test server. `apm ls` is not working for some reason.
-            # expect(issueBody).toContain 'notifications, v'
-
-        it "contains core and notifications config values", ->
-          atom.config.set('notifications.something', 10)
-          waitsForPromise ->
-            fatalError.getRenderPromise().then -> issueBody = fatalError.issue.issueBody
-
-          runs ->
-            expect(issueBody).toContain '"core":'
-            expect(issueBody).toContain '"notifications":'
-            expect(issueBody).not.toContain '"editor":'
+            # expect(issueBody).toContain 'notifications '
 
         it "standardizes platform separators on #win32", ->
           waitsForPromise ->
@@ -609,7 +599,9 @@ describe "Notifications", ->
           notificationContainer = workspaceElement.querySelector('atom-notifications')
           fatalError = notificationContainer.querySelector('atom-notification.fatal')
           waitsForPromise ->
-            fatalError.getRenderPromise().then -> issueBody = fatalError.issue.issueBody
+            fatalError.getRenderPromise().then ->
+              fatalError.issue.getIssueBody().then (result) ->
+                issueBody = result
 
         it "displays a fatal error with the package name in the error", ->
           expect(notificationContainer.childNodes.length).toBe 1
@@ -621,15 +613,9 @@ describe "Notifications", ->
 
           button = fatalError.querySelector('.btn')
           expect(button.textContent).toContain 'Create issue on atom/atom'
-          expect(button.getAttribute('href')).toContain 'is.gd/cats'
 
           expect(issueBody).toContain 'ReferenceError: a is not defined'
           expect(issueBody).toContain '**Thrown From**: Atom Core'
-
-        it "contains core and editor config values", ->
-          expect(issueBody).toContain '"core":'
-          expect(issueBody).toContain '"editor":'
-          expect(issueBody).not.toContain '"notifications":'
 
         it "contains the commands that the user run in the issue body", ->
           expect(issueBody).toContain 'some-package:a-command'
@@ -660,7 +646,6 @@ describe "Notifications", ->
           fatalNotification = fatalError.querySelector('.fatal-notification')
           expect(button.textContent).toContain 'Create issue'
           expect(fatalNotification.textContent).toContain 'You can help by creating an issue'
-          expect(button.getAttribute('href')).toContain 'is.gd/cats'
 
       describe "when the error has not been reported", ->
         beforeEach ->
@@ -689,7 +674,6 @@ describe "Notifications", ->
               button = fatalError.querySelector('.btn')
               encodedMessage = encodeURIComponent(truncatedMessage)
               expect(button.textContent).toContain 'Create issue'
-              expect(button.getAttribute('href')).toContain 'is.gd/cats'
 
       describe "when the package is out of date", ->
         beforeEach ->
@@ -911,8 +895,8 @@ generateException = ->
 # shortenerResponse
 # packageResponse
 # issuesResponse
-generateFakeFetchResponses = (options) =>
-  fetch.andCallFake (url) =>
+generateFakeFetchResponses = (options) ->
+  fetch.andCallFake (url) ->
     if url.indexOf('is.gd') > -1
       return textPromise options?.shortenerResponse ? 'http://is.gd/cats'
 
