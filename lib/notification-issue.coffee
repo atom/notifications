@@ -123,7 +123,7 @@ class NotificationIssue
           ```
           At #{options.detail}
 
-          #{options.stack}
+          #{@normalizedStackPaths(options.stack)}
           ```
 
           ### Commands
@@ -139,6 +139,9 @@ class NotificationIssue
           #{copyText}
         """
         resolve(@issueBody)
+
+  normalizedStackPaths: (stack) ->
+    stack.replace /(^\W+at )([\w.]{2,} [(])?(.*)(:\d+:\d+[)]?)/gm, (m, p1, p2, p3, p4) -> p1 + (p2 || '') + p3.replace(/\\/g, '/').replace(/.*(\/(app\.asar|packages\/).*)/, '$1') + p4
 
   getRepoUrl: ->
     packageName = @getPackageName()
