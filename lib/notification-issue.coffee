@@ -141,7 +141,7 @@ class NotificationIssue
         resolve(@issueBody)
 
   normalizedStackPaths: (stack) =>
-    stack.replace /(^\W+at )([\w.]{2,} [(])?(.*)(:\d+:\d+[)]?)/gm, (m, p1, p2, p3, p4) => p1 + (p2 || '') +
+    stack.replace /(^\W+at )([\w.]{2,} [(])?(.*)(:\d+:\d+[)]?)/gm, (m, p1, p2, p3, p4) => p1 + (p2 or '') +
       @normalizePath(p3) + p4
 
   normalizePath: (path) ->
