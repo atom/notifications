@@ -1,4 +1,4 @@
-fs = require 'fs'
+fs = require 'fs-plus'
 path = require 'path'
 StackTraceParser = require 'stacktrace-parser'
 
@@ -123,7 +123,7 @@ class NotificationIssue
           ```
           At #{options.detail}
 
-          #{options.stack}
+          #{@normalizedStackPaths(options.stack)}
           ```
 
           ### Commands
@@ -139,6 +139,17 @@ class NotificationIssue
           #{copyText}
         """
         resolve(@issueBody)
+
+  normalizedStackPaths: (stack) =>
+    stack.replace /(^\W+at )([\w.]{2,} [(])?(.*)(:\d+:\d+[)]?)/gm, (m, p1, p2, p3, p4) => p1 + (p2 or '') +
+      @normalizePath(p3) + p4
+
+  normalizePath: (path) ->
+    path.replace('file:///', '')                         # Randomly inserted file url protocols
+        .replace(/[/]/g, '\\')                           # Temp switch for Windows home matching
+        .replace(fs.getHomeDirectory(), '~')             # Remove users home dir for apm-dev'ed packages
+        .replace(/\\/g, '/')                             # Switch \ back to / for everyone
+        .replace(/.*(\/(app\.asar|packages\/).*)/, '$1') # Remove everything before app.asar or pacakges
 
   getRepoUrl: ->
     packageName = @getPackageName()
