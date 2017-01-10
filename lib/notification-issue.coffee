@@ -101,17 +101,14 @@ class NotificationIssue
         else
           packageMessage = 'Atom Core'
 
-        atomVersion = atom.getVersion()
-        electronVersion = process.versions.electron
-
         @issueBody = """
           [Enter steps to reproduce:]
 
           1. ...
           2. ...
 
-          **Atom**: #{atomVersion}
-          **Electron**: #{electronVersion}
+          **Atom**: #{atom.getVersion()} #{process.arch}
+          **Electron**: #{process.versions.electron}
           **OS**: #{systemName}
           **Thrown From**: #{packageMessage}
           #{rootUserStatus}
