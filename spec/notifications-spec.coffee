@@ -281,7 +281,7 @@ describe "Notifications", ->
           notificationContainer = workspaceElement.querySelector('atom-notifications')
           fatalError = notificationContainer.querySelector('atom-notification.fatal')
 
-          spyOn(require('fs'), 'realpathSync').andCallFake (p) -> p
+          spyOn(fs, 'realpathSync').andCallFake (p) -> p
           spyOn(fatalError.issue, 'getPackagePathsByPackageName').andCallFake ->
             'save-session': '/Users/someguy/.atom/packages/save-session'
             'tabs': '/Applications/Atom.app/Contents/Resources/app/node_modules/tabs'
