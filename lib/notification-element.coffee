@@ -73,7 +73,7 @@ class NotificationElement extends HTMLElement
 
     @classList.add('has-detail') if detail = @model.getDetail()
     @classList.add('has-close') if @model.isDismissable()
-    @classList.add('has-stack') if @model.getOptions().stack?
+    @classList.add('has-stack') if detail and @model.getOptions().stack?
 
     @setAttribute('tabindex', '-1')
 
