@@ -46,6 +46,18 @@ Notifications =
     @subscriptions.add atom.commands.add 'atom-workspace', 'core:cancel', ->
       notification.dismiss() for notification in atom.notifications.getNotifications()
 
+    if atom.inDevMode()
+      @subscriptions.add atom.commands.add 'atom-workspace', 'notifications:toggle-dev-panel', -> Notifications.togglePanel()
+      @subscriptions.add atom.commands.add 'atom-workspace', 'notifications:trigger-error', ->
+        try
+          abc + 2 # nope
+        catch error
+          options =
+            detail: error.stack.split('\n')[1]
+            stack: error.stack
+            dismissable: true
+          atom.notifications.addFatalError("Uncaught #{error.stack.split('\n')[0]}", options)
+
   deactivate: ->
     @subscriptions.dispose()
     @notificationsElement?.remove()
@@ -100,17 +112,5 @@ isCoreOrPackageStackTrace = (stack) ->
   for {file} in StackTraceParser.parse(stack)
     return true if fs.isAbsolute(file)
   false
-
-if atom.inDevMode()
-  atom.commands.add 'atom-workspace', 'notifications:toggle-dev-panel', -> Notifications.togglePanel()
-  atom.commands.add 'atom-workspace', 'notifications:trigger-error', ->
-    try
-      abc + 2 # nope
-    catch error
-      options =
-        detail: error.stack.split('\n')[1]
-        stack: error.stack
-        dismissable: true
-      atom.notifications.addFatalError("Uncaught #{error.stack.split('\n')[0]}", options)
 
 module.exports = Notifications
