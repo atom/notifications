@@ -45,12 +45,13 @@ module.exports =
 class NotificationElement
   animationDuration: 360
   visibilityDuration: 5000
-  fatalTemplate: TemplateHelper.create(FatalMetaNotificationTemplate)
-  metaTemplate: TemplateHelper.create(MetaNotificationTemplate)
-  buttonListTemplate: TemplateHelper.create(ButtonListTemplate)
-  buttonTemplate: TemplateHelper.create(ButtonTemplate)
 
   constructor: (@model) ->
+    @fatalTemplate = TemplateHelper.create(FatalMetaNotificationTemplate)
+    @metaTemplate = TemplateHelper.create(MetaNotificationTemplate)
+    @buttonListTemplate = TemplateHelper.create(ButtonListTemplate)
+    @buttonTemplate = TemplateHelper.create(ButtonTemplate)
+
     @element = document.createElement('atom-notification')
     @issue = new NotificationIssue(@model) if @model.getType() is 'fatal'
     @renderPromise = @render().catch (e) ->
