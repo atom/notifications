@@ -110,7 +110,8 @@ Notifications =
 isCoreOrPackageStackTrace = (stack) ->
   StackTraceParser ?= require 'stacktrace-parser'
   for {file} in StackTraceParser.parse(stack)
-    return true if fs.isAbsolute(file)
+    if file is '<embedded>' or fs.isAbsolute(file)
+      return true
   false
 
 module.exports = Notifications

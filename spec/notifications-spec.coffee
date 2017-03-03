@@ -593,7 +593,7 @@ describe "Notifications", ->
             a + 1
           catch e
             # Mung the stack so it looks like its from core
-            e.stack = e.stack.replace(/notifications/g, 'core')
+            e.stack = e.stack.replace(new RegExp(__filename, 'g'), '<embedded>')
             window.onerror.call(window, e.toString(), '/dev/null', 2, 3, e)
 
           notificationContainer = workspaceElement.querySelector('atom-notifications')
