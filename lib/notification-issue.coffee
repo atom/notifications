@@ -9,11 +9,6 @@ TITLE_CHAR_LIMIT = 100 # Truncate issue title to 100 characters (including ellip
 
 FileURLRegExp = new RegExp('file://\w*/(.*)')
 
-githubHeaders = new Headers({
-  accept: 'application/vnd.github.v3+json'
-  contentType: "application/json"
-})
-
 module.exports =
 class NotificationIssue
   constructor: (@notification) ->
@@ -24,6 +19,10 @@ class NotificationIssue
     repo = repoUrl.replace /http(s)?:\/\/(\d+\.)?github.com\//gi, ''
     issueTitle = @getIssueTitle()
     query = "#{issueTitle} repo:#{repo}"
+    githubHeaders = new Headers({
+      accept: 'application/vnd.github.v3+json'
+      contentType: "application/json"
+    })
 
     fetch "https://api.github.com/search/issues?q=#{encodeURIComponent(query)}&sort=created", {headers: githubHeaders}
       .then (r) -> r?.json()
