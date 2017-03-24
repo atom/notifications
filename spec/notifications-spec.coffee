@@ -107,7 +107,7 @@ describe "Notifications", ->
     it "does not add the has-stack class if a stack is provided without any detail", ->
       atom.notifications.addInfo('A message', stack: 'Some stack')
       notification = notificationContainer.childNodes[0]
-      notificationElement = notificationContainer.querySelector('atom-notification.error')
+      notificationElement = notificationContainer.querySelector('atom-notification.info')
       expect(notificationElement).not.toHaveClass 'has-stack'
 
     describe "when a dismissable notification is added", ->
