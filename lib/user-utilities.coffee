@@ -4,11 +4,6 @@ path = require 'path'
 semver = require 'semver'
 {BufferedProcess} = require 'atom'
 
-githubHeaders = new Headers({
-  accept: 'application/vnd.github.v3+json',
-  contentType: "application/json"
-})
-
 ###
 A collection of methods for retrieving information about the user's system for
 bug report purposes.
@@ -109,6 +104,10 @@ module.exports =
       resolve("#{pack.name} #{pack.version} #{if pack.name in devPackageNames then '(dev)' else ''}" for pack in nonCorePackages)
 
   getLatestAtomData: ->
+    githubHeaders = new Headers({
+      accept: 'application/vnd.github.v3+json',
+      contentType: "application/json"
+    })
     fetch 'https://atom.io/api/updates', {headers: githubHeaders}
       .then (r) -> if r.ok then r.json() else Promise.reject r.statusCode
 
@@ -127,6 +126,10 @@ module.exports =
     require(path.join(atom.getLoadSettings().resourcePath, 'package.json')).packageDependencies[packageName]
 
   getLatestPackageData: (packageName) ->
+    githubHeaders = new Headers({
+      accept: 'application/vnd.github.v3+json',
+      contentType: "application/json"
+    })
     fetch "https://atom.io/api/packages/#{packageName}", {headers: githubHeaders}
       .then (r) -> if r.ok then r.json() else Promise.reject r.statusCode
 

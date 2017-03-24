@@ -1,6 +1,7 @@
 {Notification, CompositeDisposable} = require 'atom'
 fs = require 'fs-plus'
 StackTraceParser = null
+NotificationElement = require './notification-element'
 
 Notifications =
   isInitialized: false
@@ -45,6 +46,18 @@ Notifications =
     @subscriptions.add atom.commands.add 'atom-workspace', 'core:cancel', ->
       notification.dismiss() for notification in atom.notifications.getNotifications()
 
+    if atom.inDevMode()
+      @subscriptions.add atom.commands.add 'atom-workspace', 'notifications:toggle-dev-panel', -> Notifications.togglePanel()
+      @subscriptions.add atom.commands.add 'atom-workspace', 'notifications:trigger-error', ->
+        try
+          abc + 2 # nope
+        catch error
+          options =
+            detail: error.stack.split('\n')[1]
+            stack: error.stack
+            dismissable: true
+          atom.notifications.addFatalError("Uncaught #{error.stack.split('\n')[0]}", options)
+
   deactivate: ->
     @subscriptions.dispose()
     @notificationsElement?.remove()
@@ -59,13 +72,10 @@ Notifications =
   initializeIfNotInitialized: ->
     return if @isInitialized
 
-    NotificationsElement = require './notifications-element'
-    NotificationElement = require './notification-element'
-
     @subscriptions.add atom.views.addViewProvider Notification, (model) ->
-      new NotificationElement().initialize(model)
+      new NotificationElement(model)
 
-    @notificationsElement = new NotificationsElement
+    @notificationsElement = document.createElement('atom-notifications')
     atom.views.getView(atom.workspace).appendChild(@notificationsElement)
 
     @isInitialized = true
@@ -90,9 +100,9 @@ Notifications =
       # do not show duplicates unless some amount of time has passed
       timeSpan = notification.getTimestamp() - @lastNotification.getTimestamp()
       unless timeSpan < @duplicateTimeDelay and notification.isEqual(@lastNotification)
-        @notificationsElement.appendChild(atom.views.getView(notification))
+        @notificationsElement.appendChild(atom.views.getView(notification).element)
     else
-      @notificationsElement.appendChild(atom.views.getView(notification))
+      @notificationsElement.appendChild(atom.views.getView(notification).element)
 
     notification.setDisplayed(true)
     @lastNotification = notification
@@ -100,19 +110,8 @@ Notifications =
 isCoreOrPackageStackTrace = (stack) ->
   StackTraceParser ?= require 'stacktrace-parser'
   for {file} in StackTraceParser.parse(stack)
-    return true if fs.isAbsolute(file)
+    if file is '<embedded>' or fs.isAbsolute(file)
+      return true
   false
-
-if atom.inDevMode()
-  atom.commands.add 'atom-workspace', 'notifications:toggle-dev-panel', -> Notifications.togglePanel()
-  atom.commands.add 'atom-workspace', 'notifications:trigger-error', ->
-    try
-      abc + 2 # nope
-    catch error
-      options =
-        detail: error.stack.split('\n')[1]
-        stack: error.stack
-        dismissable: true
-      atom.notifications.addFatalError("Uncaught #{error.stack.split('\n')[0]}", options)
 
 module.exports = Notifications
