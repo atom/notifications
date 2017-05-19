@@ -60,8 +60,11 @@ class NotificationIssue
     encodeURI(str).replace(/#/g, '%23').replace(/;/g, '%3B').replace(/%20/g, '+')
 
   getIssueTitle: ->
+    offset = 3
     title = @notification.getMessage()
     title = title.replace(process.env.ATOM_HOME, '$ATOM_HOME')
+    offset = 4 if title.indexOf('\n') > -1
+    title = title.replace(/\r?\n|\r/g,"");
     if process.platform is 'win32'
       title = title.replace(process.env.USERPROFILE, '~')
       title = title.replace(path.sep, path.posix.sep) # Standardize issue titles
@@ -69,7 +72,7 @@ class NotificationIssue
       title = title.replace(process.env.HOME, '~')
 
     if title.length > TITLE_CHAR_LIMIT
-      title = title.substring(0, TITLE_CHAR_LIMIT - 3) + '...'
+      title = title.substring(0, TITLE_CHAR_LIMIT - offset) + '...'
     title
 
   getIssueBody: ->
