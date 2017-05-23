@@ -285,6 +285,7 @@ describe "Notifications", ->
               issueTitle = fatalError.issue.getIssueTitle()
           runs ->
             expect(issueTitle).not.toContain "\n"
+            expect(issueTitle).toBe "TypeError: undefined is not a function  at Object.module.exports.Pane.promptToSaveItem [as defau..."
 
       describe "when there are multiple packages in the stack trace", ->
         beforeEach ->
