@@ -187,7 +187,7 @@ class NotificationIssue
         packagePaths[packageName] = fs.realpathSync(packagePath)
 
     getPackageName = (filePath) =>
-      filePath = /\((.+?):\d+|\((.+)\)|(.+)/.exec(filePath)[0]
+      filePath = /\((.+?):\d+|\((.+)\)|(.*)/.exec(filePath)[0]
 
       # Stack traces may be a file URI
       if match = FileURLRegExp.exec(filePath)
