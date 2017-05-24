@@ -265,14 +265,12 @@ describe "Notifications", ->
             expect(atom.notifications.getNotifications().length).toBe 0
 
       describe "when the message contains a newline", ->
-        beforeEach ->
+        it "removes the newline when generating the issue title", ->
           message = "Uncaught Error: Cannot read property 'object' of undefined\nTypeError: Cannot read property 'object' of undefined"
-
           atom.notifications.addFatalError(message)
           notificationContainer = workspaceElement.querySelector('atom-notifications')
           fatalError = notificationContainer.querySelector('atom-notification.fatal')
 
-        it "removes the newline when generating the issue title", ->
           waitsForPromise ->
             fatalError.getRenderPromise().then ->
               issueTitle = fatalError.issue.getIssueTitle()
