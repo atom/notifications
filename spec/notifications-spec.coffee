@@ -250,6 +250,24 @@ describe "Notifications", ->
           expect(notificationContainer.childNodes.length).toBe 0
           expect(fatalError).toBe null
 
+      describe "when the exception has a package name", ->
+        it "blames that package for the error", ->
+          stack = """
+            TypeError: undefined is not a function
+              at Object.module.exports.Pane.promptToSaveItem [as defaultSavePrompt] (/Applications/Atom.app/Contents/Resources/app/src/pane.js:490:23)
+              at Pane.promptToSaveItem (/Users/someguy/.atom/packages/save-session/lib/save-prompt.coffee:21:15)
+              at Pane.module.exports.Pane.destroyItem (/Applications/Atom.app/Contents/Resources/app/src/pane.js:442:18)
+              at HTMLDivElement.<anonymous> (/Applications/Atom.app/Contents/Resources/app/node_modules/tabs/lib/tab-bar-view.js:174:22)
+              at space-pen-ul.jQuery.event.dispatch (/Applications/Atom.app/Contents/Resources/app/node_modules/archive-view/node_modules/atom-space-pen-views/node_modules/space-pen/vendor/jquery.js:4676:9)
+              at space-pen-ul.elemData.handle (/Applications/Atom.app/Contents/Resources/app/node_modules/archive-view/node_modules/atom-space-pen-views/node_modules/space-pen/vendor/jquery.js:4360:46)
+          """
+          detail = 'ok'
+
+          atom.notifications.addFatalError('TypeError: undefined', {detail, stack, packageName: "a-package"})
+          fatalError = notificationContainer.querySelector('atom-notification.fatal')
+
+          expect(fatalError.issue.getPackageName()).toBe 'a-package'
+
       describe "when the exception has no core or package paths in the stack trace", ->
         it "does not display a notification", ->
           atom.notifications.clear()
