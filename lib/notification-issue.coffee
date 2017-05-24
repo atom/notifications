@@ -70,7 +70,7 @@ class NotificationIssue
 
     if title.length > TITLE_CHAR_LIMIT
       title = title.substring(0, TITLE_CHAR_LIMIT - 3) + '...'
-    title
+    title.replace(/\r?\n|\r/g, "")
 
   getIssueBody: ->
     new Promise (resolve, reject) =>
