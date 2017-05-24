@@ -699,8 +699,8 @@ describe "Notifications", ->
 
             runs ->
               button = fatalError.querySelector('.btn')
-              encodedMessage = encodeURIComponent(truncatedMessage)
               expect(button.textContent).toContain 'Create issue'
+              expect(fatalError.issue.getIssueTitle()).toBe(truncatedMessage)
 
       describe "when the package is out of date", ->
         beforeEach ->
