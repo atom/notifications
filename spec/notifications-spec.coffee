@@ -278,6 +278,19 @@ describe "Notifications", ->
             expect(issueTitle).not.toContain "\n"
             expect(issueTitle).toBe "Uncaught Error: Cannot read property 'object' of undefinedTypeError: Cannot read property 'objec..."
 
+      describe "when the message contains continguous newlines", ->
+        it "removes the newlines when generating the issue title", ->
+          message = "Uncaught Error: Cannot do the thing\n\nSuper sorry about this"
+          atom.notifications.addFatalError(message)
+          notificationContainer = workspaceElement.querySelector('atom-notifications')
+          fatalError = notificationContainer.querySelector('atom-notification.fatal')
+
+          waitsForPromise ->
+            fatalError.getRenderPromise().then ->
+              issueTitle = fatalError.issue.getIssueTitle()
+          runs ->
+            expect(issueTitle).toBe "Uncaught Error: Cannot do the thingSuper sorry about this"
+
       describe "when there are multiple packages in the stack trace", ->
         beforeEach ->
           stack = """
