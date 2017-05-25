@@ -680,7 +680,7 @@ describe "Notifications", ->
 
         describe "when the message is longer than 100 characters", ->
           message = "Uncaught Error: Cannot find module 'dialog'Error: Cannot find module 'dialog' at Function.Module._resolveFilename (module.js:351:15) at Function.Module._load (module.js:293:25) at Module.require (module.js:380:17) at EventEmitter.<anonymous> (/Applications/Atom.app/Contents/Resources/atom/browser/lib/rpc-server.js:128:79) at EventEmitter.emit (events.js:119:17) at EventEmitter.<anonymous> (/Applications/Atom.app/Contents/Resources/atom/browser/api/lib/web-contents.js:99:23) at EventEmitter.emit (events.js:119:17)"
-          truncatedMessage = "Uncaught Error: Cannot find module 'dialog'Error: Cannot find module 'dialog' at Function.Module...."
+          expectedIssueTitle = "Uncaught Error: Cannot find module 'dialog'Error: Cannot find module 'dialog' at Function.Module...."
 
           beforeEach ->
             generateFakeFetchResponses()
@@ -699,8 +699,8 @@ describe "Notifications", ->
 
             runs ->
               button = fatalError.querySelector('.btn')
-              encodedMessage = encodeURIComponent(truncatedMessage)
               expect(button.textContent).toContain 'Create issue'
+              expect(fatalError.issue.getIssueTitle()).toBe(expectedIssueTitle)
 
       describe "when the package is out of date", ->
         beforeEach ->
