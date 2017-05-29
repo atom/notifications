@@ -86,7 +86,7 @@ module.exports =
         stdout: (oneLine) -> data.push(oneLine)
         exit: ->
           info = data.join('\n')
-          info = if (res = /OS.+(Microsoft.+)$/im.exec(info)) then res[1] else 'Unknown Windows version'
+          info = if (res = /OS.+(Microsoft.+)$/im.exec(info)) then res[1] else 'Unknown Windows version' 
           resolve(info)
 
       systemInfo.onWillThrowError ({handle}) ->
