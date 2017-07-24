@@ -14,6 +14,14 @@ class LogsPanelView
     header.textContent = "Logs"
     @element.appendChild(header)
 
+    # Add Header
+    closeButton = document.createElement('i')
+    closeButton.classList.add('close-notification-logs')
+    closeButton.classList.add('icon')
+    closeButton.classList.add('icon-x')
+    closeButton.addEventListener('click', -> atom.commands.dispatch(atom.views.getView(atom.workspace), 'notifications:toggle-logs'))
+    header.appendChild(closeButton)
+
     # Add Container
     @container = document.createElement('div')
     @container.classList.add('notifications-logs')

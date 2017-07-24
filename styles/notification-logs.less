@@ -5,6 +5,11 @@
 @max-height: 300px;
 @font-family-monospace: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 
+.close-notification-logs {
+  float: right;
+  cursor: pointer;
+}
+
 .notifications-logs {
   display: block;
   overflow-x: hidden;
@@ -24,10 +29,12 @@
       display: none;
     }
 
-    // initailly collapse detail + meta
-    .detail,
-    .meta {
-      display: none;
+    &.collapse {
+      // initailly collapse detail + meta
+      .detail,
+      .meta {
+        display: none;
+      }
     }
 
     &:last-child {
