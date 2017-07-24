@@ -246,7 +246,6 @@ class NotificationElement
   handleRemoveAllNotificationsClick: ->
     notifications = atom.notifications.getNotifications()
     for notification in notifications
-      console.debug notification
       if notification.isDismissable() and not notification.isDismissed()
         notification.dismiss()
       else
