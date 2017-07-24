@@ -46,7 +46,7 @@ class NotificationElement
   animationDuration: 360
   visibilityDuration: 5000
 
-  constructor: (@model) ->
+  constructor: (@model, @notificationsElement) ->
     @fatalTemplate = TemplateHelper.create(FatalMetaNotificationTemplate)
     @metaTemplate = TemplateHelper.create(MetaNotificationTemplate)
     @buttonListTemplate = TemplateHelper.create(ButtonListTemplate)
@@ -125,13 +125,12 @@ class NotificationElement
           buttonEl.addEventListener 'click', (e) =>
             button.onDidClick.call(this, e)
 
-    if @model.isDismissable()
-      closeButton = @element.querySelector('.close')
-      closeButton.addEventListener 'click', => @handleRemoveNotificationClick()
+    closeButton = @element.querySelector('.close')
+    closeButton.addEventListener 'click', => @handleRemoveNotificationClick()
 
-      closeAllButton = @element.querySelector('.close-all')
-      closeAllButton.classList.add @getButtonClass()
-      closeAllButton.addEventListener 'click', => @handleRemoveAllNotificationsClick()
+    closeAllButton = @element.querySelector('.close-all')
+    closeAllButton.classList.add @getButtonClass()
+    closeAllButton.addEventListener 'click', => @handleRemoveAllNotificationsClick()
 
     if @model.getType() is 'fatal'
       @renderFatalError()
@@ -234,15 +233,24 @@ class NotificationElement
       Promise.resolve()
 
   removeNotification: ->
-    @element.classList.add('remove')
-    @removeNotificationAfterTimeout()
+    unless @element.classList.contains('remove')
+      @element.classList.add('remove')
+      @removeNotificationAfterTimeout()
 
   handleRemoveNotificationClick: ->
+    @removeNotification()
     @model.dismiss()
+
+  showNotification: ->
+    return unless @element.classList.contains('remove')
+    @element.classList.remove('remove')
+    @element.classList.add('has-close')
+    @notificationsElement.appendChild(@element)
 
   handleRemoveAllNotificationsClick: ->
     notifications = atom.notifications.getNotifications()
     for notification in notifications
+      atom.views.getView(notification).removeNotification()
       if notification.isDismissable() and not notification.isDismissed()
         notification.dismiss()
     return
@@ -258,8 +266,7 @@ class NotificationElement
 
   autohide: ->
     setTimeout =>
-      @element.classList.add('remove')
-      @removeNotificationAfterTimeout()
+      @removeNotification()
     , @visibilityDuration
 
   removeNotificationAfterTimeout: ->

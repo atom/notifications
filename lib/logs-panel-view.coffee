@@ -30,17 +30,11 @@ class LogsPanelView
 
   getElement: -> @element
 
-  collapseAll: ->
-    el.classList.add('collapse') for el in @element.querySelectorAll 'atom-notification'
-
   addNotification: (notification) ->
     canExpand = (notification.options.detail? or notification.options.description? or notification.options.buttons?)
 
     element = atom.views.getView(notification).element.cloneNode(true)
-    element.classList.add('collapse')
-    element.addEventListener('click', (e) =>
-      shouldExpand = element.classList.contains('collapse') and canExpand
-      @collapseAll()
-      element.classList.remove('collapse') if shouldExpand
+    element.addEventListener('click', ->
+      atom.views.getView(notification).showNotification()
     )
     @container.appendChild(element)
