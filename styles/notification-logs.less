@@ -1,0 +1,140 @@
+@import "ui-variables";
+@import "octicon-mixins";
+
+@icon-size: 30px;
+@max-height: 300px;
+@font-family-monospace: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+
+.notifications-logs {
+  display: block;
+  overflow-x: hidden;
+  overflow-y: auto;
+  max-height: @max-height;
+
+  atom-notification {
+    display: block;
+    position: relative;
+    padding-left: @icon-size;
+    border-bottom: 1px solid @base-border-color;
+    word-wrap: break-word;
+
+    // hide close buttons -> not used for the logs
+    .close,
+    .close-all {
+      display: none;
+    }
+
+    // initailly collapse detail + meta
+    .detail,
+    .meta {
+      display: none;
+    }
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &.icon:before {
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: @icon-size;
+      height: 100%;
+      padding-top: @component-padding/2;
+      text-align: center;
+    }
+
+
+    // .item's are used as general containers
+    .item {
+      padding: @component-padding/2 @component-padding;
+      border-top: 1px solid @base-border-color;
+      &.message {
+        border-top: none;
+        p:last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
+
+    .content {
+    }
+
+    .message {
+    }
+
+    .detail {
+      background-color: @base-background-color;
+      background-clip: padding-box;
+
+      .line {
+        white-space: pre;
+        font-family: @font-family-monospace;
+      }
+
+      .stack-toggle {
+        display: block;
+        margin-top: @component-padding;
+        .icon:before {
+          margin: 0;
+        }
+      }
+
+      .stack-container {
+        margin-top: @component-padding;
+      }
+    }
+
+    .btn-toolbar {
+      margin-top:  @component-padding;
+    }
+
+    .btn-copy-report {
+      vertical-align: middle;
+    }
+  }
+
+}
+
+// Types -------------------------------
+
+.notifications-logs {
+
+  atom-notification.fatal {
+    .log(@text-color-error; @background-color-error);
+  }
+
+  atom-notification.error {
+    .log(@text-color-error; @background-color-error);
+  }
+
+  atom-notification.warning {
+    .log(@text-color-warning; @background-color-warning);
+  }
+
+  atom-notification.info {
+    .log(@text-color-info; @background-color-info);
+  }
+
+  atom-notification.success {
+    .log(@text-color-success; @background-color-success);
+  }
+
+}
+
+// Type Mixin
+.log(@txt; @bg) {
+  .content {
+    color: lighten(@txt, 0%);
+    border-left: 1px solid @base-border-color;
+  }
+
+  .detail-content {
+    color: @text-color;
+  }
+
+  &.icon:before {
+    color: @txt;
+  }
+}

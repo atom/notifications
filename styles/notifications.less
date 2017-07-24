@@ -52,201 +52,203 @@ atom-notifications {
       padding-right: @component-padding + 24px; // space for icon
     }
   }
-}
 
-atom-notification {
-  float: right;
-  clear: right;
-  position: relative;
-  width: @width;
-  padding-left: @icon-size;
-  margin-bottom: @notification-gap;
-  max-height: @max-height;
-  word-wrap: break-word;
-  pointer-events: auto;
+  atom-notification {
+    float: right;
+    clear: right;
+    position: relative;
+    width: @width;
+    padding-left: @icon-size;
+    margin-bottom: @notification-gap;
+    max-height: @max-height;
+    word-wrap: break-word;
+    pointer-events: auto;
 
-  &.icon:before {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: @icon-size;
-    height: 100%;
-    padding-top: @component-padding;
-    text-align: center;
-    border-radius: @component-border-radius 0 0 @component-border-radius;
-  }
+    &.icon:before {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: @icon-size;
+      height: 100%;
+      padding-top: @component-padding;
+      text-align: center;
+      border-radius: @component-border-radius 0 0 @component-border-radius;
+    }
 
 
-  // fill space between notifiactions to prevent click throughs
-  &:after {
-    content: "";
-    display: block;
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: -@notification-gap;
-    height: @notification-gap;
-  }
+    // fill space between notifiactions to prevent click throughs
+    &:after {
+      content: "";
+      display: block;
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -@notification-gap;
+      height: @notification-gap;
+    }
 
-  .meta,
-  .close,
-  .detail,
-  .stack-toggle,
-  .stack-container {
-    display: none;
-  }
+    .meta,
+    .close,
+    .detail,
+    .stack-toggle,
+    .stack-container {
+      display: none;
+    }
 
-  &.fatal .meta,
-  &.has-description .meta,
-  &.has-buttons .meta,
-  &.has-close .close,
-  &.has-detail .detail,
-  &.has-stack .stack-toggle,
-  &.has-stack .stack-container {
-    display: block;
-  }
+    &.fatal .meta,
+    &.has-description .meta,
+    &.has-buttons .meta,
+    &.has-close .close,
+    &.has-detail .detail,
+    &.has-stack .stack-toggle,
+    &.has-stack .stack-container {
+      display: block;
+    }
 
-  // .item's are used as general containers
-  .item {
-    padding: @component-padding;
-    border-top: 1px solid hsla(0,0%,0%,.1);
-    &.message {
-      border-top: none;
-      p:last-child {
-        margin-bottom: 0;
+    // .item's are used as general containers
+    .item {
+      padding: @component-padding;
+      border-top: 1px solid hsla(0,0%,0%,.1);
+      &.message {
+        border-top: none;
+        p:last-child {
+          margin-bottom: 0;
+        }
       }
     }
-  }
 
-  &.has-close .message {
-    padding-right: @component-padding + 24px; // space for icon
-  }
-
-  .content {
-    border-radius: 0 @component-border-radius @component-border-radius 0;
-  }
-
-  .message {
-    max-height: @max-height-message;
-    overflow-y: auto;
-  }
-
-  .close-all.btn {
-    position: absolute;
-    top: 7px;
-    right: 38px;
-    background: none;
-  }
-
-  .close {
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 38px;
-    height: 38px;
-    line-height: 38px;
-    text-align: center;
-    font-size: 16px;
-    text-shadow: none;
-    color: black;
-    opacity: .4;
-    &:hover, &:focus {
-      opacity: 1;
-    }
-    &:active {
-      opacity: .2;
-    }
-    &:before {
-      margin: 0;
-    }
-  }
-
-  &.has-detail {
-    width: @width-detail;
-  }
-
-  .detail {
-    font-size: .8em;
-    background-color: hsla(0,0%,100%,.3);
-    background-clip: padding-box;
-    max-height: @max-height-detail;
-    overflow-y: auto;
-
-    .line {
-      font-family: @font-family-monospace;
+    &.has-close .message {
+      padding-right: @component-padding + 24px; // space for icon
     }
 
-    .stack-toggle {
-      margin-top: @component-padding;
+    .content {
+      border-radius: 0 @component-border-radius @component-border-radius 0;
+    }
 
-      .icon:before {
+    .message {
+      max-height: @max-height-message;
+      overflow-y: auto;
+    }
+
+    .close-all.btn {
+      position: absolute;
+      top: 7px;
+      right: 38px;
+      background: none;
+    }
+
+    .close {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 38px;
+      height: 38px;
+      line-height: 38px;
+      text-align: center;
+      font-size: 16px;
+      text-shadow: none;
+      color: black;
+      opacity: .4;
+      &:hover, &:focus {
+        opacity: 1;
+      }
+      &:active {
+        opacity: .2;
+      }
+      &:before {
         margin: 0;
       }
     }
 
-    .detail-content {
+    &.has-detail {
+      width: @width-detail;
+    }
+
+    .detail {
+      font-size: .8em;
+      background-color: hsla(0,0%,100%,.3);
+      background-clip: padding-box;
+      max-height: @max-height-detail;
+      overflow-y: auto;
+
       .line {
-        white-space: pre-wrap;
+        font-family: @font-family-monospace;
+      }
+
+      .stack-toggle {
+        margin-top: @component-padding;
+
+        .icon:before {
+          margin: 0;
+        }
+      }
+
+      .detail-content {
+        .line {
+          white-space: pre-wrap;
+        }
+      }
+
+      .stack-container {
+        margin-top: @component-padding;
+
+        .line {
+          white-space: pre;
+        }
       }
     }
 
-    .stack-container {
-      margin-top: @component-padding;
+    .description {
+      font-size: .8em;
 
-      .line {
-        white-space: pre;
+      p:last-child {
+        margin-bottom: 0;
       }
     }
-  }
 
-  .description {
-    font-size: .8em;
-
-    p:last-child {
-      margin-bottom: 0;
+    .btn-toolbar.btn-toolbar {
+      margin-top: 10px;
+      margin-bottom: -5px;
+      margin-left: 0;
     }
-  }
 
-  .btn-toolbar.btn-toolbar {
-    margin-top: 10px;
-    margin-bottom: -5px;
-    margin-left: 0;
-  }
+    .btn-toolbar.btn-toolbar > .btn {
+      margin-left: 0;
+      margin-bottom: 5px;
+    }
 
-  .btn-toolbar.btn-toolbar > .btn {
-    margin-left: 0;
-    margin-bottom: 5px;
-  }
+    .btn-copy-report {
+      vertical-align: middle;
+    }
 
-  .btn-copy-report {
-    vertical-align: middle;
-  }
-
-  .opening {
-    cursor: progress;
+    .opening {
+      cursor: progress;
+    }
   }
 }
 
 // Types -------------------------------
 
-atom-notification.fatal {
-  .notification(@text-color-error; @background-color-error);
-}
+atom-notifications {
+  atom-notification.fatal {
+    .notification(@text-color-error; @background-color-error);
+  }
 
-atom-notification.error {
-  .notification(@text-color-error; @background-color-error);
-}
+  atom-notification.error {
+    .notification(@text-color-error; @background-color-error);
+  }
 
-atom-notification.warning {
-  .notification(@text-color-warning; @background-color-warning);
-}
+  atom-notification.warning {
+    .notification(@text-color-warning; @background-color-warning);
+  }
 
-atom-notification.info {
-  .notification(@text-color-info; @background-color-info);
-}
+  atom-notification.info {
+    .notification(@text-color-info; @background-color-info);
+  }
 
-atom-notification.success {
-  .notification(@text-color-success; @background-color-success);
+  atom-notification.success {
+    .notification(@text-color-success; @background-color-success);
+  }
 }
 
 
@@ -289,7 +291,7 @@ atom-notification.success {
 
 // Animations -------------------------------
 
-atom-notification {
+atom-notifications atom-notification {
   -webkit-animation: notification-show .16s cubic-bezier(0.175, 0.885, 0.32, 1.27499);
 
   &[type="fatal"] {
