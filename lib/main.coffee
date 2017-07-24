@@ -111,10 +111,10 @@ Notifications =
       timeSpan = notification.getTimestamp() - @lastNotification.getTimestamp()
       unless timeSpan < @duplicateTimeDelay and notification.isEqual(@lastNotification)
         @notificationsElement.appendChild(atom.views.getView(notification).element)
-        @logsPanelView.addNotification(atom.views.getView(notification).element.cloneNode(true))
+        @logsPanelView.addNotification(notification)
     else
       @notificationsElement.appendChild(atom.views.getView(notification).element)
-      @logsPanelView.addNotification(atom.views.getView(notification).element.cloneNode(true))
+      @logsPanelView.addNotification(notification)
 
     notification.setDisplayed(true)
     @lastNotification = notification
