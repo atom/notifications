@@ -45,6 +45,7 @@ module.exports =
 class NotificationElement
   animationDuration: 360
   visibilityDuration: 5000
+  autohideTimeout: null
 
   constructor: (@model) ->
     @fatalTemplate = TemplateHelper.create(FatalMetaNotificationTemplate)
@@ -61,6 +62,7 @@ class NotificationElement
     if @model.isDismissable()
       @model.onDidDismiss => @removeNotification()
     else
+      @model.removeElement = @removeNotification.bind(this)
       @autohide()
 
     @element.issue = @issue
@@ -129,9 +131,9 @@ class NotificationElement
       closeButton = @element.querySelector('.close')
       closeButton.addEventListener 'click', => @handleRemoveNotificationClick()
 
-      closeAllButton = @element.querySelector('.close-all')
-      closeAllButton.classList.add @getButtonClass()
-      closeAllButton.addEventListener 'click', => @handleRemoveAllNotificationsClick()
+    closeAllButton = @element.querySelector('.close-all')
+    closeAllButton.classList.add @getButtonClass()
+    closeAllButton.addEventListener 'click', => @handleRemoveAllNotificationsClick()
 
     if @model.getType() is 'fatal'
       @renderFatalError()
@@ -234,6 +236,7 @@ class NotificationElement
       Promise.resolve()
 
   removeNotification: ->
+    clearTimeout @autohideTimeout
     @element.classList.add('remove')
     @removeNotificationAfterTimeout()
 
@@ -245,6 +248,8 @@ class NotificationElement
     for notification in notifications
       if notification.isDismissable() and not notification.isDismissed()
         notification.dismiss()
+      else
+        notification.removeElement?()
     return
 
   handleStackTraceToggleClick: (e, container) ->
@@ -257,7 +262,7 @@ class NotificationElement
       container.style.display = 'none'
 
   autohide: ->
-    setTimeout =>
+    @autohideTimeout = setTimeout =>
       @element.classList.add('remove')
       @removeNotificationAfterTimeout()
     , @visibilityDuration
