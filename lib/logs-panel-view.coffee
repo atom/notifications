@@ -1,7 +1,18 @@
-# The logs panel
-module.exports =
-class LogsPanelView
+{Emitter} = require 'atom'
+
+module.exports = class LogsPanelView
+  itemClickCallbacks: []
+
   constructor: ->
+    @render()
+    @emitter = new Emitter
+    atom.workspace.open(this, {
+      activatePane: false
+      activateItem: false
+      searchAllPanes: true
+    })
+
+  render: ->
 
     # Create root element
     @element = document.createElement('div')
@@ -11,16 +22,7 @@ class LogsPanelView
     header = document.createElement('header')
     header.classList.add('panel-heading')
     header.classList.add('padded')
-    header.textContent = "Logs"
     @element.appendChild(header)
-
-    # Add Header
-    closeButton = document.createElement('i')
-    closeButton.classList.add('close-notification-logs')
-    closeButton.classList.add('icon')
-    closeButton.classList.add('icon-x')
-    closeButton.addEventListener('click', -> atom.commands.dispatch(atom.views.getView(atom.workspace), 'notifications:toggle-logs'))
-    header.appendChild(closeButton)
 
     # Add Container
     @container = document.createElement('div')
@@ -28,13 +30,25 @@ class LogsPanelView
     @container.classList.add('panel-body')
     @element.appendChild(@container)
 
+  destroy: ->
+    @element.remove()
+
   getElement: -> @element
 
-  addNotification: (notification) ->
-    canExpand = (notification.options.detail? or notification.options.description? or notification.options.buttons?)
+  getURI: -> 'atom://notifications/logs'
 
+  getTitle: -> 'Log'
+
+  getDefaultLocation: -> 'bottom'
+
+  getAllowedLocations: -> ['left', 'right', 'bottom']
+
+  toggle: -> atom.workspace.toggle(this)
+
+  addNotification: (notification) ->
     element = atom.views.getView(notification).element.cloneNode(true)
-    element.addEventListener('click', ->
-      atom.views.getView(notification).showNotification()
-    )
+    element.addEventListener('click', => @emitter.emit('item-clicked', notification))
     @container.appendChild(element)
+
+  onItemClick: (callback) ->
+    @emitter.on 'item-clicked', callback

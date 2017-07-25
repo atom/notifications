@@ -46,7 +46,7 @@ class NotificationElement
   animationDuration: 360
   visibilityDuration: 5000
 
-  constructor: (@model, @notificationsElement) ->
+  constructor: (@model) ->
     @fatalTemplate = TemplateHelper.create(FatalMetaNotificationTemplate)
     @metaTemplate = TemplateHelper.create(MetaNotificationTemplate)
     @buttonListTemplate = TemplateHelper.create(ButtonListTemplate)
@@ -240,12 +240,6 @@ class NotificationElement
   handleRemoveNotificationClick: ->
     @removeNotification()
     @model.dismiss()
-
-  showNotification: ->
-    return unless @element.classList.contains('remove')
-    @element.classList.remove('remove')
-    @element.classList.add('has-close')
-    @notificationsElement.appendChild(@element)
 
   handleRemoveAllNotificationsClick: ->
     notifications = atom.notifications.getNotifications()
