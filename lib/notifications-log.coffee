@@ -46,12 +46,15 @@ module.exports = class NotificationsLog
 
   destroy: ->
     @element.remove()
+    @emitter.emit 'did-destroy'
 
   getElement: -> @element
 
   getURI: -> 'atom://notifications/log'
 
   getTitle: -> 'Log'
+
+  getLongTitle: -> 'Notifications Log'
 
   getDefaultLocation: -> 'bottom'
 
@@ -76,3 +79,8 @@ module.exports = class NotificationsLog
 
   onItemClick: (callback) ->
     @emitter.on 'item-clicked', callback
+
+  onDidDestroy: (callback) ->
+    @emitter.on 'did-destroy', callback
+
+  getIconName: -> 'comment'
