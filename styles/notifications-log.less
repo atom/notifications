@@ -21,15 +21,17 @@
     }
   }
 
-  ul  {
+  > ul  {
     flex: auto;
     list-style: none;
     padding: 0;
     margin: 0;
     overflow: auto;
 
-    li {
+    > li {
       border-bottom: 1px solid @base-border-color;
+      max-height: @icon-size;
+      overflow: hidden;
 
       atom-notification {
         display: block;
