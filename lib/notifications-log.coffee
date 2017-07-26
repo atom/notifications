@@ -83,4 +83,4 @@ module.exports = class NotificationsLog
   onDidDestroy: (callback) ->
     @emitter.on 'did-destroy', callback
 
-  getIconName: -> 'comment'
+  getIconName: -> 'alert'
