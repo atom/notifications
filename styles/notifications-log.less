@@ -1,0 +1,221 @@
+@import "ui-variables";
+@import "octicon-mixins";
+
+@icon-size: 30px;
+@font-family-monospace: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+
+.notifications-log {
+  display: flex;
+  flex-direction: column;
+
+  header {
+    flex: none;
+
+    .notification-type {
+      border: none;
+      width: @icon-size;
+      height: @icon-size;
+      margin-right: 5px;
+      color: @text-color-subtle;
+      background-color: @base-background-color;
+    }
+  }
+
+  ul  {
+    flex: auto;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    overflow: auto;
+
+    li {
+      border-bottom: 1px solid @base-border-color;
+
+      atom-notification {
+        display: block;
+        position: relative;
+        padding-left: @icon-size;
+        word-wrap: break-word;
+
+        // hide close buttons -> not used for the logs
+        .close,
+        .close-all {
+          display: none;
+        }
+
+        // hide detail + meta
+        .detail,
+        .meta {
+          display: none;
+        }
+
+        &.icon:before {
+          position: absolute;
+          top: 0;
+          left: 0;
+          bottom: 0;
+          width: @icon-size;
+          height: 100%;
+          padding-top: @component-padding/2;
+          text-align: center;
+        }
+
+
+        // .item's are used as general containers
+        .item {
+          padding: @component-padding/2 @component-padding;
+          border-top: 1px solid @base-border-color;
+          &.message {
+            border-top: none;
+            p:last-child {
+              margin-bottom: 0;
+            }
+          }
+        }
+
+        .content {
+        }
+
+        .message {
+        }
+
+        .detail {
+          background-color: @base-background-color;
+          background-clip: padding-box;
+
+          .line {
+            white-space: pre;
+            font-family: @font-family-monospace;
+          }
+
+          .stack-toggle {
+            display: block;
+            margin-top: @component-padding;
+            .icon:before {
+              margin: 0;
+            }
+          }
+
+          .stack-container {
+            margin-top: @component-padding;
+          }
+        }
+
+        .btn-toolbar {
+          margin-top:  @component-padding;
+        }
+
+        .btn-copy-report {
+          vertical-align: middle;
+        }
+      }
+    }
+  }
+
+}
+
+// Types -------------------------------
+
+.notifications-log {
+
+  // fatal
+  .notification-type.fatal {
+    .type(@text-color-error; @background-color-error);
+  }
+
+  .hide-fatal li.fatal {
+    display: none;
+  }
+
+  atom-notification.fatal {
+    .log(@text-color-error; @background-color-error);
+  }
+
+  // error
+  .notification-type.error {
+    .type(@text-color-error; @background-color-error);
+  }
+
+  .hide-error li.error {
+    display: none;
+  }
+
+  atom-notification.error {
+    .log(@text-color-error; @background-color-error);
+    .hide-error & {
+      display: none;
+    }
+  }
+
+  // warning
+  .notification-type.warning {
+    .type(@text-color-warning; @background-color-warning);
+  }
+
+  .hide-warning li.warning {
+    display: none;
+  }
+
+  atom-notification.warning {
+    .log(@text-color-warning; @background-color-warning);
+    .hide-warning & {
+      display: none;
+    }
+  }
+
+  // info
+  .notification-type.info {
+    .type(@text-color-info; @background-color-info);
+  }
+
+  .hide-info li.info {
+    display: none;
+  }
+
+  atom-notification.info {
+    .log(@text-color-info; @background-color-info);
+    .hide-info & {
+      display: none;
+    }
+  }
+
+  // success
+  .notification-type.success {
+    .type(@text-color-success; @background-color-success);
+  }
+
+  .hide-success li.success {
+    display: none;
+  }
+
+  atom-notification.success {
+    .log(@text-color-success; @background-color-success);
+    .hide-success & {
+      display: none;
+    }
+  }
+
+}
+
+// Type Mixin
+
+.type(@txt; @bg) {
+  &.show-type {
+    color: @txt;
+  }
+}
+
+.log(@txt; @bg) {
+  .content {
+    color: lighten(@txt, 0%);
+    border-left: 1px solid @base-border-color;
+  }
+
+  .detail-content {
+    color: @text-color;
+  }
+
+  &.icon:before {
+    color: @txt;
+  }
+}

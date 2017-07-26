@@ -2,7 +2,7 @@
 fs = require 'fs-plus'
 StackTraceParser = null
 NotificationElement = require './notification-element'
-LogsPanelView = require './logs-panel-view'
+NotificationsLog = require './notifications-log'
 
 Notifications =
   isInitialized: false
@@ -58,9 +58,9 @@ Notifications =
             dismissable: true
           atom.notifications.addFatalError("Uncaught #{error.stack.split('\n')[0]}", options)
 
-    @logsPanelView = new LogsPanelView
-    @logsPanelView.onItemClick @logsClick.bind(this)
-    @subscriptions.add atom.commands.add 'atom-workspace', 'notifications:toggle-logs', => @logsPanelView.toggle()
+    @notificationLog = new NotificationsLog
+    @notificationLog.onItemClick @logItemClick.bind(this)
+    @subscriptions.add atom.commands.add 'atom-workspace', 'notifications:toggle-logs', => @notificationLog.toggle()
 
   deactivate: ->
     @subscriptions.dispose()
@@ -84,7 +84,7 @@ Notifications =
 
     @isInitialized = true
 
-  logsClick: (notification) ->
+  logItemClick: (notification) ->
     element = atom.views.getView(notification).element
     return unless element.classList.contains('remove')
     element.classList.remove('remove')
@@ -113,10 +113,10 @@ Notifications =
       timeSpan = notification.getTimestamp() - @lastNotification.getTimestamp()
       unless timeSpan < @duplicateTimeDelay and notification.isEqual(@lastNotification)
         @notificationsElement.appendChild(atom.views.getView(notification).element)
-        @logsPanelView.addNotification(notification)
+        @notificationLog.addNotification(notification)
     else
       @notificationsElement.appendChild(atom.views.getView(notification).element)
-      @logsPanelView.addNotification(notification)
+      @notificationLog.addNotification(notification)
 
     notification.setDisplayed(true)
     @lastNotification = notification
