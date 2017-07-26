@@ -25,7 +25,6 @@ module.exports = class NotificationsLog
 
     # Add Header
     @header = document.createElement('header')
-    @header.classList.add('panel-heading')
     @element.appendChild(@header)
 
     # Add Container
@@ -45,7 +44,7 @@ module.exports = class NotificationsLog
       @list.classList.toggle("hide-#{type}", not shown)
 
       button = document.createElement('button')
-      button.classList.add('notification-type', 'icon', "icon-#{icon}", type)
+      button.classList.add('notification-type', 'btn', 'icon', "icon-#{icon}", type)
       button.classList.toggle('show-type', shown)
       button.dataset.type = type
       button.addEventListener 'click', (e) => @toggleType(e.target.dataset.type)
@@ -79,6 +78,7 @@ module.exports = class NotificationsLog
     button.classList.toggle('show-type', show)
 
   addNotification: (notification) ->
+    # TODO: should probably create new element instead of cloning
     atomNotification = atom.views.getView(notification).element.cloneNode(true)
 
     item = document.createElement('li')
