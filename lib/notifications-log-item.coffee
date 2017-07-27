@@ -25,7 +25,9 @@ module.exports = class NotificationsLogItem
     @element.classList.add('notifications-log-item', @notification.getType())
     @element.appendChild(notificationElement)
     @element.appendChild(@timestamp)
-    @element.addEventListener('click', => @emitter.emit 'click')
+    @element.addEventListener 'click', (e) =>
+      if not e.target.closest('.btn-toolbar')?
+        @emitter.emit 'click'
 
   renderNotification: (view) ->
     message = document.createElement('div')
@@ -33,17 +35,15 @@ module.exports = class NotificationsLogItem
     message.innerHTML = view.element.querySelector(".content > .message").innerHTML
 
     buttons = document.createElement('div')
-    buttons.classList.add('buttons')
+    buttons.classList.add('btn-toolbar')
     nButtons = view.element.querySelector(".content > .meta > .btn-toolbar")
     if nButtons?
       for button in nButtons.children
         logButton = button.cloneNode(true)
         logButton.originalButton = button
-        logButton.addEventListener('click', (e) ->
-          e.stopPropagation()
+        logButton.addEventListener 'click', (e) ->
           newEvent = new MouseEvent('click', e)
           e.target.originalButton.dispatchEvent(newEvent)
-        )
         if button.classList.contains('btn-copy-report')
           atom.tooltips.add(logButton, title: 'Copy error report to clipboard')
         buttons.appendChild(logButton)
