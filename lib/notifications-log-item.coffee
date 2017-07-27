@@ -2,13 +2,11 @@
 moment = require 'moment'
 
 module.exports = class NotificationsLogItem
-  timestampTimeout: null
+  timestampInterval: null
 
   constructor: (@notification) ->
     @emitter = new Emitter
     @disposables = new CompositeDisposable
-    @disposables.add new Disposable => clearTimeout @timestampTimeout
-    @updateTimestamp = @updateTimestamp.bind(this)
     @render()
 
   render: ->
@@ -24,6 +22,8 @@ module.exports = class NotificationsLogItem
     @notification.moment = moment(@notification.getTimestamp())
     @disposables.add atom.tooltips.add(@timestamp, title: @notification.moment.format("ll LTS"))
     @updateTimestamp()
+    @timestampInterval = setInterval(@updateTimestamp.bind(this), 60 * 1000)
+    @disposables.add new Disposable => clearInterval @timestampInterval
 
     @element = document.createElement('li')
     @element.classList.add('notifications-log-item', @notification.getType())
@@ -73,37 +73,4 @@ module.exports = class NotificationsLogItem
     @emitter.on 'did-destroy', callback
 
   updateTimestamp: ->
-    ms = 0 - @notification.moment.diff()
-    sec = Math.round(ms / 1000)
-    min = Math.round(sec / 60)
-    hr = Math.round(min / 60)
-    day = Math.round(hr / 24)
-
-    switch
-      when ms < 0 # in the future
-        timeout = 1000 # 1 second
-      when sec < 45 # a few seconds ago
-        timeout = 45 * 1000 # 45 seconds
-      when sec < 90 # a minute ago
-        timeout = 45 * 1000 # 45 seconds
-      when min < 45 # x minutes ago
-        timeout = 60 * 1000 # 1 minute
-      when min < 90 # an hour ago
-        timeout = 45 * 60 * 1000 # 45 minutes
-      when hr < 22 # x hours ago
-        timeout = 60 * 60 * 1000 # 1 hour
-      when hr < 36 # a day ago
-        timeout = 14 * 60 * 60 * 1000 # 14 hours
-      when day < 26 # x days ago
-        timeout = 24 * 60 * 60 * 1000 # 1 day
-      when day < 46 # a month ago
-        timeout = 20 * 24 * 60 * 60 * 1000 # 20 days
-      when day < 320 # x momnths ago
-        timeout = 274 * 24 * 60 * 60 * 1000 # 274 days
-      when day < 548 # a year ago
-        timeout = 228 * 24 * 60 * 60 * 1000 # 228 days
-      else # x years ago
-        timeout = 357 * 24 * 60 * 60 * 1000 # 357 days
-
-    @timestampTimeout = if timeout? then setTimeout(@updateTimestamp, timeout) else null
     @timestamp.textContent = @notification.moment.fromNow()
