@@ -59,13 +59,14 @@ Notifications =
           atom.notifications.addFatalError("Uncaught #{error.stack.split('\n')[0]}", options)
 
     @notificationsLog = new NotificationsLog
-    @notificationsLog.onItemClick @logItemClick.bind(this)
+    @subscriptions.add @notificationsLog.onItemClick @logItemClick.bind(this)
     @subscriptions.add atom.commands.add 'atom-workspace', 'notifications:toggle-logs', => @notificationsLog.toggle()
 
   deactivate: ->
     @subscriptions.dispose()
     @notificationsElement?.remove()
     @notificationsPanel?.destroy()
+    @notificationsLog?.destroy()
 
     @subscriptions = null
     @notificationsElement = null
