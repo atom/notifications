@@ -9,7 +9,6 @@ module.exports = class NotificationsLogItem
     @render()
 
   render: ->
-    # TODO: should probably create new element instead of cloning
     notificationView = atom.views.getView(@notification)
     notificationElement = @renderNotification(notificationView)
 
@@ -19,7 +18,7 @@ module.exports = class NotificationsLogItem
 
     @timestamp = document.createElement('div')
     @timestamp.classList.add('timestamp')
-    atom.tooltips.add(@timestamp, title: @notification.timestamp.toLocaleString())
+    atom.tooltips.add(@timestamp, title: @notification.getTimestamp().toLocaleString())
     @updateTimestamp()
 
     @element = document.createElement('li')
@@ -29,7 +28,31 @@ module.exports = class NotificationsLogItem
     @element.addEventListener('click', => @emitter.emit 'click')
 
   renderNotification: (view) ->
-    view.element.cloneNode(true)
+    message = document.createElement('div')
+    message.classList.add('message')
+    message.innerHTML = view.element.querySelector(".content > .message").innerHTML
+
+    buttons = document.createElement('div')
+    buttons.classList.add('buttons')
+    nButtons = view.element.querySelector(".content > .meta > .btn-toolbar")
+    if nButtons?
+      for button in nButtons.children
+        logButton = button.cloneNode(true)
+        logButton.originalButton = button
+        logButton.addEventListener('click', (e) ->
+          e.stopPropagation()
+          newEvent = new MouseEvent('click', e)
+          e.target.originalButton.dispatchEvent(newEvent)
+        )
+        if button.classList.contains('btn-copy-report')
+          atom.tooltips.add(logButton, title: 'Copy error report to clipboard')
+        buttons.appendChild(logButton)
+
+    nElement = document.createElement('div')
+    nElement.classList.add('notifications-log-notification', 'icon', "icon-#{@notification.getIcon()}", @notification.getType())
+    nElement.appendChild(message)
+    nElement.appendChild(buttons)
+    nElement
 
   getElement: -> @element
 
@@ -46,7 +69,7 @@ module.exports = class NotificationsLogItem
 
   updateTimestamp: ->
     # modified from https://github.com/github/time-elements/blob/master/src/relative-time.js#L53
-    ms = new Date().getTime() - @notification.timestamp.getTime()
+    ms = new Date().getTime() - @notification.getTimestamp().getTime()
     sec = Math.round(ms / 1000)
     min = Math.round(sec / 60)
     hr = Math.round(min / 60)

@@ -38,25 +38,13 @@
       max-height: @icon-size;
       overflow: hidden;
 
-      atom-notification {
+      .notifications-log-notification {
         flex: auto;
-        display: block;
+        display: flex;
         position: relative;
         padding-left: @icon-size;
-        word-wrap: break-word;
         min-width: 200px;
-
-        // hide close buttons -> not used for the logs
-        .close,
-        .close-all {
-          display: none;
-        }
-
-        // hide detail + meta
-        .detail,
-        .meta {
-          display: none;
-        }
+        overflow: hidden;
 
         &.icon:before {
           position: absolute;
@@ -71,51 +59,33 @@
 
 
         // .item's are used as general containers
-        .item {
-          padding: @component-padding/2 @component-padding;
-          border-top: 1px solid @base-border-color;
-          &.message {
-            border-top: none;
-            p:last-child {
-              margin-bottom: 0;
-            }
-          }
-        }
-
-        .content {
-        }
-
         .message {
+          flex: 1  1 0;
+          min-width: 190px - @icon-size;
+          word-wrap: break-word;
+          padding: @component-padding/2 @component-padding;
+          border-left: 1px solid @base-border-color;
         }
 
-        .detail {
-          background-color: @base-background-color;
-          background-clip: padding-box;
+        .buttons {
+          flex: 0 1 1;
+          min-width: 0;
+          padding-top: 1px;
+          padding-right: @component-padding;
+          white-space: nowrap;
 
-          .line {
-            white-space: pre;
-            font-family: @font-family-monospace;
+          &:empty {
+            display: none;
           }
 
-          .stack-toggle {
-            display: block;
-            margin-top: @component-padding;
-            .icon:before {
+          .btn-copy-report {
+            vertical-align: middle;
+            margin-left: @component-padding/2;
+
+            &::before {
               margin: 0;
             }
           }
-
-          .stack-container {
-            margin-top: @component-padding;
-          }
-        }
-
-        .btn-toolbar {
-          margin-top:  @component-padding;
-        }
-
-        .btn-copy-report {
-          vertical-align: middle;
         }
       }
 
@@ -143,7 +113,7 @@
     display: none;
   }
 
-  atom-notification.fatal {
+  .notifications-log-notification.fatal {
     .log(@text-color-error; @background-color-error);
   }
 
@@ -156,11 +126,8 @@
     display: none;
   }
 
-  atom-notification.error {
+  .notifications-log-notification.error {
     .log(@text-color-error; @background-color-error);
-    .hide-error & {
-      display: none;
-    }
   }
 
   // warning
@@ -172,11 +139,8 @@
     display: none;
   }
 
-  atom-notification.warning {
+  .notifications-log-notification.warning {
     .log(@text-color-warning; @background-color-warning);
-    .hide-warning & {
-      display: none;
-    }
   }
 
   // info
@@ -188,11 +152,8 @@
     display: none;
   }
 
-  atom-notification.info {
+  .notifications-log-notification.info {
     .log(@text-color-info; @background-color-info);
-    .hide-info & {
-      display: none;
-    }
   }
 
   // success
@@ -204,11 +165,8 @@
     display: none;
   }
 
-  atom-notification.success {
+  .notifications-log-notification.success {
     .log(@text-color-success; @background-color-success);
-    .hide-success & {
-      display: none;
-    }
   }
 
 }
@@ -222,13 +180,8 @@
 }
 
 .log(@txt; @bg) {
-  .content {
+  .message {
     color: lighten(@txt, 0%);
-    border-left: 1px solid @base-border-color;
-  }
-
-  .detail-content {
-    color: @text-color;
   }
 
   &.icon:before {
