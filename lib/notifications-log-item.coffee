@@ -1,4 +1,5 @@
 {Emitter, CompositeDisposable, Disposable} = require 'atom'
+moment = require 'moment'
 
 module.exports = class NotificationsLogItem
   timestampTimeout: null
@@ -20,7 +21,8 @@ module.exports = class NotificationsLogItem
 
     @timestamp = document.createElement('div')
     @timestamp.classList.add('timestamp')
-    @disposables.add atom.tooltips.add(@timestamp, title: @notification.getTimestamp().toLocaleString())
+    @notification.moment = moment(@notification.getTimestamp())
+    @disposables.add atom.tooltips.add(@timestamp, title: @notification.moment.format("ll LTS"))
     @updateTimestamp()
 
     @element = document.createElement('li')
@@ -71,58 +73,37 @@ module.exports = class NotificationsLogItem
     @emitter.on 'did-destroy', callback
 
   updateTimestamp: ->
-    # modified from https://github.com/github/time-elements/blob/master/src/relative-time.js#L53
-    ms = new Date().getTime() - @notification.getTimestamp().getTime()
+    ms = 0 - @notification.moment.diff()
     sec = Math.round(ms / 1000)
     min = Math.round(sec / 60)
     hr = Math.round(min / 60)
     day = Math.round(hr / 24)
-    month = Math.round(day / 30)
-    year = Math.round(month / 12)
 
     switch
-      when ms < 0
+      when ms < 0 # in the future
         timeout = 1000 # 1 second
-        text = 'From the future'
-      when sec < 15
-        timeout = 15 * 1000 # 15 seconds
-        text = 'Just now'
-      when sec < 45
-        timeout = 30 * 1000 # 30 seconds
-        text = "30 seconds ago"
-      when sec < 90
+      when sec < 45 # a few seconds ago
         timeout = 45 * 1000 # 45 seconds
-        text = 'A minute ago'
-      when min < 45
+      when sec < 90 # a minute ago
+        timeout = 45 * 1000 # 45 seconds
+      when min < 45 # x minutes ago
         timeout = 60 * 1000 # 1 minute
-        text = "#{min} minutes ago"
-      when min < 90
+      when min < 90 # an hour ago
         timeout = 45 * 60 * 1000 # 45 minutes
-        text = 'An hour ago'
-      when hr < 24
+      when hr < 22 # x hours ago
         timeout = 60 * 60 * 1000 # 1 hour
-        text = "#{hr} hours ago"
-      when hr < 36
-        timeout = 12 * 60 * 60 * 1000 # 12 hours
-        text = 'A day ago'
-      else
-        timeout = null # after this point it doesn't matter
-        text = 'A long time ago'
-      # when day < 30
-      #   timeout = 24 * 60 * 60 * 1000 # 1 day
-      #   text = "#{day} days ago"
-      # when day < 45
-      #   timeout = 15 * 24 * 60 * 60 * 1000 # 15 days
-      #   text = 'A month ago'
-      # when month < 12
-      #   timeout = 30 * 24 * 60 * 60 * 1000 # 1 month
-      #   text = "#{month} months ago"
-      # when month < 18
-      #   timeout = 6 * 30 * 24 * 60 * 60 * 1000 # 6 months
-      #   text = 'A year ago'
-      # else
-      #   timeout = 12 * 30 * 24 * 60 * 60 * 1000 # 1 year
-      #   text = "#{year} years ago"
+      when hr < 36 # a day ago
+        timeout = 14 * 60 * 60 * 1000 # 14 hours
+      when day < 26 # x days ago
+        timeout = 24 * 60 * 60 * 1000 # 1 day
+      when day < 46 # a month ago
+        timeout = 20 * 24 * 60 * 60 * 1000 # 20 days
+      when day < 320 # x momnths ago
+        timeout = 274 * 24 * 60 * 60 * 1000 # 274 days
+      when day < 548 # a year ago
+        timeout = 228 * 24 * 60 * 60 * 1000 # 228 days
+      else # x years ago
+        timeout = 357 * 24 * 60 * 60 * 1000 # 357 days
 
     @timestampTimeout = if timeout? then setTimeout(@updateTimestamp, timeout) else null
-    @timestamp.textContent = text
+    @timestamp.textContent = @notification.moment.fromNow()
