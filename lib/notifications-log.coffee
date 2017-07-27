@@ -50,7 +50,7 @@ module.exports = class NotificationsLog
 
   destroy: ->
     @element.remove()
-    item.destroy() for item in logItems
+    item.destroy() for item in @logItems
     @emitter.emit 'did-destroy'
 
   getElement: -> @element
