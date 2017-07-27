@@ -11,7 +11,7 @@ typeIcons =
 module.exports = class NotificationsLog
   logItems: []
 
-  constructor: ->
+  constructor: (@duplicateTimeDelay) ->
     @emitter = new Emitter
     @disposables = new CompositeDisposable
     @render()
@@ -46,8 +46,17 @@ module.exports = class NotificationsLog
     @element.appendChild(@list)
 
     # Add Notifications
+    lastNotification = null
     for notification in atom.notifications.getNotifications()
-      @addNotification(notification)
+      if lastNotification?
+        # do not show duplicates unless some amount of time has passed
+        timeSpan = notification.getTimestamp() - lastNotification.getTimestamp()
+        unless timeSpan < @duplicateTimeDelay and notification.isEqual(lastNotification)
+          @addNotification(notification)
+      else
+        @addNotification(notification)
+
+      lastNotification = notification
 
     @disposables.add new Disposable => @element.remove()
 
