@@ -1,4 +1,5 @@
 {Emitter} = require 'atom'
+NotificationsLogItem = require './notifications-log-item'
 
 typeIcons =
   fatal: 'bug'
@@ -8,9 +9,11 @@ typeIcons =
   success: 'check'
 
 module.exports = class NotificationsLog
+  logItems: []
+
   constructor: ->
-    @render()
     @emitter = new Emitter
+    @render()
     atom.workspace.open(this, {
       activatePane: false
       activateItem: false
@@ -27,10 +30,6 @@ module.exports = class NotificationsLog
     header = document.createElement('header')
     @element.appendChild(header)
 
-    # Add Container
-    @list = document.createElement('ul')
-    @element.appendChild(@list)
-
     # Add Buttons
     for type, icon of typeIcons
       button = document.createElement('button')
@@ -40,12 +39,18 @@ module.exports = class NotificationsLog
       atom.tooltips.add(button, {title: "Toggle #{type} notifications"})
       header.appendChild(button)
 
+    # Add Container
+    @list = document.createElement('ul')
+    @list.classList.add('notifications-log-items')
+    @element.appendChild(@list)
+
     # Add Notifications
     for notification in atom.notifications.getNotifications()
       @addNotification(notification)
 
   destroy: ->
     @element.remove()
+    item.destroy() for item in logItems
     @emitter.emit 'did-destroy'
 
   getElement: -> @element
@@ -55,6 +60,8 @@ module.exports = class NotificationsLog
   getTitle: -> 'Log'
 
   getLongTitle: -> 'Notifications Log'
+
+  getIconName: -> 'alert'
 
   getDefaultLocation: -> 'bottom'
 
@@ -68,19 +75,13 @@ module.exports = class NotificationsLog
     @list.classList.toggle("hide-#{type}", hide)
 
   addNotification: (notification) ->
-    # TODO: should probably create new element instead of cloning
-    atomNotification = atom.views.getView(notification).element.cloneNode(true)
-
-    item = document.createElement('li')
-    item.classList.add(notification.getType())
-    item.appendChild(atomNotification)
-    item.addEventListener('click', => @emitter.emit('item-clicked', notification))
-    @list.appendChild(item)
+    logItem = new NotificationsLogItem(notification)
+    logItem.onClick => @emitter.emit('item-clicked', notification)
+    @logItems.push logItem
+    @list.insertBefore(logItem.getElement(), @list.firstChild)
 
   onItemClick: (callback) ->
     @emitter.on 'item-clicked', callback
 
   onDidDestroy: (callback) ->
     @emitter.on 'did-destroy', callback
-
-  getIconName: -> 'alert'
