@@ -10,7 +10,12 @@ module.exports = class NotificationsLogItem
 
   render: ->
     # TODO: should probably create new element instead of cloning
-    atomNotification = atom.views.getView(@notification).element.cloneNode(true)
+    notificationView = atom.views.getView(@notification)
+    notificationElement = @renderNotification(notificationView)
+
+    if @notification.getType() is 'fatal'
+      notificationView.getRenderPromise().then =>
+        @element.replaceChild(@renderNotification(notificationView), notificationElement)
 
     @timestamp = document.createElement('div')
     @timestamp.classList.add('timestamp')
@@ -19,9 +24,12 @@ module.exports = class NotificationsLogItem
 
     @element = document.createElement('li')
     @element.classList.add('notifications-log-item', @notification.getType())
-    @element.appendChild(atomNotification)
+    @element.appendChild(notificationElement)
     @element.appendChild(@timestamp)
     @element.addEventListener('click', => @emitter.emit 'click')
+
+  renderNotification: (view) ->
+    view.element.cloneNode(true)
 
   getElement: -> @element
 
