@@ -1,4 +1,4 @@
-{Emitter} = require 'atom'
+{Emitter, CompositeDisposable, Disposable} = require 'atom'
 NotificationsLogItem = require './notifications-log-item'
 
 typeIcons =
@@ -13,6 +13,7 @@ module.exports = class NotificationsLog
 
   constructor: ->
     @emitter = new Emitter
+    @disposables = new CompositeDisposable
     @render()
     atom.workspace.open(this, {
       activatePane: false
@@ -36,7 +37,7 @@ module.exports = class NotificationsLog
       button.classList.add('notification-type', 'btn', 'icon', "icon-#{icon}", 'show-type', type)
       button.dataset.type = type
       button.addEventListener 'click', (e) => @toggleType(e.target.dataset.type)
-      atom.tooltips.add(button, {title: "Toggle #{type} notifications"})
+      @disposables.add atom.tooltips.add(button, {title: "Toggle #{type} notifications"})
       header.appendChild(button)
 
     # Add Container
@@ -48,9 +49,10 @@ module.exports = class NotificationsLog
     for notification in atom.notifications.getNotifications()
       @addNotification(notification)
 
+    @disposables.add new Disposable => @element.remove()
+
   destroy: ->
-    @element.remove()
-    item.destroy() for item in @logItems
+    @disposables.dispose()
     @emitter.emit 'did-destroy'
 
   getElement: -> @element
@@ -79,6 +81,8 @@ module.exports = class NotificationsLog
     logItem.onClick => @emitter.emit('item-clicked', notification)
     @logItems.push logItem
     @list.insertBefore(logItem.getElement(), @list.firstChild)
+
+    @disposables.add new Disposable -> logItem.destroy()
 
   onItemClick: (callback) ->
     @emitter.on 'item-clicked', callback

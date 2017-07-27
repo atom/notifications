@@ -1,10 +1,12 @@
-{Emitter} = require 'atom'
+{Emitter, CompositeDisposable, Disposable} = require 'atom'
 
 module.exports = class NotificationsLogItem
   timestampTimeout: null
 
   constructor: (@notification) ->
     @emitter = new Emitter
+    @disposables = new CompositeDisposable
+    @disposables.add new Disposable => clearTimeout @timestampTimeout
     @updateTimestamp = @updateTimestamp.bind(this)
     @render()
 
@@ -18,7 +20,7 @@ module.exports = class NotificationsLogItem
 
     @timestamp = document.createElement('div')
     @timestamp.classList.add('timestamp')
-    atom.tooltips.add(@timestamp, title: @notification.getTimestamp().toLocaleString())
+    @disposables.add atom.tooltips.add(@timestamp, title: @notification.getTimestamp().toLocaleString())
     @updateTimestamp()
 
     @element = document.createElement('li')
@@ -28,6 +30,8 @@ module.exports = class NotificationsLogItem
     @element.addEventListener 'click', (e) =>
       if not e.target.closest('.btn-toolbar')?
         @emitter.emit 'click'
+
+    @disposables.add new Disposable => @element.remove()
 
   renderNotification: (view) ->
     message = document.createElement('div')
@@ -45,7 +49,7 @@ module.exports = class NotificationsLogItem
           newEvent = new MouseEvent('click', e)
           e.target.originalButton.dispatchEvent(newEvent)
         if button.classList.contains('btn-copy-report')
-          atom.tooltips.add(logButton, title: 'Copy error report to clipboard')
+          @disposables.add atom.tooltips.add(logButton, title: 'Copy error report to clipboard')
         buttons.appendChild(logButton)
 
     nElement = document.createElement('div')
@@ -57,8 +61,7 @@ module.exports = class NotificationsLogItem
   getElement: -> @element
 
   destroy: ->
-    @element.remove()
-    clearTimeout @timestampTimeout
+    @disposables.dispose()
     @emitter.emit 'did-destroy'
 
   onClick: (callback) ->
@@ -81,12 +84,12 @@ module.exports = class NotificationsLogItem
       when ms < 0
         timeout = 1000 # 1 second
         text = 'From the future'
-      when sec < 10
-        timeout = 10 * 1000 # 10 seconds
+      when sec < 15
+        timeout = 15 * 1000 # 15 seconds
         text = 'Just now'
       when sec < 45
-        timeout = 1000 # 1 second
-        text = "#{sec} seconds ago"
+        timeout = 30 * 1000 # 30 seconds
+        text = "30 seconds ago"
       when sec < 90
         timeout = 45 * 1000 # 45 seconds
         text = 'A minute ago'
