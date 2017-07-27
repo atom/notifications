@@ -60,7 +60,7 @@ Notifications =
 
     @notificationsLog = new NotificationsLog
     @subscriptions.add @notificationsLog.onItemClick @logItemClick.bind(this)
-    @subscriptions.add atom.commands.add 'atom-workspace', 'notifications:toggle-logs', => @notificationsLog.toggle()
+    @subscriptions.add atom.commands.add 'atom-workspace', 'notifications:toggle-log', => @notificationsLog.toggle()
 
   deactivate: ->
     @subscriptions.dispose()
