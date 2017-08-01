@@ -43,7 +43,6 @@
         display: flex;
         position: relative;
         padding-left: @icon-size;
-        min-width: 200px;
         overflow: hidden;
 
         &.icon:before {
@@ -60,16 +59,14 @@
 
         // .item's are used as general containers
         .message {
-          flex: 1  1 0;
-          min-width: 190px - @icon-size;
+          flex: 0 1 auto;
           word-wrap: break-word;
           padding: @component-padding/2 @component-padding;
           border-left: 1px solid @base-border-color;
         }
 
         .btn-toolbar {
-          flex: 0 1 auto;
-          min-width: 0;
+          flex: 1 0 auto;
           padding-top: 1px;
           white-space: nowrap;
 
