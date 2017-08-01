@@ -63,7 +63,9 @@ class NotificationElement
       @model.onDidDismiss => @removeNotification()
     else
       @autohide()
-      @element.addEventListener 'click', => @makeDismissable()
+      @element.addEventListener 'click', =>
+        @makeDismissable()
+        @model.dismissed = false
 
     @element.issue = @issue
     @element.getRenderPromise = @getRenderPromise.bind(this)
@@ -235,10 +237,10 @@ class NotificationElement
       Promise.resolve()
 
   makeDismissable: ->
-    clearTimeout(@autohideTimeout)
-    @model.options.dismissable = true
-    @model.dismissed = false
-    @element.classList.add('has-close')
+    unless @model.isDismissable()
+      clearTimeout(@autohideTimeout)
+      @model.options.dismissable = true
+      @element.classList.add('has-close')
 
   removeNotification: ->
     unless @element.classList.contains('remove')
