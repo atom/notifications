@@ -22,16 +22,12 @@ module.exports = class NotificationsLog
     })
 
   render: ->
-
-    # Create root element
     @element = document.createElement('div')
     @element.classList.add('notifications-log')
 
-    # Add Header
     header = document.createElement('header')
     @element.appendChild(header)
 
-    # Add Buttons
     for type, icon of typeIcons
       button = document.createElement('button')
       button.classList.add('notification-type', 'btn', 'icon', "icon-#{icon}", 'show-type', type)
@@ -40,12 +36,10 @@ module.exports = class NotificationsLog
       @disposables.add atom.tooltips.add(button, {title: "Toggle #{type} notifications"})
       header.appendChild(button)
 
-    # Add Container
     @list = document.createElement('ul')
     @list.classList.add('notifications-log-items')
     @element.appendChild(@list)
 
-    # Add Notifications
     lastNotification = null
     for notification in atom.notifications.getNotifications()
       if lastNotification?
