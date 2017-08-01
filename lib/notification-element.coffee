@@ -45,6 +45,7 @@ module.exports =
 class NotificationElement
   animationDuration: 360
   visibilityDuration: 5000
+  autohideTimeout: null
 
   constructor: (@model) ->
     @fatalTemplate = TemplateHelper.create(FatalMetaNotificationTemplate)
@@ -62,6 +63,9 @@ class NotificationElement
       @model.onDidDismiss => @removeNotification()
     else
       @autohide()
+      @element.addEventListener 'click', =>
+        clearTimeout(@autohideTimeout)
+        @element.classList.add('has-close')
 
     @element.issue = @issue
     @element.getRenderPromise = @getRenderPromise.bind(this)
@@ -259,7 +263,7 @@ class NotificationElement
       container.style.display = 'none'
 
   autohide: ->
-    setTimeout =>
+    @autohideTimeout = setTimeout =>
       @removeNotification()
     , @visibilityDuration
 
