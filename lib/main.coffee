@@ -86,12 +86,12 @@ Notifications =
     @isInitialized = true
 
   logItemClick: (notification) ->
-    element = atom.views.getView(notification).element
-    return unless element.classList.contains('remove')
+    view = atom.views.getView(notification)
+    view.makeDismissable()
+
+    return unless view.element.classList.contains('remove')
     element.classList.remove('remove')
-    element.classList.add('has-close')
     @notificationsElement.appendChild(element)
-    @notificationsElement
 
   togglePanel: ->
     if @notificationsPanel?
