@@ -30,7 +30,7 @@ module.exports = class NotificationsLogItem
     @element.appendChild(notificationElement)
     @element.appendChild(@timestamp)
     @element.addEventListener 'click', (e) =>
-      if not e.target.closest('.btn-toolbar')?
+      if not e.target.closest('.btn-toolbar a, .btn-toolbar button')?
         @emitter.emit 'click'
 
     @disposables.add new Disposable => @element.remove()
