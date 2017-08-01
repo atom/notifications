@@ -237,6 +237,7 @@ class NotificationElement
   makeDismissable: ->
     clearTimeout(@autohideTimeout)
     @model.options.dismissable = true
+    @model.dismissed = false
     @element.classList.add('has-close')
 
   removeNotification: ->
