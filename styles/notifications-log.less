@@ -34,6 +34,7 @@
 
     .notifications-log-item {
       display: flex;
+      border-top: 1px solid transparent; // Keep spacing even
       border-bottom: 1px solid @base-border-color;
       max-height: @icon-size;
       overflow: hidden;
@@ -67,7 +68,8 @@
 
         .btn-toolbar {
           flex: 1 0 auto;
-          padding-top: 1px;
+          display: flex;
+          align-items: center;
           white-space: nowrap;
 
           &:empty {
