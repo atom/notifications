@@ -4,6 +4,7 @@ temp = require('temp').track()
 {Notification} = require 'atom'
 NotificationElement = require '../lib/notification-element'
 NotificationIssue = require '../lib/notification-issue'
+{generateFakeFetchResponses, generateException} = require './helper'
 
 describe "Notifications", ->
   [workspaceElement, activationPromise] = []
@@ -56,7 +57,6 @@ describe "Notifications", ->
       notificationContainer = workspaceElement.querySelector('atom-notifications')
       jasmine.attachToDOM(workspaceElement)
 
-      spyOn(window, 'fetch')
       generateFakeFetchResponses()
 
     it "adds an atom-notification element to the container with a class corresponding to the type", ->
@@ -929,43 +929,3 @@ describe "Notifications", ->
             notificationContainer = workspaceElement.querySelector('atom-notifications')
             error = notificationContainer.querySelector('atom-notification.fatal')
             expect(error).toExist()
-
-generateException = ->
-  try
-    a + 1
-  catch e
-    errMsg = "#{e.toString()} in #{process.env.ATOM_HOME}/somewhere"
-    window.onerror.call(window, errMsg, '/dev/null', 2, 3, e)
-
-# shortenerResponse
-# packageResponse
-# issuesResponse
-generateFakeFetchResponses = (options) ->
-  fetch.andCallFake (url) ->
-    if url.indexOf('is.gd') > -1
-      return textPromise options?.shortenerResponse ? 'http://is.gd/cats'
-
-    if url.indexOf('atom.io/api/packages') > -1
-      return jsonPromise(options?.packageResponse ? {
-        repository: url: 'https://github.com/atom/notifications'
-        releases: latest: '0.0.0'
-      })
-
-    if url.indexOf('atom.io/api/updates') > -1
-      return(jsonPromise options?.atomResponse ? {name: atom.getVersion()})
-
-    if options?.issuesErrorResponse?
-      return Promise.reject(options?.issuesErrorResponse)
-
-    jsonPromise(options?.issuesResponse ? {items: []})
-
-jsonPromise = (object) -> Promise.resolve {ok: true, json: -> Promise.resolve object}
-textPromise = (text) -> Promise.resolve {ok: true, text: -> Promise.resolve text}
-
-window.waitsForPromise = (fn) ->
-  promise = fn()
-  window.waitsFor 5000, (moveOn) ->
-    promise.then (moveOn)
-    promise.catch (error) ->
-      jasmine.getEnv().currentSpec.fail("Expected promise to be resolved, but it was rejected with #{jasmine.pp(error)}")
-      moveOn()

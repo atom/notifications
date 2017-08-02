@@ -1,11 +1,7 @@
-fs = require 'fs-plus'
-path = require 'path'
-temp = require('temp').track()
 {Notification} = require 'atom'
 NotificationElement = require '../lib/notification-element'
 NotificationIssue = require '../lib/notification-issue'
-NotificationsLog = require '../lib/notifications-log'
-NotificationsLogItem = require '../lib/notifications-log-item'
+{generateFakeFetchResponses, generateException} = require './helper'
 
 describe "Notifications Log", ->
   [workspaceElement, activationPromise] = []
@@ -56,7 +52,6 @@ describe "Notifications Log", ->
       notificationsLogContainer = workspaceElement.querySelector('.notifications-log-items')
       jasmine.attachToDOM(workspaceElement)
 
-      spyOn(window, 'fetch')
       generateFakeFetchResponses()
 
     it "adds an .notifications-log-item element to the container with a class corresponding to the type", ->
@@ -219,36 +214,16 @@ describe "Notifications Log", ->
           expect(notification.dismissed).toBe false
           expect(notificationView.element).toBeVisible()
 
+        describe "when the notification is dismissed again", ->
 
+          it "emits did-dismiss", ->
+            didDismiss = false
+            notification.onDidDismiss -> didDismiss = true
+            logItem.click()
 
-generateException = ->
-  try
-    a + 1
-  catch e
-    errMsg = "#{e.toString()} in #{process.env.ATOM_HOME}/somewhere"
-    window.onerror.call(window, errMsg, '/dev/null', 2, 3, e)
+            notification.dismiss()
+            advanceClock(NotificationElement::animationDuration)
 
-# shortenerResponse
-# packageResponse
-# issuesResponse
-generateFakeFetchResponses = (options) ->
-  fetch.andCallFake (url) ->
-    if url.indexOf('is.gd') > -1
-      return textPromise options?.shortenerResponse ? 'http://is.gd/cats'
-
-    if url.indexOf('atom.io/api/packages') > -1
-      return jsonPromise(options?.packageResponse ? {
-        repository: url: 'https://github.com/atom/notifications'
-        releases: latest: '0.0.0'
-      })
-
-    if url.indexOf('atom.io/api/updates') > -1
-      return(jsonPromise options?.atomResponse ? {name: atom.getVersion()})
-
-    if options?.issuesErrorResponse?
-      return Promise.reject(options?.issuesErrorResponse)
-
-    jsonPromise(options?.issuesResponse ? {items: []})
-
-jsonPromise = (object) -> Promise.resolve {ok: true, json: -> Promise.resolve object}
-textPromise = (text) -> Promise.resolve {ok: true, text: -> Promise.resolve text}
+            expect(didDismiss).toBe true
+            expect(notification.dismissed).toBe true
+            expect(notificationView.element).not.toBeVisible()
