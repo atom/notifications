@@ -9,17 +9,20 @@ typeIcons =
   success: 'check'
 
 module.exports = class NotificationsLog
+  subscriptions: null
   logItems: []
+  typesHidden:
+    fatal: false
+    error: false
+    warning: false
+    info: false
+    success: false
 
-  constructor: (@duplicateTimeDelay) ->
+  constructor: (@duplicateTimeDelay, typesHidden = null) ->
+    @typesHidden = typesHidden if typesHidden?
     @emitter = new Emitter
-    @disposables = new CompositeDisposable
+    @subscriptions = new CompositeDisposable
     @render()
-    atom.workspace.open(this, {
-      activatePane: false
-      activateItem: false
-      searchAllPanes: true
-    })
 
   render: ->
     @element = document.createElement('div')
@@ -28,17 +31,19 @@ module.exports = class NotificationsLog
     header = document.createElement('header')
     @element.appendChild(header)
 
-    for type, icon of typeIcons
-      button = document.createElement('button')
-      button.classList.add('notification-type', 'btn', 'icon', "icon-#{icon}", 'show-type', type)
-      button.dataset.type = type
-      button.addEventListener 'click', (e) => @toggleType(e.target.dataset.type)
-      @disposables.add atom.tooltips.add(button, {title: "Toggle #{type} notifications"})
-      header.appendChild(button)
-
     @list = document.createElement('ul')
     @list.classList.add('notifications-log-items')
     @element.appendChild(@list)
+
+    for type, icon of typeIcons
+      button = document.createElement('button')
+      button.classList.add('notification-type', 'btn', 'icon', "icon-#{icon}", type)
+      button.classList.toggle('show-type', not @typesHidden[type])
+      @list.classList.toggle("hide-#{type}", @typesHidden[type])
+      button.dataset.type = type
+      button.addEventListener 'click', (e) => @toggleType(e.target.dataset.type)
+      @subscriptions.add atom.tooltips.add(button, {title: "Toggle #{type} notifications"})
+      header.appendChild(button)
 
     lastNotification = null
     for notification in atom.notifications.getNotifications()
@@ -52,10 +57,10 @@ module.exports = class NotificationsLog
 
       lastNotification = notification
 
-    @disposables.add new Disposable => @element.remove()
+    @subscriptions.add new Disposable => @element.remove()
 
   destroy: ->
-    @disposables.dispose()
+    @subscriptions.dispose()
     @emitter.emit 'did-destroy'
 
   getElement: -> @element
@@ -72,12 +77,17 @@ module.exports = class NotificationsLog
 
   getAllowedLocations: -> ['left', 'right', 'bottom']
 
-  toggle: -> atom.workspace.toggle(this)
+  serialize: ->
+    return {
+      @typesHidden
+      deserializer: 'notifications/NotificationsLog'
+    }
 
   toggleType: (type, force) ->
     button = @element.querySelector(".notification-type.#{type}")
     hide = not button.classList.toggle('show-type', force)
     @list.classList.toggle("hide-#{type}", hide)
+    @typesHidden[type] = hide
 
   addNotification: (notification) ->
     logItem = new NotificationsLogItem(notification)
@@ -85,7 +95,7 @@ module.exports = class NotificationsLog
     @logItems.push logItem
     @list.insertBefore(logItem.getElement(), @list.firstChild)
 
-    @disposables.add new Disposable -> logItem.destroy()
+    @subscriptions.add new Disposable -> logItem.destroy()
 
   onItemClick: (callback) ->
     @emitter.on 'item-clicked', callback

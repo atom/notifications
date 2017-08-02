@@ -58,9 +58,9 @@ Notifications =
             dismissable: true
           atom.notifications.addFatalError("Uncaught #{error.stack.split('\n')[0]}", options)
 
-    @notificationsLog = new NotificationsLog @duplicateTimeDelay
-    @subscriptions.add @notificationsLog.onItemClick @logItemClick.bind(this)
-    @subscriptions.add atom.commands.add 'atom-workspace', 'notifications:toggle-log', => @notificationsLog.toggle()
+    @addNotificaionLogSubscriptions() if @notificationsLog?
+    @subscriptions.add atom.workspace.addOpener (uri) => @createLog() if uri is NotificationsLog::getURI()
+    @subscriptions.add atom.commands.add 'atom-workspace', 'notifications:toggle-log', -> atom.workspace.toggle(NotificationsLog::getURI())
 
   deactivate: ->
     @subscriptions.dispose()
@@ -85,16 +85,6 @@ Notifications =
 
     @isInitialized = true
 
-  logItemClick: (notification) ->
-    view = atom.views.getView(notification)
-    view.makeDismissable()
-
-    return unless view.element.classList.contains('remove')
-    view.element.classList.remove('remove')
-    @notificationsElement.appendChild(view.element)
-    notification.dismissed = false
-    notification.setDisplayed(true)
-
   togglePanel: ->
     if @notificationsPanel?
       if Notifications.notificationsPanel.isVisible()
@@ -105,6 +95,23 @@ Notifications =
       NotificationsPanelView = require './notifications-panel-view'
       Notifications.notificationsPanelView = new NotificationsPanelView
       Notifications.notificationsPanel = atom.workspace.addBottomPanel(item: Notifications.notificationsPanelView.getElement())
+
+  createLog: (serialized) ->
+    @notificationsLog = new NotificationsLog @duplicateTimeDelay, serialized?.typesHidden
+    @addNotificaionLogSubscriptions() if @subscriptions?
+    @notificationsLog
+
+  addNotificaionLogSubscriptions: ->
+    @subscriptions.add @notificationsLog.onDidDestroy => @notificationsLog = null
+    @subscriptions.add @notificationsLog.onItemClick (notification) =>
+      view = atom.views.getView(notification)
+      view.makeDismissable()
+
+      return unless view.element.classList.contains('remove')
+      view.element.classList.remove('remove')
+      @notificationsElement.appendChild(view.element)
+      notification.dismissed = false
+      notification.setDisplayed(true)
 
   addNotificationView: (notification) ->
     return unless notification?
