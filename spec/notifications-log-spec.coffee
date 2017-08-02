@@ -7,7 +7,7 @@ NotificationIssue = require '../lib/notification-issue'
 NotificationsLog = require '../lib/notifications-log'
 NotificationsLogItem = require '../lib/notifications-log-item'
 
-fdescribe "Notifications Log", ->
+describe "Notifications Log", ->
   [workspaceElement, activationPromise] = []
 
   beforeEach ->
@@ -180,7 +180,7 @@ fdescribe "Notifications Log", ->
           expect(button.textContent).toContain 'View Issue'
           expect(button.getAttribute('href')).toBe 'http://url.com/ok'
 
-    ffdescribe "when a log item is clicked", ->
+    describe "when a log item is clicked", ->
       [notification, notificationView, logItem] = []
 
       describe "when the notification is not dismissed", ->
