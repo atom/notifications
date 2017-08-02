@@ -13,10 +13,6 @@ module.exports = class NotificationsLogItem
     notificationView = atom.views.getView(@notification)
     notificationElement = @renderNotification(notificationView)
 
-    if @notification.getType() is 'fatal'
-      notificationView.getRenderPromise().then =>
-        @element.replaceChild(@renderNotification(notificationView), notificationElement)
-
     @timestamp = document.createElement('div')
     @timestamp.classList.add('timestamp')
     @notification.moment = moment(@notification.getTimestamp())
@@ -32,6 +28,11 @@ module.exports = class NotificationsLogItem
     @element.addEventListener 'click', (e) =>
       if not e.target.closest('.btn-toolbar a, .btn-toolbar button')?
         @emitter.emit 'click'
+
+    @element.getRenderPromise = -> notificationView.getRenderPromise()
+    if @notification.getType() is 'fatal'
+      notificationView.getRenderPromise().then =>
+        @element.replaceChild(@renderNotification(notificationView), notificationElement)
 
     @disposables.add new Disposable => @element.remove()
 
