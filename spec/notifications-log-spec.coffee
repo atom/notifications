@@ -1,6 +1,7 @@
 {Notification} = require 'atom'
 NotificationElement = require '../lib/notification-element'
 NotificationIssue = require '../lib/notification-issue'
+NotificationsLog = require '../lib/notifications-log'
 {generateFakeFetchResponses, generateException} = require './helper'
 
 describe "Notifications Log", ->
@@ -13,6 +14,9 @@ describe "Notifications Log", ->
 
     waitsForPromise ->
       activationPromise
+
+    waitsForPromise ->
+      atom.workspace.open(NotificationsLog::getURI())
 
   describe "when the package is activated", ->
     it "attaches an atom-notifications element to the dom", ->
@@ -33,6 +37,9 @@ describe "Notifications Log", ->
       activationPromise = atom.packages.activatePackage('notifications')
       waitsForPromise ->
         activationPromise
+
+      waitsForPromise ->
+        atom.workspace.open(NotificationsLog::getURI())
 
       runs ->
         notificationsLogContainer = workspaceElement.querySelector('.notifications-log-items')
