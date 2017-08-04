@@ -5,15 +5,14 @@ NotificationsLog = require '../lib/notifications-log'
 {generateFakeFetchResponses, generateException} = require './helper'
 
 describe "Notifications Log", ->
-  [workspaceElement, activationPromise] = []
+  workspaceElement = null
 
   beforeEach ->
     workspaceElement = atom.views.getView(atom.workspace)
     atom.notifications.clear()
-    activationPromise = atom.packages.activatePackage('notifications')
 
     waitsForPromise ->
-      activationPromise
+      atom.packages.activatePackage('notifications')
 
     waitsForPromise ->
       atom.workspace.open(NotificationsLog::getURI())
@@ -34,9 +33,8 @@ describe "Notifications Log", ->
       atom.notifications.addNotification(error)
       atom.notifications.addNotification(warning)
 
-      activationPromise = atom.packages.activatePackage('notifications')
       waitsForPromise ->
-        activationPromise
+        atom.packages.activatePackage('notifications')
 
       waitsForPromise ->
         atom.workspace.open(NotificationsLog::getURI())
@@ -50,6 +48,7 @@ describe "Notifications Log", ->
 
   describe "when notifications are added to atom.notifications", ->
     notificationsLogContainer = null
+
     beforeEach ->
       enableInitNotification = atom.notifications.addSuccess('A message to trigger initialization', dismissable: true)
       enableInitNotification.dismiss()
@@ -62,29 +61,27 @@ describe "Notifications Log", ->
       generateFakeFetchResponses()
 
     it "adds an .notifications-log-item element to the container with a class corresponding to the type", ->
-      expect(notificationsLogContainer.childNodes.length).toBe 1
-
       atom.notifications.addSuccess('A message')
       notification = notificationsLogContainer.querySelector('.notifications-log-item.success')
-      expect(notificationsLogContainer.childNodes.length).toBe 2
+      expect(notificationsLogContainer.childNodes).toHaveLength 2
       expect(notification.querySelector('.message').textContent.trim()).toBe 'A message'
       expect(notification.querySelector('.btn-toolbar')).toBeEmpty()
 
       atom.notifications.addInfo('A message')
-      expect(notificationsLogContainer.childNodes.length).toBe 3
+      expect(notificationsLogContainer.childNodes).toHaveLength 3
       expect(notificationsLogContainer.querySelector('.notifications-log-item.info')).toBeDefined()
 
       atom.notifications.addWarning('A message')
-      expect(notificationsLogContainer.childNodes.length).toBe 4
+      expect(notificationsLogContainer.childNodes).toHaveLength 4
       expect(notificationsLogContainer.querySelector('.notifications-log-item.warning')).toBeDefined()
 
       atom.notifications.addError('A message')
-      expect(notificationsLogContainer.childNodes.length).toBe 5
+      expect(notificationsLogContainer.childNodes).toHaveLength 5
       expect(notificationsLogContainer.querySelector('.notifications-log-item.error')).toBeDefined()
 
       atom.notifications.addFatalError('A message')
       notification = notificationsLogContainer.querySelector('.notifications-log-item.fatal')
-      expect(notificationsLogContainer.childNodes.length).toBe 6
+      expect(notificationsLogContainer.childNodes).toHaveLength 6
       expect(notification).toBeDefined()
       expect(notification.querySelector('.btn-toolbar')).not.toBeEmpty()
 
@@ -234,3 +231,75 @@ describe "Notifications Log", ->
             expect(didDismiss).toBe true
             expect(notification.dismissed).toBe true
             expect(notificationView.element).not.toBeVisible()
+
+  describe "the dock pane", ->
+    notificationsLogPane = null
+
+    beforeEach ->
+      notificationsLogPane = atom.workspace.paneForURI(NotificationsLog::getURI())
+
+    describe "when notifications:toggle-log is dispatched", ->
+      it "toggles the pane URI", ->
+        spyOn(atom.workspace, "toggle")
+
+        atom.commands.dispatch(workspaceElement, "notifications:toggle-log")
+        expect(atom.workspace.toggle).toHaveBeenCalledWith(NotificationsLog::getURI())
+
+      describe "when the pane is destroyed", ->
+
+        beforeEach ->
+          notificationsLogPane.destroyItems()
+
+        it "opens the pane", ->
+          [notificationsLog] = []
+
+          waitsForPromise ->
+            atom.workspace.toggle(NotificationsLog::getURI()).then (paneItem) ->
+              notificationsLog = paneItem
+
+          runs ->
+            expect(notificationsLog).toBeDefined()
+
+        describe "when notifications are displayed", ->
+
+          beforeEach ->
+            atom.notifications.addSuccess("success")
+
+          it "lists all notifications", ->
+            waitsForPromise ->
+              atom.workspace.toggle(NotificationsLog::getURI())
+
+            runs ->
+              notificationsLogContainer = workspaceElement.querySelector('.notifications-log-items')
+              expect(notificationsLogContainer.childNodes).toHaveLength 1
+
+      describe "when the pane is hidden", ->
+
+        beforeEach ->
+          atom.workspace.hide(NotificationsLog::getURI())
+
+        it "opens the pane", ->
+          [notificationsLog] = []
+
+          waitsForPromise ->
+            atom.workspace.toggle(NotificationsLog::getURI()).then (paneItem) ->
+              notificationsLog = paneItem
+
+          runs ->
+            expect(notificationsLog).toBeDefined()
+
+      describe "when the pane is open", ->
+
+        beforeEach ->
+          waitsForPromise ->
+            atom.workspace.open(NotificationsLog::getURI())
+
+        it "closes the pane", ->
+          notificationsLog = null
+
+          waitsForPromise ->
+            atom.workspace.toggle(NotificationsLog::getURI()).then (paneItem) ->
+              notificationsLog = paneItem
+
+          runs ->
+            expect(notificationsLog).not.toBeDefined()
