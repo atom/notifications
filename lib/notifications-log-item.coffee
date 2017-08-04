@@ -2,11 +2,12 @@
 moment = require 'moment'
 
 module.exports = class NotificationsLogItem
+  subscriptions: null
   timestampInterval: null
 
   constructor: (@notification) ->
     @emitter = new Emitter
-    @disposables = new CompositeDisposable
+    @subscriptions = new CompositeDisposable
     @render()
 
   render: ->
@@ -16,10 +17,10 @@ module.exports = class NotificationsLogItem
     @timestamp = document.createElement('div')
     @timestamp.classList.add('timestamp')
     @notification.moment = moment(@notification.getTimestamp())
-    @disposables.add atom.tooltips.add(@timestamp, title: @notification.moment.format("ll LTS"))
+    @subscriptions.add atom.tooltips.add(@timestamp, title: @notification.moment.format("ll LTS"))
     @updateTimestamp()
     @timestampInterval = setInterval(@updateTimestamp.bind(this), 60 * 1000)
-    @disposables.add new Disposable => clearInterval @timestampInterval
+    @subscriptions.add new Disposable => clearInterval @timestampInterval
 
     @element = document.createElement('li')
     @element.classList.add('notifications-log-item', @notification.getType())
@@ -34,7 +35,7 @@ module.exports = class NotificationsLogItem
       notificationView.getRenderPromise().then =>
         @element.replaceChild(@renderNotification(notificationView), notificationElement)
 
-    @disposables.add new Disposable => @element.remove()
+    @subscriptions.add new Disposable => @element.remove()
 
   renderNotification: (view) ->
     message = document.createElement('div')
@@ -52,7 +53,7 @@ module.exports = class NotificationsLogItem
           newEvent = new MouseEvent('click', e)
           e.target.originalButton.dispatchEvent(newEvent)
         if button.classList.contains('btn-copy-report')
-          @disposables.add atom.tooltips.add(logButton, title: 'Copy error report to clipboard')
+          @subscriptions.add atom.tooltips.add(logButton, title: 'Copy error report to clipboard')
         buttons.appendChild(logButton)
 
     nElement = document.createElement('div')
@@ -64,7 +65,7 @@ module.exports = class NotificationsLogItem
   getElement: -> @element
 
   destroy: ->
-    @disposables.dispose()
+    @subscriptions.dispose()
     @emitter.emit 'did-destroy'
 
   onClick: (callback) ->
