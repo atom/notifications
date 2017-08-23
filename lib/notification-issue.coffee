@@ -100,17 +100,6 @@ class NotificationIssue
         else
           packageMessage = 'Atom Core'
 
-        metadataSection = ""
-        if options.metadata
-          metadataSection = """
-
-            ### Metadata
-
-            ```json
-            #{JSON.stringify(options.metadata, null, 2)}
-            ```
-          """
-
         @issueBody = """
           [Enter steps to reproduce:]
 
@@ -132,7 +121,6 @@ class NotificationIssue
 
           #{@normalizedStackPaths(options.stack)}
           ```
-          #{metadataSection}
 
           ### Commands
 
