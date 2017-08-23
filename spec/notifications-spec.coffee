@@ -350,8 +350,6 @@ describe "Notifications", ->
             expect(issueBody).toContain 'ReferenceError: a is not defined'
             expect(issueBody).toContain 'Thrown From**: [notifications](https://github.com/atom/notifications) package '
             expect(issueBody).toContain '### Non-Core Packages'
-            expect(issueBody).toContain '### Metadata'
-            expect(issueBody).toContain '{\n  "foo": "bar"\n}'
 
             # FIXME: this doesnt work on the test server. `apm ls` is not working for some reason.
             # expect(issueBody).toContain 'notifications '
@@ -918,7 +916,6 @@ generateException = ->
   try
     a + 1
   catch e
-    e.metadata = {foo: 'bar'}
     errMsg = "#{e.toString()} in #{process.env.ATOM_HOME}/somewhere"
     window.onerror.call(window, errMsg, '/dev/null', 2, 3, e)
 

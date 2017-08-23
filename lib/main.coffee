@@ -40,7 +40,6 @@ Notifications =
         options =
           detail: "#{url}:#{line}"
           stack: originalError.stack
-          metadata: originalError.metadata
           dismissable: true
         atom.notifications.addFatalError(message, options)
 
