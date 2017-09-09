@@ -36,7 +36,7 @@ atom-notifications {
     .close-all {
       display: block;
     }
-    &.has-close .message {
+    .message {
       padding-right: @component-padding * 2 + 95px; // space for icon and button
     }
   }
@@ -44,6 +44,9 @@ atom-notifications {
   atom-notification:only-child {
     .close-all {
       display: none;
+    }
+    .message {
+      padding-right: inherit;
     }
     &.has-close .message {
       padding-right: @component-padding + 24px; // space for icon
