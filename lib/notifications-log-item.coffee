@@ -52,8 +52,8 @@ module.exports = class NotificationsLogItem
         logButton.addEventListener 'click', (e) ->
           newEvent = new MouseEvent('click', e)
           e.target.originalButton.dispatchEvent(newEvent)
-        if button.classList.contains('btn-copy-report')
-          @subscriptions.add atom.tooltips.add(logButton, title: 'Copy error report to clipboard')
+        for tooltip in atom.tooltips.findTooltips button
+          @subscriptions.add atom.tooltips.add(logButton, tooltip.options)
         buttons.appendChild(logButton)
 
     nElement = document.createElement('div')
