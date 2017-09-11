@@ -58,7 +58,7 @@ Notifications =
             dismissable: true
           atom.notifications.addFatalError("Uncaught #{error.stack.split('\n')[0]}", options)
 
-    @addNotificaionsLogSubscriptions() if @notificationsLog?
+    @addNotificationsLogSubscriptions() if @notificationsLog?
     @subscriptions.add atom.workspace.addOpener (uri) => @createLog() if uri is NotificationsLog::getURI()
     @subscriptions.add atom.commands.add 'atom-workspace', 'notifications:toggle-log', -> atom.workspace.toggle(NotificationsLog::getURI())
 
@@ -98,10 +98,10 @@ Notifications =
 
   createLog: (state) ->
     @notificationsLog = new NotificationsLog @duplicateTimeDelay, state?.typesHidden
-    @addNotificaionsLogSubscriptions() if @subscriptions?
+    @addNotificationsLogSubscriptions() if @subscriptions?
     @notificationsLog
 
-  addNotificaionsLogSubscriptions: ->
+  addNotificationsLogSubscriptions: ->
     @subscriptions.add @notificationsLog.onDidDestroy => @notificationsLog = null
     @subscriptions.add @notificationsLog.onItemClick (notification) =>
       view = atom.views.getView(notification)
