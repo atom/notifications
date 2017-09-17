@@ -59,13 +59,11 @@ class NotificationElement
       console.error e.message
       console.error e.stack
 
-    if @model.isDismissable()
-      @model.onDidDismiss => @removeNotification()
-    else
+    @model.onDidDismiss => @removeNotification()
+
+    unless @model.isDismissable()
       @autohide()
-      @element.addEventListener 'click', =>
-        @makeDismissable()
-        @model.dismissed = false
+      @element.addEventListener 'click', @makeDismissable.bind(this), {once: true}
 
     @element.issue = @issue
     @element.getRenderPromise = @getRenderPromise.bind(this)
@@ -240,6 +238,7 @@ class NotificationElement
     unless @model.isDismissable()
       clearTimeout(@autohideTimeout)
       @model.options.dismissable = true
+      @model.dismissed = false
       @element.classList.add('has-close')
 
   removeNotification: ->

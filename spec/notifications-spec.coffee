@@ -187,10 +187,10 @@ describe "Notifications", ->
           expect(atom.views.getView(atom.workspace.getActiveTextEditor())).toHaveFocus()
 
     describe "when an autoclose notification is added", ->
-      notification = null
+      [notification, model] = []
 
       beforeEach ->
-        atom.notifications.addSuccess('A message')
+        model = atom.notifications.addSuccess('A message')
         notification = notificationContainer.querySelector('atom-notification.success')
 
       it "closes and removes the message after a given amount of time", ->
@@ -213,7 +213,9 @@ describe "Notifications", ->
           advanceClock(NotificationElement::visibilityDuration)
           expect(notification).not.toHaveClass 'remove'
 
-
+        it "removes the notification when dismissed", ->
+          model.dismiss()
+          expect(notification).toHaveClass 'remove'
 
     describe "when the `description` option is used", ->
       it "displays the description text in the .description element", ->
