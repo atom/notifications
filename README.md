@@ -6,4 +6,4 @@
 ### Docs
 
 Notifications are available for use in your Atom packages via the `atom.notifications` `NotificationManager` object. See
-https://atom.io/docs/api/latest/NotificationManager and https://atom.io/docs/api/latest/Notification for documentation.
+https://atom.io/docs/api/v1.20.1/NotificationManager and https://atom.io/docs/api/v1.20.1/Notification for documentation.
