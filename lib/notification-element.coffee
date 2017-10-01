@@ -83,9 +83,14 @@ class NotificationElement
     @element.innerHTML = NotificationTemplate
 
     options = @model.getOptions()
+    options.contentType ||= 'text/markdown'
 
     notificationContainer = @element.querySelector('.message')
-    notificationContainer.innerHTML = marked(@model.getMessage())
+
+    if options.contentType is 'text/markdown'
+      notificationContainer.innerHTML = marked(@model.getMessage())
+    else if options.contentType is 'text/plain'
+      notificationContainer.innerHTML = @model.getMessage()
 
     if detail = @model.getDetail()
       addSplitLinesToContainer(@element.querySelector('.detail-content'), detail)

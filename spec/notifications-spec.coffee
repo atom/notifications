@@ -199,6 +199,23 @@ describe "Notifications", ->
         advanceClock(NotificationElement::animationDuration)
         expect(notificationContainer.childNodes.length).toBe 0
 
+    describe "when the `contentType` option is not used", ->
+      it "renders the notification text as markdown", ->
+        atom.notifications.addSuccess('# A message')
+        message = notificationContainer.querySelector('.message')
+        h1 = notificationContainer.querySelector('#a-message')
+        console.log message.childNodes
+        expect(message.childNodes.length).toBe 2
+        expect(h1.textContent.trim()).toBe 'A message'
+        expect(h1.nodeName).toBe 'H1'
+
+    describe "when the `contentType` option is set to `text/plain`", ->
+      it "renders the notification as plain text", ->
+        atom.notifications.addSuccess('# A message', contentType: 'text/plain')
+        message = notificationContainer.querySelector('.message')
+        expect(message.textContent.trim()).toBe '# A message'
+        expect(message.childNodes.length).toBe 1
+
     describe "when the `description` option is used", ->
       it "displays the description text in the .description element", ->
         atom.notifications.addSuccess('A message', description: 'This is [a link](http://atom.io)')
