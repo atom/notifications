@@ -47,7 +47,6 @@ Notifications =
       notification.dismiss() for notification in atom.notifications.getNotifications()
 
     if atom.inDevMode()
-      @subscriptions.add atom.commands.add 'atom-workspace', 'notifications:toggle-dev-panel', -> Notifications.togglePanel()
       @subscriptions.add atom.commands.add 'atom-workspace', 'notifications:trigger-error', ->
         try
           abc + 2 # nope
@@ -79,17 +78,6 @@ Notifications =
     atom.views.getView(atom.workspace).appendChild(@notificationsElement)
 
     @isInitialized = true
-
-  togglePanel: ->
-    if @notificationsPanel?
-      if Notifications.notificationsPanel.isVisible()
-        Notifications.notificationsPanel.hide()
-      else
-        Notifications.notificationsPanel.show()
-    else
-      NotificationsPanelView = require './notifications-panel-view'
-      Notifications.notificationsPanelView = new NotificationsPanelView
-      Notifications.notificationsPanel = atom.workspace.addBottomPanel(item: Notifications.notificationsPanelView.getElement())
 
   addNotificationView: (notification) ->
     return unless notification?
