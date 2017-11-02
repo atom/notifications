@@ -1,6 +1,6 @@
 fs = require 'fs-plus'
 path = require 'path'
-marked = require 'marked'
+marked = require '8fold-marked'
 {shell} = require 'electron'
 
 NotificationIssue = require './notification-issue'
