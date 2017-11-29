@@ -11,7 +11,7 @@
   "dependencies": {
     "fs-plus": "^3.0.0",
     "marked": "^0.3.6",
-    "moment": "^2.18.1",
+    "moment": "^2.19.3",
     "semver": "^4.3.2",
     "stacktrace-parser": "^0.1.3",
     "temp": "^0.8.1"
