@@ -85,17 +85,6 @@ Notifications =
 
     @isInitialized = true
 
-  togglePanel: ->
-    if @notificationsPanel?
-      if Notifications.notificationsPanel.isVisible()
-        Notifications.notificationsPanel.hide()
-      else
-        Notifications.notificationsPanel.show()
-    else
-      NotificationsPanelView = require './notifications-panel-view'
-      Notifications.notificationsPanelView = new NotificationsPanelView
-      Notifications.notificationsPanel = atom.workspace.addBottomPanel(item: Notifications.notificationsPanelView.getElement())
-
   createLog: (state) ->
     @notificationsLog = new NotificationsLog @duplicateTimeDelay, state?.typesHidden
     @addNotificationsLogSubscriptions() if @subscriptions?
