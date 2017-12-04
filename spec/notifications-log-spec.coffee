@@ -23,7 +23,8 @@ describe "Notifications Log", ->
 
   describe "when there are notifications before activation", ->
     beforeEach ->
-      atom.packages.deactivatePackage('notifications')
+      waitsForPromise ->
+        atom.packages.deactivatePackage('notifications')
 
     it "displays all non displayed notifications", ->
       warning = new Notification('warning', 'Un-displayed warning')
