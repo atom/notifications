@@ -2,6 +2,7 @@
 fs = require 'fs-plus'
 StackTraceParser = null
 NotificationElement = require './notification-element'
+NotificationsLog = require './notifications-log'
 
 Notifications =
   isInitialized: false
@@ -57,10 +58,15 @@ Notifications =
             dismissable: true
           atom.notifications.addFatalError("Uncaught #{error.stack.split('\n')[0]}", options)
 
+    @addNotificationsLogSubscriptions() if @notificationsLog?
+    @subscriptions.add atom.workspace.addOpener (uri) => @createLog() if uri is NotificationsLog::getURI()
+    @subscriptions.add atom.commands.add 'atom-workspace', 'notifications:toggle-log', -> atom.workspace.toggle(NotificationsLog::getURI())
+
   deactivate: ->
     @subscriptions.dispose()
     @notificationsElement?.remove()
     @notificationsPanel?.destroy()
+    @notificationsLog?.destroy()
 
     @subscriptions = null
     @notificationsElement = null
@@ -79,6 +85,34 @@ Notifications =
 
     @isInitialized = true
 
+  togglePanel: ->
+    if @notificationsPanel?
+      if Notifications.notificationsPanel.isVisible()
+        Notifications.notificationsPanel.hide()
+      else
+        Notifications.notificationsPanel.show()
+    else
+      NotificationsPanelView = require './notifications-panel-view'
+      Notifications.notificationsPanelView = new NotificationsPanelView
+      Notifications.notificationsPanel = atom.workspace.addBottomPanel(item: Notifications.notificationsPanelView.getElement())
+
+  createLog: (state) ->
+    @notificationsLog = new NotificationsLog @duplicateTimeDelay, state?.typesHidden
+    @addNotificationsLogSubscriptions() if @subscriptions?
+    @notificationsLog
+
+  addNotificationsLogSubscriptions: ->
+    @subscriptions.add @notificationsLog.onDidDestroy => @notificationsLog = null
+    @subscriptions.add @notificationsLog.onItemClick (notification) =>
+      view = atom.views.getView(notification)
+      view.makeDismissable()
+
+      return unless view.element.classList.contains('remove')
+      view.element.classList.remove('remove')
+      @notificationsElement.appendChild(view.element)
+      notification.dismissed = false
+      notification.setDisplayed(true)
+
   addNotificationView: (notification) ->
     return unless notification?
     @initializeIfNotInitialized()
@@ -89,8 +123,10 @@ Notifications =
       timeSpan = notification.getTimestamp() - @lastNotification.getTimestamp()
       unless timeSpan < @duplicateTimeDelay and notification.isEqual(@lastNotification)
         @notificationsElement.appendChild(atom.views.getView(notification).element)
+        @notificationsLog?.addNotification(notification)
     else
       @notificationsElement.appendChild(atom.views.getView(notification).element)
+      @notificationsLog?.addNotification(notification)
 
     notification.setDisplayed(true)
     @lastNotification = notification

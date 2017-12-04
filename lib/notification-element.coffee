@@ -45,6 +45,7 @@ module.exports =
 class NotificationElement
   animationDuration: 360
   visibilityDuration: 5000
+  autohideTimeout: null
 
   constructor: (@model) ->
     @fatalTemplate = TemplateHelper.create(FatalMetaNotificationTemplate)
@@ -58,10 +59,11 @@ class NotificationElement
       console.error e.message
       console.error e.stack
 
-    if @model.isDismissable()
-      @model.onDidDismiss => @removeNotification()
-    else
+    @model.onDidDismiss => @removeNotification()
+
+    unless @model.isDismissable()
       @autohide()
+      @element.addEventListener 'click', @makeDismissable.bind(this), {once: true}
 
     @element.issue = @issue
     @element.getRenderPromise = @getRenderPromise.bind(this)
@@ -125,13 +127,12 @@ class NotificationElement
           buttonEl.addEventListener 'click', (e) =>
             button.onDidClick.call(this, e)
 
-    if @model.isDismissable()
-      closeButton = @element.querySelector('.close')
-      closeButton.addEventListener 'click', => @handleRemoveNotificationClick()
+    closeButton = @element.querySelector('.close')
+    closeButton.addEventListener 'click', => @handleRemoveNotificationClick()
 
-      closeAllButton = @element.querySelector('.close-all')
-      closeAllButton.classList.add @getButtonClass()
-      closeAllButton.addEventListener 'click', => @handleRemoveAllNotificationsClick()
+    closeAllButton = @element.querySelector('.close-all')
+    closeAllButton.classList.add @getButtonClass()
+    closeAllButton.addEventListener 'click', => @handleRemoveAllNotificationsClick()
 
     if @model.getType() is 'fatal'
       @renderFatalError()
@@ -233,16 +234,26 @@ class NotificationElement
     else
       Promise.resolve()
 
+  makeDismissable: ->
+    unless @model.isDismissable()
+      clearTimeout(@autohideTimeout)
+      @model.options.dismissable = true
+      @model.dismissed = false
+      @element.classList.add('has-close')
+
   removeNotification: ->
-    @element.classList.add('remove')
-    @removeNotificationAfterTimeout()
+    unless @element.classList.contains('remove')
+      @element.classList.add('remove')
+      @removeNotificationAfterTimeout()
 
   handleRemoveNotificationClick: ->
+    @removeNotification()
     @model.dismiss()
 
   handleRemoveAllNotificationsClick: ->
     notifications = atom.notifications.getNotifications()
     for notification in notifications
+      atom.views.getView(notification).removeNotification()
       if notification.isDismissable() and not notification.isDismissed()
         notification.dismiss()
     return
@@ -257,9 +268,8 @@ class NotificationElement
       container.style.display = 'none'
 
   autohide: ->
-    setTimeout =>
-      @element.classList.add('remove')
-      @removeNotificationAfterTimeout()
+    @autohideTimeout = setTimeout =>
+      @removeNotification()
     , @visibilityDuration
 
   removeNotificationAfterTimeout: ->
