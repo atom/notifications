@@ -63,6 +63,10 @@ Notifications =
     @addNotificationsLogSubscriptions() if @notificationsLog?
     @subscriptions.add atom.workspace.addOpener (uri) => @createLog() if uri is NotificationsLog::getURI()
     @subscriptions.add atom.commands.add 'atom-workspace', 'notifications:toggle-log', -> atom.workspace.toggle(NotificationsLog::getURI())
+    @subscriptions.add atom.commands.add 'atom-workspace', 'notifications-plus:clear-log', =>
+      notification.dismiss() for notification in atom.notifications.getNotifications()
+      atom.notifications.clear()
+      @notificationsLog?.clearLogItems() # TODO: remove this once atom/atom#16074 is released
 
   deactivate: ->
     @subscriptions.dispose()
