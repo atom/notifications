@@ -238,24 +238,16 @@ describe "Notifications Log", ->
     beforeEach ->
       clearButton = workspaceElement.querySelector('.notifications-log .notifications-clear-log')
       atom.notifications.addInfo('A message', dismissable: true)
+      atom.notifications.addInfo('non-dismissable')
       clearButton.click()
 
     it "clears the notifications", ->
       expect(atom.notifications.getNotifications()).toHaveLength 0
       notifications = workspaceElement.querySelector('atom-notifications')
       advanceClock(NotificationElement::animationDuration)
-      expect(notifications.childNodes).toHaveLength 0
+      expect(notifications.children).toHaveLength 0
       logItems = workspaceElement.querySelector('.notifications-log-items')
-      expect(logItems.childNodes).toHaveLength 0
-
-    # TODO: These don't work most likely because of some async operation
-    # it "removes all notifications", ->
-    #   notifications = workspaceElement.querySelector('atom-notifications')
-    #   expect(notifications.childNodes).toHaveLength 0
-    #
-    # it "clears the notifications log", ->
-    #   logItems = workspaceElement.querySelector('.notifications-log-items')
-    #   expect(logItems.childNodes).toHaveLength 0
+      expect(logItems.children).toHaveLength 0
 
   describe "the dock pane", ->
     notificationsLogPane = null
