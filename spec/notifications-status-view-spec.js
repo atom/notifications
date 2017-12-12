@@ -1,24 +1,21 @@
 
 const {Notification} = require('atom');
-const {generateFakeFetchResponses, generateException} = require('./helper');
+const {generateFakeFetchResponses} = require('./helper-v2');
 
 describe("Notifications Count", () => {
   let [workspaceElement, statusBarManager, notificationsCountContainer] = Array.from([]);
 
-  beforeEach(() => {
+  beforeEach(async () => {
     workspaceElement = atom.views.getView(atom.workspace);
     atom.notifications.clear();
 
-    waitsForPromise(() =>
-      Promise.all([
-        atom.packages.activatePackage('notifications'),
-        atom.packages.activatePackage('status-bar')
-      ]));
+    await Promise.all([
+      atom.packages.activatePackage('notifications'),
+      atom.packages.activatePackage('status-bar')
+    ]);
 
-    runs(() => {
-      statusBarManager = atom.packages.getActivePackage('notifications').mainModule.statusBarManager;
-      notificationsCountContainer = workspaceElement.querySelector('.notifications-count');
-    });
+    statusBarManager = atom.packages.getActivePackage('notifications').mainModule.statusBarManager;
+    notificationsCountContainer = workspaceElement.querySelector('.notifications-count');
   });
 
   describe("when the package is activated", () =>
@@ -29,14 +26,11 @@ describe("Notifications Count", () => {
   );
 
   describe("when there are notifications before activation", () => {
-    beforeEach(() =>
-      waitsForPromise(() =>
-        // Wrapped in Promise.resolve so this test continues to work on earlier versions of Atom
-        Promise.resolve(atom.packages.deactivatePackage('notifications'))
-      )
-    );
+    beforeEach(async () => {
+      await atom.packages.deactivatePackage('notifications');
+    });
 
-    it("displays counts notifications", () => {
+    it("displays counts notifications", async () => {
       let warning = new Notification('warning', 'Un-displayed warning');
       let error = new Notification('error', 'Displayed error');
       error.setDisplayed(true);
@@ -44,14 +38,12 @@ describe("Notifications Count", () => {
       atom.notifications.addNotification(error);
       atom.notifications.addNotification(warning);
 
-      waitsForPromise(() => atom.packages.activatePackage('notifications'));
+      await atom.packages.activatePackage('notifications');
 
-      runs(() => {
-        statusBarManager = atom.packages.getActivePackage('notifications').mainModule.statusBarManager;
-        notificationsCountContainer = workspaceElement.querySelector('.notifications-count');
-        expect(statusBarManager.count).toBe(2);
-        expect(parseInt(notificationsCountContainer.textContent, 10)).toBe(2);
-      });
+      statusBarManager = atom.packages.getActivePackage('notifications').mainModule.statusBarManager;
+      notificationsCountContainer = workspaceElement.querySelector('.notifications-count');
+      expect(statusBarManager.count).toBe(2);
+      expect(parseInt(notificationsCountContainer.textContent, 10)).toBe(2);
     });
   });
 
@@ -60,11 +52,12 @@ describe("Notifications Count", () => {
 
     it("will add the new-notification class for as long as the animation", () => {
       let notificationsCountNumber = notificationsCountContainer.firstChild.firstChild;
+      let animationend = new AnimationEvent('animationend', {animationName: 'new-notification'});
+      notificationsCountNumber.dispatchEvent(animationend);
       expect(notificationsCountNumber).not.toHaveClass('new-notification');
       atom.notifications.addInfo('A message');
       expect(notificationsCountNumber).toHaveClass('new-notification');
 
-      let animationend = new AnimationEvent('animationend', {animationName: 'new-notification'});
       notificationsCountNumber.dispatchEvent(animationend);
       expect(notificationsCountNumber).not.toHaveClass('new-notification');
     });
