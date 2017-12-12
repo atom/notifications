@@ -3,12 +3,14 @@ fs = require 'fs-plus'
 StackTraceParser = null
 NotificationElement = require './notification-element'
 NotificationsLog = require './notifications-log'
+StatusBarManager = require './status-bar-manager'
 
 Notifications =
   isInitialized: false
   subscriptions: null
   duplicateTimeDelay: 500
   lastNotification: null
+  statusBarManager: null
 
   activate: (state) ->
     CommandLogger = require './command-logger'
@@ -67,10 +69,12 @@ Notifications =
     @notificationsElement?.remove()
     @notificationsPanel?.destroy()
     @notificationsLog?.destroy()
+    @statusBarManager?.destroy()
 
     @subscriptions = null
     @notificationsElement = null
     @notificationsPanel = null
+    @statusBarManager = null
 
     @isInitialized = false
 
@@ -113,12 +117,17 @@ Notifications =
       unless timeSpan < @duplicateTimeDelay and notification.isEqual(@lastNotification)
         @notificationsElement.appendChild(atom.views.getView(notification).element)
         @notificationsLog?.addNotification(notification)
+        @statusBarManager?.addNotification(notification)
     else
       @notificationsElement.appendChild(atom.views.getView(notification).element)
       @notificationsLog?.addNotification(notification)
+      @statusBarManager?.addNotification(notification)
 
     notification.setDisplayed(true)
     @lastNotification = notification
+
+  statusBarService: (statusBar) ->
+    @statusBarManager = new StatusBarManager(statusBar, @duplicateTimeDelay)
 
 isCoreOrPackageStackTrace = (stack) ->
   StackTraceParser ?= require 'stacktrace-parser'

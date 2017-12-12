@@ -227,30 +227,59 @@ atom-notifications {
   }
 }
 
-// Types -------------------------------
+// Status Bar --------------------------
 
-atom-notifications {
-  atom-notification.fatal {
-    .notification(@text-color-error; @background-color-error);
-  }
+.notifications-count span {
+  padding: 0 @component-padding/3;
+  border: 1px solid @text-color;
 
-  atom-notification.error {
-    .notification(@text-color-error; @background-color-error);
-  }
-
-  atom-notification.warning {
-    .notification(@text-color-warning; @background-color-warning);
-  }
-
-  atom-notification.info {
-    .notification(@text-color-info; @background-color-info);
-  }
-
-  atom-notification.success {
-    .notification(@text-color-success; @background-color-success);
+  div {
+    display: inline-block;
+    position: relative;
   }
 }
 
+// Types -------------------------------
+
+atom-notification.fatal {
+  .notification(@text-color-error; @background-color-error);
+}
+.notifications-count[last-type='fatal'] span {
+  color: @text-color-error;
+  border-color: @background-color-error;
+}
+
+atom-notification.error {
+  .notification(@text-color-error; @background-color-error);
+}
+.notifications-count[last-type='error'] span {
+  color: @text-color-error;
+  border-color: @background-color-error;
+}
+
+atom-notification.warning {
+  .notification(@text-color-warning; @background-color-warning);
+}
+.notifications-count[last-type='warning'] span {
+  color: @text-color-warning;
+  border-color: @background-color-warning;
+}
+
+atom-notification.info {
+  .notification(@text-color-info; @background-color-info);
+}
+.notifications-count[last-type='info'] span {
+  color: @text-color-info;
+  border-color: @background-color-info;
+}
+
+atom-notification.success {
+  .notification(@text-color-success; @background-color-success);
+}
+.notifications-count[last-type='success'] span {
+  color: @text-color-success;
+  border-color: @background-color-success;
+}
 
 // Mixins -------------------------------
 
@@ -292,41 +321,55 @@ atom-notifications {
 // Animations -------------------------------
 
 atom-notifications atom-notification {
-  -webkit-animation: notification-show .16s cubic-bezier(0.175, 0.885, 0.32, 1.27499);
+  animation: notification-show .16s cubic-bezier(0.175, 0.885, 0.32, 1.27499);
 
-  &[type="fatal"] {
-    -webkit-animation: notification-show .16s cubic-bezier(0.175, 0.885, 0.32, 1.27499),
-                       notification-shake 4s 2s;
-    -webkit-animation-iteration-count: 1, 3; // shake 3 times after showing
+  &.fatal {
+    animation: notification-show .16s cubic-bezier(0.175, 0.885, 0.32, 1.27499),
+               notification-shake 4s 2s;
+    animation-iteration-count: 1, 3; // shake 3 times after showing
     &:hover {
-      -webkit-animation-play-state: paused; // stop shaking when hovering
+      animation-play-state: paused; // stop shaking when hovering
     }
   }
 
   &.remove,
   &.remove:hover {
-    -webkit-animation: notification-hide   .12s      cubic-bezier(.34,.07,1,.2),
-                       notification-shrink .24s .12s cubic-bezier(0.5, 0, 0, 1);
-    -webkit-animation-fill-mode: forwards;
+    animation: notification-hide   .12s      cubic-bezier(.34,.07,1,.2),
+               notification-shrink .24s .12s cubic-bezier(0.5, 0, 0, 1);
+    animation-fill-mode: forwards;
   }
 }
 
-@-webkit-keyframes notification-show {
+.notifications-count .new-notification {
+  animation: new-notification .5s ease-out;
+}
+
+@keyframes zoom-in {
+    0% { transform: scale(.1); }
+  100% { transform: scale(1); }
+}
+
+@keyframes new-notification {
+    0% { transform: scale(3); top: -.5em; }
+  100% { transform: scale(1); top: 0; }
+}
+
+@keyframes notification-show {
     0% { opacity: 0; transform: perspective(@width) translate(0, -@icon-size) rotateX(90deg); }
   100% { opacity: 1; transform: perspective(@width) translate(0,           0) rotateX( 0deg); }
 }
 
-@-webkit-keyframes notification-hide {
+@keyframes notification-hide {
     0% { opacity: 1; transform: scale( 1); }
   100% { opacity: 0; transform: scale(.8); }
 }
 
-@-webkit-keyframes notification-shrink {
+@keyframes notification-shrink {
     0% {  opacity: 0; max-height: @max-height; transform: scale(.8); }
   100% {  opacity: 0; max-height: 0;           transform: scale(.8); }
 }
 
-@-webkit-keyframes notification-shake {
+@keyframes notification-shake {
     0% { transform: translateX(   0); }
     2% { transform: translateX(-4px); }
     4% { transform: translateX( 8px); }
