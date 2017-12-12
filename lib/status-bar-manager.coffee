@@ -1,3 +1,4 @@
+{CompositeDisposable, Disposable} = require 'atom'
 moment = require 'moment'
 
 module.exports =
@@ -5,11 +6,15 @@ class StatusBarManager
   count: 0
 
   constructor: (statusBar, @duplicateTimeDelay) ->
+    @subscriptions = new CompositeDisposable
     @render()
     @tile = statusBar.addRightTile(
       item: @element
       priority: 100
     )
+    @subscriptions.add new Disposable => @tile.destroy()
+    # TODO: uncomment next line when atom/atom#16074 is released
+    # @subscriptions.add atom.notifications.onDidClearNotifications => @clear()
 
   render: ->
     @number = document.createElement('div')
@@ -37,10 +42,8 @@ class StatusBarManager
       lastNotification = notification
 
   destroy: ->
-    @tile.destroy()
-    @tile = null
+    @subscriptions.dispose()
     @tooltip.dispose()
-    @tooltip = null
 
   addNotification: (notification) ->
     date = moment(notification.timestamp).format('LT')
