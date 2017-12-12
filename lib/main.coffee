@@ -3,7 +3,7 @@ fs = require 'fs-plus'
 StackTraceParser = null
 NotificationElement = require './notification-element'
 NotificationsLog = require './notifications-log'
-StatusBarManager = require './status-bar-manager'
+NotificationsStatusView = require './notifications-status-view'
 
 Notifications =
   isInitialized: false
@@ -126,8 +126,8 @@ Notifications =
     notification.setDisplayed(true)
     @lastNotification = notification
 
-  statusBarService: (statusBar) ->
-    @statusBarManager = new StatusBarManager(statusBar, @duplicateTimeDelay)
+  consumeStatusBar: (statusBar) ->
+    @statusBarManager = new NotificationsStatusView(statusBar, @duplicateTimeDelay)
 
 isCoreOrPackageStackTrace = (stack) ->
   StackTraceParser ?= require 'stacktrace-parser'
