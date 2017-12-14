@@ -9,6 +9,7 @@ Notifications =
   subscriptions: null
   duplicateTimeDelay: 500
   lastNotification: null
+  allowPopups: null
 
   activate: (state) ->
     CommandLogger = require './command-logger'
@@ -48,6 +49,7 @@ Notifications =
       notification.dismiss() for notification in atom.notifications.getNotifications()
 
     @subscriptions.add atom.config.observe 'notifications.defaultTimeout', (value) => @visibilityDuration = value
+    @subscriptions.add atom.config.observe 'notifications.allowPopups', (value) => @allowPopups = value
 
     if atom.inDevMode()
       @subscriptions.add atom.commands.add 'atom-workspace', 'notifications:trigger-error', ->
@@ -109,17 +111,33 @@ Notifications =
     @initializeIfNotInitialized()
     return if notification.wasDisplayed()
 
+    showNotification = false
     if @lastNotification?
       # do not show duplicates unless some amount of time has passed
       timeSpan = notification.getTimestamp() - @lastNotification.getTimestamp()
       unless timeSpan < @duplicateTimeDelay and notification.isEqual(@lastNotification)
-        @notificationsElement.appendChild(atom.views.getView(notification).element)
-        @notificationsLog?.addNotification(notification)
+        showNotification = true
     else
-      @notificationsElement.appendChild(atom.views.getView(notification).element)
+      showNotification = true
+
+    if showNotification
+      view = atom.views.getView(notification)
+
+      popupAllowed = switch @allowPopups
+        when 'None' then false
+        when 'Errors' then notification.getType() in ['fatal', 'error']
+        when 'Dismissable' then notification.isDismissable()
+        else true
+
+      if popupAllowed
+        @notificationsElement.appendChild(view.element)
+      else
+        view.element.classList.add("remove")
+        view.makeDismissable()
+        notification.dismiss()
       @notificationsLog?.addNotification(notification)
 
-    notification.setDisplayed(true)
+    notification.setDisplayed(true) if showNotification and popupAllowed
     @lastNotification = notification
 
 isCoreOrPackageStackTrace = (stack) ->

@@ -951,3 +951,129 @@ describe "Notifications", ->
             notificationContainer = workspaceElement.querySelector('atom-notifications')
             error = notificationContainer.querySelector('atom-notification.fatal')
             expect(error).toExist()
+
+    describe "when the Allow Popups setting is set", ->
+
+      describe "when it is set to None", ->
+        beforeEach ->
+          atom.config.set('notifications.allowPopups', 'None')
+
+        it "will not display any notifications", ->
+          expect(notificationContainer.childNodes.length).toBe 0
+
+          notification = atom.notifications.addSuccess('A message')
+          expect(notificationContainer.childNodes.length).toBe 0
+          expect(notification.wasDisplayed()).toBe false
+
+          notification = atom.notifications.addSuccess('A message', dismissable: true)
+          expect(notificationContainer.childNodes.length).toBe 0
+          expect(notification.wasDisplayed()).toBe false
+
+          notification = atom.notifications.addInfo('A message')
+          expect(notificationContainer.childNodes.length).toBe 0
+          expect(notification.wasDisplayed()).toBe false
+
+          notification = atom.notifications.addWarning('A message')
+          expect(notificationContainer.childNodes.length).toBe 0
+          expect(notification.wasDisplayed()).toBe false
+
+          notification = atom.notifications.addError('A message')
+          expect(notificationContainer.childNodes.length).toBe 0
+          expect(notification.wasDisplayed()).toBe false
+
+          notification = atom.notifications.addFatalError('A message')
+          expect(notificationContainer.childNodes.length).toBe 0
+          expect(notification.wasDisplayed()).toBe false
+
+      describe "when it is set to Errors", ->
+        beforeEach ->
+          atom.config.set('notifications.allowPopups', 'Errors')
+
+        it "will only display error and fatal notifications", ->
+          expect(notificationContainer.childNodes.length).toBe 0
+
+          notification = atom.notifications.addSuccess('A message')
+          expect(notificationContainer.childNodes.length).toBe 0
+          expect(notification.wasDisplayed()).toBe false
+
+          notification = atom.notifications.addSuccess('A message', dismissable: true)
+          expect(notificationContainer.childNodes.length).toBe 0
+          expect(notification.wasDisplayed()).toBe false
+
+          notification = atom.notifications.addInfo('A message')
+          expect(notificationContainer.childNodes.length).toBe 0
+          expect(notification.wasDisplayed()).toBe false
+
+          notification = atom.notifications.addWarning('A message')
+          expect(notificationContainer.childNodes.length).toBe 0
+          expect(notification.wasDisplayed()).toBe false
+
+          notification = atom.notifications.addError('A message')
+          expect(notificationContainer.childNodes.length).toBe 1
+          expect(notification.wasDisplayed()).toBe true
+
+          notification = atom.notifications.addFatalError('A message')
+          expect(notificationContainer.childNodes.length).toBe 2
+          expect(notification.wasDisplayed()).toBe true
+
+      describe "when it is set to Dismissable", ->
+        beforeEach ->
+          atom.config.set('notifications.allowPopups', 'Dismissable')
+
+        it "will only display dismissable notifications", ->
+          expect(notificationContainer.childNodes.length).toBe 0
+
+          notification = atom.notifications.addSuccess('A message')
+          expect(notificationContainer.childNodes.length).toBe 0
+          expect(notification.wasDisplayed()).toBe false
+
+          notification = atom.notifications.addSuccess('A dismissable message', dismissable: true)
+          expect(notificationContainer.childNodes.length).toBe 1
+          expect(notification.wasDisplayed()).toBe true
+
+          notification = atom.notifications.addInfo('A message')
+          expect(notificationContainer.childNodes.length).toBe 1
+          expect(notification.wasDisplayed()).toBe false
+
+          notification = atom.notifications.addWarning('A message')
+          expect(notificationContainer.childNodes.length).toBe 1
+          expect(notification.wasDisplayed()).toBe false
+
+          notification = atom.notifications.addError('A message')
+          expect(notificationContainer.childNodes.length).toBe 1
+          expect(notification.wasDisplayed()).toBe false
+
+          notification = atom.notifications.addFatalError('A message')
+          expect(notificationContainer.childNodes.length).toBe 1
+          expect(notification.wasDisplayed()).toBe false
+
+      describe "when it is set to anything else", ->
+        beforeEach ->
+          atom.config.set('notifications.allowPopups', 'anything else')
+
+        it "will display all notifications", ->
+          expect(notificationContainer.childNodes.length).toBe 0
+
+          notification = atom.notifications.addSuccess('A message')
+          expect(notificationContainer.childNodes.length).toBe 1
+          expect(notification.wasDisplayed()).toBe true
+
+          notification = atom.notifications.addSuccess('A dismissable message', dismissable: true)
+          expect(notificationContainer.childNodes.length).toBe 2
+          expect(notification.wasDisplayed()).toBe true
+
+          notification = atom.notifications.addInfo('A message')
+          expect(notificationContainer.childNodes.length).toBe 3
+          expect(notification.wasDisplayed()).toBe true
+
+          notification = atom.notifications.addWarning('A message')
+          expect(notificationContainer.childNodes.length).toBe 4
+          expect(notification.wasDisplayed()).toBe true
+
+          notification = atom.notifications.addError('A message')
+          expect(notificationContainer.childNodes.length).toBe 5
+          expect(notification.wasDisplayed()).toBe true
+
+          notification = atom.notifications.addFatalError('A message')
+          expect(notificationContainer.childNodes.length).toBe 6
+          expect(notification.wasDisplayed()).toBe true

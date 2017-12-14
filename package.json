@@ -31,6 +31,17 @@
       "default": 5000,
       "minimum": 1000,
       "description": "The default notification timeout for a non-dismissable notification."
+    },
+    "allowPopups": {
+      "type": "string",
+      "default": "All",
+      "description": "Allow popup notifications when a notification is received.",
+      "enum": [
+        "All",
+        "Errors",
+        "Dismissable",
+        "None"
+      ]
     }
   },
   "deserializers": {
