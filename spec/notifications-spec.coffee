@@ -217,6 +217,19 @@ describe "Notifications", ->
           model.dismiss()
           expect(notification).toHaveClass 'remove'
 
+    describe "when the default timeout setting is changed", ->
+      [notification] = []
+
+      beforeEach ->
+        atom.config.set("notifications.defaultTimeout", 1000)
+        atom.notifications.addSuccess('A message')
+        notification = notificationContainer.querySelector('atom-notification.success')
+
+      it "uses the setting value for the autoclose timeout", ->
+        expect(notification).not.toHaveClass 'remove'
+        advanceClock(1000)
+        expect(notification).toHaveClass 'remove'
+
     describe "when the `description` option is used", ->
       it "displays the description text in the .description element", ->
         atom.notifications.addSuccess('A message', description: 'This is [a link](http://atom.io)')
