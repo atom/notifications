@@ -49,7 +49,7 @@ module.exports = class NotificationsLog
       header.appendChild(button)
 
     button = document.createElement('button')
-    button.classList.add('notifications-clear-log', 'btn', 'icon', 'icon-dash')
+    button.classList.add('notifications-clear-log', 'btn', 'icon', 'icon-trashcan')
     button.addEventListener 'click', (e) -> atom.commands.dispatch(atom.views.getView(atom.workspace), "notifications:clear-log")
     @subscriptions.add atom.tooltips.add(button, {title: "Clear notifications"})
     header.appendChild(button)
