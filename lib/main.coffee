@@ -10,7 +10,7 @@ Notifications =
   subscriptions: null
   duplicateTimeDelay: 500
   lastNotification: null
-  statusBarManager: null
+  notificationsStatusView: null
 
   activate: (state) ->
     CommandLogger = require './command-logger'
@@ -69,12 +69,12 @@ Notifications =
     @notificationsElement?.remove()
     @notificationsPanel?.destroy()
     @notificationsLog?.destroy()
-    @statusBarManager?.destroy()
+    @notificationsStatusView?.destroy()
 
     @subscriptions = null
     @notificationsElement = null
     @notificationsPanel = null
-    @statusBarManager = null
+    @notificationsStatusView = null
 
     @isInitialized = false
 
@@ -117,17 +117,17 @@ Notifications =
       unless timeSpan < @duplicateTimeDelay and notification.isEqual(@lastNotification)
         @notificationsElement.appendChild(atom.views.getView(notification).element)
         @notificationsLog?.addNotification(notification)
-        @statusBarManager?.addNotification(notification)
+        @notificationsStatusView?.addNotification(notification)
     else
       @notificationsElement.appendChild(atom.views.getView(notification).element)
       @notificationsLog?.addNotification(notification)
-      @statusBarManager?.addNotification(notification)
+      @notificationsStatusView?.addNotification(notification)
 
     notification.setDisplayed(true)
     @lastNotification = notification
 
   consumeStatusBar: (statusBar) ->
-    @statusBarManager = new NotificationsStatusView(statusBar, @duplicateTimeDelay)
+    @notificationsStatusView = new NotificationsStatusView(statusBar, @duplicateTimeDelay)
 
 isCoreOrPackageStackTrace = (stack) ->
   StackTraceParser ?= require 'stacktrace-parser'

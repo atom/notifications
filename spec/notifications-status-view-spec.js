@@ -3,7 +3,7 @@ const {Notification} = require('atom');
 const {generateFakeFetchResponses} = require('./helper-v2');
 
 describe("Notifications Count", () => {
-  let [workspaceElement, statusBarManager, notificationsCountContainer] = Array.from([]);
+  let [workspaceElement, notificationsStatusView, notificationsCountContainer] = Array.from([]);
 
   beforeEach(async () => {
     workspaceElement = atom.views.getView(atom.workspace);
@@ -14,13 +14,13 @@ describe("Notifications Count", () => {
       atom.packages.activatePackage('status-bar')
     ]);
 
-    statusBarManager = atom.packages.getActivePackage('notifications').mainModule.statusBarManager;
+    notificationsStatusView = atom.packages.getActivePackage('notifications').mainModule.notificationsStatusView;
     notificationsCountContainer = workspaceElement.querySelector('.notifications-count');
   });
 
   describe("when the package is activated", () =>
     it("attaches an .notifications-count element to the dom", () => {
-      expect(statusBarManager.count).toBe(0);
+      expect(notificationsStatusView.count).toBe(0);
       expect(notificationsCountContainer).toExist();
     })
   );
@@ -40,9 +40,9 @@ describe("Notifications Count", () => {
 
       await atom.packages.activatePackage('notifications');
 
-      statusBarManager = atom.packages.getActivePackage('notifications').mainModule.statusBarManager;
+      notificationsStatusView = atom.packages.getActivePackage('notifications').mainModule.notificationsStatusView;
       notificationsCountContainer = workspaceElement.querySelector('.notifications-count');
-      expect(statusBarManager.count).toBe(2);
+      expect(notificationsStatusView.count).toBe(2);
       expect(parseInt(notificationsCountContainer.textContent, 10)).toBe(2);
     });
   });
