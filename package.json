@@ -18,7 +18,14 @@
   },
   "devDependencies": {
     "atom-jasmine2-test-runner": "^2.0.0",
-    "coffeelint": "^1.9.7"
+    "babel-eslint": "^8.2.1",
+    "coffeelint": "^1.9.7",
+    "eslint": "^4.17.0",
+    "eslint-config-standard": "^10.2.1",
+    "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-node": "^5.2.1",
+    "eslint-plugin-promise": "^3.6.0",
+    "eslint-plugin-standard": "^3.0.1"
   },
   "configSchema": {
     "showErrorsInDevMode": {
