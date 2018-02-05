@@ -229,7 +229,7 @@ atom-notifications {
 
 // Status Bar --------------------------
 
-.notifications-count span {
+.notifications-count-badge {
   display: inline-block;
   text-align: center;
   padding: 0 .25em;
@@ -247,35 +247,35 @@ atom-notifications {
 atom-notification.fatal {
   .notification(@text-color-error; @background-color-error);
 }
-.notifications-count[last-type='fatal'] span {
+.notifications-count[last-type='fatal'] .notifications-count-badge {
   background-color: @background-color-error;
 }
 
 atom-notification.error {
   .notification(@text-color-error; @background-color-error);
 }
-.notifications-count[last-type='error'] span {
+.notifications-count[last-type='error'] .notifications-count-badge {
   background-color: @background-color-error;
 }
 
 atom-notification.warning {
   .notification(@text-color-warning; @background-color-warning);
 }
-.notifications-count[last-type='warning'] span {
+.notifications-count[last-type='warning'] .notifications-count-badge {
   background-color: @background-color-warning;
 }
 
 atom-notification.info {
   .notification(@text-color-info; @background-color-info);
 }
-.notifications-count[last-type='info'] span {
+.notifications-count[last-type='info'] .notifications-count-badge {
   background-color: @background-color-info;
 }
 
 atom-notification.success {
   .notification(@text-color-success; @background-color-success);
 }
-.notifications-count[last-type='success'] span {
+.notifications-count[last-type='success'] .notifications-count-badge {
   background-color: @background-color-success;
 }
 
