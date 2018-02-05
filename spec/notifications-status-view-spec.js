@@ -1,9 +1,12 @@
+/** @babel */
 
-const {Notification} = require('atom')
-const {generateFakeFetchResponses} = require('./helper-v2')
+import {Notification} from 'atom'
+import {generateFakeFetchResponses} from './helper'
+// eslint-disable-next-line no-unused-vars
+import {it, fit, ffit, fffit, beforeEach, afterEach} from './async-spec-helpers'
 
 describe('Notifications Count', () => {
-  let [workspaceElement, notificationsStatusView, notificationsCountContainer] = Array.from([])
+  let [workspaceElement, notificationsStatusView, notificationsCountContainer] = []
 
   beforeEach(async () => {
     workspaceElement = atom.views.getView(atom.workspace)

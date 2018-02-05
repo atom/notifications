@@ -5,9 +5,9 @@
     "browser": true,
     "node": true,
     "es6": true,
-    "jasmine": true,
+    "jasmine": true
   },
-  "globals" : {
+  "globals": {
     "atom": false
   }
 }
