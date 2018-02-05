@@ -227,58 +227,27 @@ atom-notifications {
   }
 }
 
-// Status Bar --------------------------
-
-.notifications-count span {
-  padding: 0 @component-padding/3;
-  border: 1px solid @text-color;
-
-  div {
-    display: inline-block;
-    position: relative;
-  }
-}
 
 // Types -------------------------------
 
 atom-notification.fatal {
   .notification(@text-color-error; @background-color-error);
 }
-.notifications-count[last-type='fatal'] span {
-  color: @text-color-error;
-  border-color: @background-color-error;
-}
 
 atom-notification.error {
   .notification(@text-color-error; @background-color-error);
-}
-.notifications-count[last-type='error'] span {
-  color: @text-color-error;
-  border-color: @background-color-error;
 }
 
 atom-notification.warning {
   .notification(@text-color-warning; @background-color-warning);
 }
-.notifications-count[last-type='warning'] span {
-  color: @text-color-warning;
-  border-color: @background-color-warning;
-}
 
 atom-notification.info {
   .notification(@text-color-info; @background-color-info);
 }
-.notifications-count[last-type='info'] span {
-  color: @text-color-info;
-  border-color: @background-color-info;
-}
 
 atom-notification.success {
   .notification(@text-color-success; @background-color-success);
-}
-.notifications-count[last-type='success'] span {
-  color: @text-color-success;
-  border-color: @background-color-success;
 }
 
 // Mixins -------------------------------
