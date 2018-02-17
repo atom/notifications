@@ -1,9 +1,7 @@
-/** @babel */
-
-import {Notification} from 'atom'
-import {generateFakeFetchResponses} from './helper'
+const {Notification} = require('atom')
+const {generateFakeFetchResponses} = require('./helper')
 // eslint-disable-next-line no-unused-vars
-import {it, fit, ffit, fffit, beforeEach, afterEach} from './async-spec-helpers'
+const {it, fit, ffit, fffit, beforeEach, afterEach} = require('./async-spec-helpers')
 
 describe('Notifications Count', () => {
   let [workspaceElement, notificationsStatusView, notificationsCountContainer] = []
