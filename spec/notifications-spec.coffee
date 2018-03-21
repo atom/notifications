@@ -106,6 +106,13 @@ describe "Notifications", ->
       notification = notificationContainer.childNodes[4]
       expect(notification.querySelector('.detail').textContent).toContain 'cats,ok'
 
+    it "renders the message as sanitized markdown", ->
+      atom.notifications.addInfo('test <b>html</b> <iframe>but sanitized</iframe>')
+      notification = notificationContainer.childNodes[0]
+      expect(notification.querySelector('.message').innerHTML).toContain(
+        'test <b>html</b> but sanitized'
+      )
+
     describe "when a dismissable notification is added", ->
       it "is removed when Notification::dismiss() is called", ->
         notification = atom.notifications.addSuccess('A message', dismissable: true)
