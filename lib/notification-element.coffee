@@ -1,3 +1,4 @@
+DOMPurify = require 'dompurify'
 fs = require 'fs-plus'
 path = require 'path'
 marked = require 'marked'
@@ -87,7 +88,7 @@ class NotificationElement
     options = @model.getOptions()
 
     notificationContainer = @element.querySelector('.message')
-    notificationContainer.innerHTML = marked(@model.getMessage())
+    notificationContainer.innerHTML = DOMPurify.sanitize(marked(@model.getMessage()))
 
     if detail = @model.getDetail()
       addSplitLinesToContainer(@element.querySelector('.detail-content'), detail)
