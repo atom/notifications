@@ -4,6 +4,7 @@ temp = require('temp').track()
 {Notification} = require 'atom'
 NotificationElement = require '../lib/notification-element'
 NotificationIssue = require '../lib/notification-issue'
+{generateFakeFetchResponses, generateException} = require './helper'
 
 describe "Notifications", ->
   [workspaceElement, activationPromise] = []
@@ -22,7 +23,9 @@ describe "Notifications", ->
 
   describe "when there are notifications before activation", ->
     beforeEach ->
-      atom.packages.deactivatePackage('notifications')
+      waitsForPromise ->
+        # Wrapped in Promise.resolve so this test continues to work on earlier versions of Atom
+        Promise.resolve(atom.packages.deactivatePackage('notifications'))
 
     it "displays all non displayed notifications", ->
       warning = new Notification('warning', 'Un-displayed warning')
@@ -54,7 +57,6 @@ describe "Notifications", ->
       notificationContainer = workspaceElement.querySelector('atom-notifications')
       jasmine.attachToDOM(workspaceElement)
 
-      spyOn(window, 'fetch')
       generateFakeFetchResponses()
 
     it "adds an atom-notification element to the container with a class corresponding to the type", ->
@@ -109,6 +111,13 @@ describe "Notifications", ->
       notification = notificationContainer.childNodes[0]
       notificationElement = notificationContainer.querySelector('atom-notification.info')
       expect(notificationElement).not.toHaveClass 'has-stack'
+
+    it "renders the message as sanitized markdown", ->
+      atom.notifications.addInfo('test <b>html</b> <iframe>but sanitized</iframe>')
+      notification = notificationContainer.childNodes[0]
+      expect(notification.querySelector('.message').innerHTML).toContain(
+        'test <b>html</b> but sanitized'
+      )
 
     describe "when a dismissable notification is added", ->
       it "is removed when Notification::dismiss() is called", ->
@@ -191,9 +200,13 @@ describe "Notifications", ->
           expect(atom.views.getView(atom.workspace.getActiveTextEditor())).toHaveFocus()
 
     describe "when an autoclose notification is added", ->
-      it "closes and removes the message after a given amount of time", ->
-        atom.notifications.addSuccess('A message')
+      [notification, model] = []
+
+      beforeEach ->
+        model = atom.notifications.addSuccess('A message')
         notification = notificationContainer.querySelector('atom-notification.success')
+
+      it "closes and removes the message after a given amount of time", ->
         expect(notification).not.toHaveClass 'remove'
 
         advanceClock(NotificationElement::visibilityDuration)
@@ -202,6 +215,33 @@ describe "Notifications", ->
 
         advanceClock(NotificationElement::animationDuration)
         expect(notificationContainer.childNodes.length).toBe 0
+
+      describe "when the notification is clicked", ->
+        beforeEach ->
+          notification.click()
+
+        it "makes the notification dismissable", ->
+          expect(notification).toHaveClass 'has-close'
+
+          advanceClock(NotificationElement::visibilityDuration)
+          expect(notification).not.toHaveClass 'remove'
+
+        it "removes the notification when dismissed", ->
+          model.dismiss()
+          expect(notification).toHaveClass 'remove'
+
+    describe "when the default timeout setting is changed", ->
+      [notification] = []
+
+      beforeEach ->
+        atom.config.set("notifications.defaultTimeout", 1000)
+        atom.notifications.addSuccess('A message')
+        notification = notificationContainer.querySelector('atom-notification.success')
+
+      it "uses the setting value for the autoclose timeout", ->
+        expect(notification).not.toHaveClass 'remove'
+        advanceClock(1000)
+        expect(notification).toHaveClass 'remove'
 
     describe "when the `description` option is used", ->
       it "displays the description text in the .description element", ->
@@ -269,6 +309,33 @@ describe "Notifications", ->
 
           runs ->
             expect(atom.notifications.getNotifications().length).toBe 0
+
+      describe "when the message contains a newline", ->
+        it "removes the newline when generating the issue title", ->
+          message = "Uncaught Error: Cannot read property 'object' of undefined\nTypeError: Cannot read property 'object' of undefined"
+          atom.notifications.addFatalError(message)
+          notificationContainer = workspaceElement.querySelector('atom-notifications')
+          fatalError = notificationContainer.querySelector('atom-notification.fatal')
+
+          waitsForPromise ->
+            fatalError.getRenderPromise().then ->
+              issueTitle = fatalError.issue.getIssueTitle()
+          runs ->
+            expect(issueTitle).not.toContain "\n"
+            expect(issueTitle).toBe "Uncaught Error: Cannot read property 'object' of undefinedTypeError: Cannot read property 'objec..."
+
+      describe "when the message contains continguous newlines", ->
+        it "removes the newlines when generating the issue title", ->
+          message = "Uncaught Error: Cannot do the thing\n\nSuper sorry about this"
+          atom.notifications.addFatalError(message)
+          notificationContainer = workspaceElement.querySelector('atom-notifications')
+          fatalError = notificationContainer.querySelector('atom-notification.fatal')
+
+          waitsForPromise ->
+            fatalError.getRenderPromise().then ->
+              issueTitle = fatalError.issue.getIssueTitle()
+          runs ->
+            expect(issueTitle).toBe "Uncaught Error: Cannot do the thingSuper sorry about this"
 
       describe "when there are multiple packages in the stack trace", ->
         beforeEach ->
@@ -659,7 +726,7 @@ describe "Notifications", ->
 
         describe "when the message is longer than 100 characters", ->
           message = "Uncaught Error: Cannot find module 'dialog'Error: Cannot find module 'dialog' at Function.Module._resolveFilename (module.js:351:15) at Function.Module._load (module.js:293:25) at Module.require (module.js:380:17) at EventEmitter.<anonymous> (/Applications/Atom.app/Contents/Resources/atom/browser/lib/rpc-server.js:128:79) at EventEmitter.emit (events.js:119:17) at EventEmitter.<anonymous> (/Applications/Atom.app/Contents/Resources/atom/browser/api/lib/web-contents.js:99:23) at EventEmitter.emit (events.js:119:17)"
-          truncatedMessage = "Uncaught Error: Cannot find module 'dialog'Error: Cannot find module 'dialog' at Function.Module...."
+          expectedIssueTitle = "Uncaught Error: Cannot find module 'dialog'Error: Cannot find module 'dialog' at Function.Module...."
 
           beforeEach ->
             generateFakeFetchResponses()
@@ -678,8 +745,8 @@ describe "Notifications", ->
 
             runs ->
               button = fatalError.querySelector('.btn')
-              encodedMessage = encodeURIComponent(truncatedMessage)
               expect(button.textContent).toContain 'Create issue'
+              expect(fatalError.issue.getIssueTitle()).toBe(expectedIssueTitle)
 
       describe "when the package is out of date", ->
         beforeEach ->
@@ -890,43 +957,3 @@ describe "Notifications", ->
             notificationContainer = workspaceElement.querySelector('atom-notifications')
             error = notificationContainer.querySelector('atom-notification.fatal')
             expect(error).toExist()
-
-generateException = ->
-  try
-    a + 1
-  catch e
-    errMsg = "#{e.toString()} in #{process.env.ATOM_HOME}/somewhere"
-    window.onerror.call(window, errMsg, '/dev/null', 2, 3, e)
-
-# shortenerResponse
-# packageResponse
-# issuesResponse
-generateFakeFetchResponses = (options) ->
-  fetch.andCallFake (url) ->
-    if url.indexOf('is.gd') > -1
-      return textPromise options?.shortenerResponse ? 'http://is.gd/cats'
-
-    if url.indexOf('atom.io/api/packages') > -1
-      return jsonPromise(options?.packageResponse ? {
-        repository: url: 'https://github.com/atom/notifications'
-        releases: latest: '0.0.0'
-      })
-
-    if url.indexOf('atom.io/api/updates') > -1
-      return(jsonPromise options?.atomResponse ? {name: atom.getVersion()})
-
-    if options?.issuesErrorResponse?
-      return Promise.reject(options?.issuesErrorResponse)
-
-    jsonPromise(options?.issuesResponse ? {items: []})
-
-jsonPromise = (object) -> Promise.resolve {ok: true, json: -> Promise.resolve object}
-textPromise = (text) -> Promise.resolve {ok: true, text: -> Promise.resolve text}
-
-window.waitsForPromise = (fn) ->
-  promise = fn()
-  window.waitsFor 5000, (moveOn) ->
-    promise.then (moveOn)
-    promise.catch (error) ->
-      jasmine.getEnv().currentSpec.fail("Expected promise to be resolved, but it was rejected with #{jasmine.pp(error)}")
-      moveOn()
