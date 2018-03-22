@@ -48,7 +48,7 @@ class NotificationElement
   visibilityDuration: 5000
   autohideTimeout: null
 
-  constructor: (@model) ->
+  constructor: (@model, @visibilityDuration) ->
     @fatalTemplate = TemplateHelper.create(FatalMetaNotificationTemplate)
     @metaTemplate = TemplateHelper.create(MetaNotificationTemplate)
     @buttonListTemplate = TemplateHelper.create(ButtonListTemplate)
