@@ -8,7 +8,7 @@ NotificationIssue = require './notification-issue'
 TemplateHelper = require './template-helper'
 UserUtilities = require './user-utilities'
 
-DOMPurify = createDOMPurify()
+DOMPurify = null
 
 NotificationTemplate = """
   <div class="content">
@@ -90,6 +90,9 @@ class NotificationElement
     options = @model.getOptions()
 
     notificationContainer = @element.querySelector('.message')
+
+    if DOMPurify is null
+      DOMPurify = createDOMPurify()
     notificationContainer.innerHTML = DOMPurify.sanitize(marked(@model.getMessage()))
 
     if detail = @model.getDetail()
