@@ -79,7 +79,7 @@ Notifications =
   initializeIfNotInitialized: ->
     return if @isInitialized
 
-    @subscriptions.add atom.views.addViewProvider Notification, (model) ->
+    @subscriptions.add atom.views.addViewProvider Notification, (model) =>
       new NotificationElement(model, @visibilityDuration)
 
     @notificationsElement = document.createElement('atom-notifications')

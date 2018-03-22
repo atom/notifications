@@ -1,4 +1,4 @@
-DOMPurify = require 'dompurify'
+createDOMPurify = require 'dompurify'
 fs = require 'fs-plus'
 path = require 'path'
 marked = require 'marked'
@@ -7,6 +7,8 @@ marked = require 'marked'
 NotificationIssue = require './notification-issue'
 TemplateHelper = require './template-helper'
 UserUtilities = require './user-utilities'
+
+DOMPurify = createDOMPurify()
 
 NotificationTemplate = """
   <div class="content">
