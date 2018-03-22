@@ -92,7 +92,6 @@ class NotificationElement
     notificationContainer = @element.querySelector('.message')
 
     if DOMPurify is null
-      console.log("creating DOMPurify")
       DOMPurify = createDOMPurify()
     notificationContainer.innerHTML = DOMPurify.sanitize(marked(@model.getMessage()))
 
