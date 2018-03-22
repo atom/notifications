@@ -8,7 +8,7 @@ NotificationIssue = require './notification-issue'
 TemplateHelper = require './template-helper'
 UserUtilities = require './user-utilities'
 
-DOMPurify = createDOMPurify(window)
+DOMPurify = createDOMPurify()
 
 NotificationTemplate = """
   <div class="content">
