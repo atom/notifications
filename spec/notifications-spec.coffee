@@ -300,9 +300,9 @@ describe "Notifications", ->
           # Fake an unhandled error with a call stack located outside of the source
           # of Atom or an Atom package
           fs.readFile(__dirname, ->
-              err = new Error()
-              err.stack = 'FakeError: foo is not bar\n    at blah.fakeFunc (directory/fakefile.js:1:25)'
-              throw err
+            err = new Error()
+            err.stack = 'FakeError: foo is not bar\n    at blah.fakeFunc (directory/fakefile.js:1:25)'
+            throw err
           )
 
           waitsFor ->
