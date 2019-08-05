@@ -22,7 +22,7 @@ module.exports = class NotificationsLog
     @typesHidden = typesHidden if typesHidden?
     @emitter = new Emitter
     @subscriptions = new CompositeDisposable
-    @subscriptions.add atom.notifications.onDidClearNotifications => @clear()
+    @subscriptions.add atom.notifications.onDidClearNotifications => @clearLogItems()
     @render()
     @subscriptions.add new Disposable => @clearLogItems()
 
