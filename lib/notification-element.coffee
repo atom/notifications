@@ -81,7 +81,7 @@ class NotificationElement
 
     @element.classList.add('has-detail') if detail = @model.getDetail()
     @element.classList.add('has-close') if @model.isDismissable()
-    @element.classList.add('has-stack') if @model.getOptions().stack?
+    @element.classList.add('has-stack') if detail and @model.getOptions().stack?
 
     @element.setAttribute('tabindex', '-1')
 

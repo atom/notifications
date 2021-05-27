@@ -106,6 +106,12 @@ describe "Notifications", ->
       notification = notificationContainer.childNodes[4]
       expect(notification.querySelector('.detail').textContent).toContain 'cats,ok'
 
+    it "does not add the has-stack class if a stack is provided without any detail", ->
+      atom.notifications.addInfo('A message', stack: 'Some stack')
+      notification = notificationContainer.childNodes[0]
+      notificationElement = notificationContainer.querySelector('atom-notification.info')
+      expect(notificationElement).not.toHaveClass 'has-stack'
+
     it "renders the message as sanitized markdown", ->
       atom.notifications.addInfo('test <b>html</b> <iframe>but sanitized</iframe>')
       notification = notificationContainer.childNodes[0]
