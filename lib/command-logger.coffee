@@ -67,9 +67,10 @@ class CommandLogger
   #
   # * `command` Command {Object} to be logged
   #   * `type` Name {String} of the command
-  #   * `target` {String} describing where the command was triggered
+  #   * `target` {Object} Node where the command was triggered
   logCommand: (command) ->
-    {type: name, target, time} = command
+    {type: name, time} = command
+    target = command.target ? {}
     return if command.detail?.jQueryTrigger
     return if name of ignoredCommands
 
