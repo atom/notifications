@@ -10,6 +10,7 @@ describe "Notifications Log", ->
   beforeEach ->
     workspaceElement = atom.views.getView(atom.workspace)
     atom.notifications.clear()
+    jasmine.attachToDOM(workspaceElement)
 
     waitsForPromise ->
       atom.packages.activatePackage('notifications')
