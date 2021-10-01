@@ -81,9 +81,9 @@ class CommandLogger
       @logIndex = (@logIndex + 1) % @logSize
       event = @latestEvent()
       event.name = name
-      event.targetNodeName = target.nodeName
-      event.targetClassName = target.className
-      event.targetId = target.id
+      event.targetNodeName = target?.nodeName
+      event.targetClassName = target?.className
+      event.targetId = target?.id
       event.count = 1
       event.time = time ? Date.now()
 
